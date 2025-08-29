@@ -10,25 +10,29 @@ export const LanguageSelector = (): JSX.Element => {
       id: "english",
       name: "English",
       subtitle: "English (UK)",
-      flag: "🇬🇧"
+      flagUrl: "https://flagcdn.com/w80/gb.png",
+      flagAlt: "United Kingdom flag"
     },
     {
       id: "yoruba",
       name: "Yoruba",
       subtitle: "Èdè Yorùbá",
-      flag: "🇳🇬"
+      flagUrl: "https://flagcdn.com/w80/ng.png",
+      flagAlt: "Nigeria flag"
     },
     {
       id: "igbo",
       name: "Igbo",
       subtitle: "Asụsụ Igbo",
-      flag: "🇳🇬"
+      flagUrl: "https://flagcdn.com/w80/ng.png",
+      flagAlt: "Nigeria flag"
     },
     {
       id: "hausa",
       name: "Hausa",
       subtitle: "Harshen Hausa",
-      flag: "🇳🇬"
+      flagUrl: "https://flagcdn.com/w80/ng.png",
+      flagAlt: "Nigeria flag"
     }
   ];
 
@@ -85,7 +89,13 @@ export const LanguageSelector = (): JSX.Element => {
                   </svg>
                 </div>
               )}
-              <div className="text-3xl mb-2 md:text-4xl lg:text-5xl">{language.flag}</div>
+              <div className="mb-2 flex justify-center">
+                <img 
+                  src={language.flagUrl} 
+                  alt={language.flagAlt}
+                  className="w-12 h-8 md:w-16 md:h-10 lg:w-20 lg:h-12 object-cover rounded-sm"
+                />
+              </div>
               <div className="text-left">
                 <h3 className="font-semibold text-gray-900 md:text-lg lg:text-xl">{language.name}</h3>
                 <p className="text-sm text-gray-500 md:text-base">{language.subtitle}</p>
