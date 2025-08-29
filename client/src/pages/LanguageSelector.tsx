@@ -49,7 +49,7 @@ export const LanguageSelector = (): JSX.Element => {
   };
 
   return (
-    <main className="relative w-full h-screen max-w-md mx-auto bg-gray-50 md:max-w-2xl lg:max-w-4xl xl:max-w-5xl overflow-hidden flex flex-col">
+    <main className="relative w-full min-h-screen max-w-md mx-auto bg-gray-50 md:max-w-2xl lg:max-w-4xl xl:max-w-5xl flex flex-col">
 
       {/* Content */}
       <div className="flex-1 px-6 pt-[40px] pb-4 md:px-8 md:pt-6 md:pb-6 lg:px-16 lg:pt-8 lg:pb-8 flex flex-col justify-center">
