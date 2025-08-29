@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { useLoading } from "@/hooks/useLoading";
 
 export const Splash = (): JSX.Element => {
   const [, setLocation] = useLocation();
   const [isVisible, setIsVisible] = useState(true);
+  const { isLoading } = useLoading({ minimumLoadTime: 1000 });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -17,7 +20,11 @@ export const Splash = (): JSX.Element => {
   }, [setLocation]);
 
   if (!isVisible) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner fullScreen message="Transitioning..." />;
+  }
+
+  if (isLoading) {
+    return <LoadingSpinner fullScreen message="Initializing..." />;
   }
 
   return (

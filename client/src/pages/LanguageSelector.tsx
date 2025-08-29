@@ -1,9 +1,16 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { useLoading } from "@/hooks/useLoading";
 
 export const LanguageSelector = (): JSX.Element => {
   const [, setLocation] = useLocation();
   const [selectedLanguage, setSelectedLanguage] = useState("english");
+  const { isLoading } = useLoading({ minimumLoadTime: 600 });
+
+  if (isLoading) {
+    return <LoadingSpinner fullScreen message="Loading language options..." />;
+  }
 
   const languages = [
     {
