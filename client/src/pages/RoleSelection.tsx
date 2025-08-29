@@ -46,7 +46,7 @@ export const RoleSelection = (): JSX.Element => {
       <div className="flex-1 px-6 pt-[60px] pb-4 md:px-8 md:pt-16 md:pb-6 lg:px-16 lg:pt-20 lg:pb-8">
         <div className="max-w-md mx-auto w-full md:max-w-lg lg:max-w-xl">
           <h1 className="text-2xl font-bold text-gray-900 mb-2 md:text-3xl lg:text-4xl md:mb-4">
-            Hi! What would you like to do?
+            Welcome! Let's get started
           </h1>
           <p className="text-gray-600 mb-8 md:text-lg lg:text-xl md:mb-12">
             Select your role to begin!
