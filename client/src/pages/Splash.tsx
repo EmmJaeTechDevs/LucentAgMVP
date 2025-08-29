@@ -7,7 +7,7 @@ export const Splash = (): JSX.Element => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLocation("/language-selector");
-    }, 1000);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, [setLocation]);
