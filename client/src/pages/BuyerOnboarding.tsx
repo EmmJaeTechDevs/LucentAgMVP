@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useLoading } from "@/hooks/useLoading";
 import leafImage from "@assets/entypo_leaf_1756517515112.png";
+import deliveryImage from "@assets/image 13_1756529531399.png";
 
 export const BuyerOnboarding = (): JSX.Element => {
   const [, setLocation] = useLocation();
@@ -24,7 +25,7 @@ export const BuyerOnboarding = (): JSX.Element => {
       id: 2,
       title: "Freshness Delivered to You",
       description: "Order in minutes and enjoy farm-fresh food at your doorstep",
-      image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+      image: deliveryImage
     },
     {
       id: 3,
