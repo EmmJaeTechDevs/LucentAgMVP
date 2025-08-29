@@ -10,6 +10,7 @@ import { Splash } from "@/pages/Splash";
 import { LanguageSelector } from "@/pages/LanguageSelector";
 import { RoleSelection } from "@/pages/RoleSelection";
 import { FarmerOnboarding } from "@/pages/FarmerOnboarding";
+import { BuyerOnboarding } from "@/pages/BuyerOnboarding";
 
 function Router() {
   return (
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/language-selector" component={LanguageSelector} />
       <Route path="/role-selection" component={RoleSelection} />
       <Route path="/farmer-onboarding" component={FarmerOnboarding} />
+      <Route path="/buyer-onboarding" component={BuyerOnboarding} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

@@ -38,9 +38,8 @@ export const RoleSelection = (): JSX.Element => {
     if (selectedRole) {
       if (selectedRole === "farmer") {
         setLocation("/farmer-onboarding");
-      } else {
-        // For now, just show an alert for buyer - you can add buyer onboarding later
-        alert(`Selected role: ${roles.find(r => r.id === selectedRole)?.title}`);
+      } else if (selectedRole === "buyer") {
+        setLocation("/buyer-onboarding");
       }
     }
   };
