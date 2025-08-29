@@ -43,21 +43,6 @@ export const LanguageSelector = (): JSX.Element => {
 
   return (
     <main className="relative w-full min-h-screen max-w-md mx-auto bg-gray-50 md:max-w-lg lg:max-w-xl xl:max-w-2xl">
-      {/* Header with status bar - only show on mobile */}
-      <div className="flex justify-between items-center px-6 pt-3 pb-6 md:hidden">
-        <span className="text-sm font-medium">9:41</span>
-        <div className="flex items-center gap-1">
-          <div className="flex gap-1">
-            <div className="w-1 h-1 bg-black rounded-full"></div>
-            <div className="w-1 h-1 bg-black rounded-full"></div>
-            <div className="w-1 h-1 bg-black rounded-full"></div>
-            <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-          </div>
-          <div className="ml-2">📶</div>
-          <div className="ml-1">📶</div>
-          <div className="ml-1">🔋</div>
-        </div>
-      </div>
 
       {/* Content */}
       <div className="px-6 py-4 md:px-8 md:py-8 lg:px-12 lg:py-12">
