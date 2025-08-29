@@ -97,13 +97,15 @@ export const LanguageSelector = (): JSX.Element => {
           </div>
 
           {/* Continue Button */}
-          <button
-            onClick={handleContinue}
-            className="w-full bg-green-700 text-white py-4 rounded-2xl font-semibold text-lg hover:bg-green-800 hover:shadow-lg transition-all duration-200 md:py-5 md:text-xl lg:text-xl md:max-w-md md:mx-auto"
-            data-testid="button-continue"
-          >
-            Continue
-          </button>
+          <div className="flex justify-center">
+            <button
+              onClick={handleContinue}
+              className="w-full max-w-md bg-green-700 text-white py-4 rounded-2xl font-semibold text-lg hover:bg-green-800 hover:shadow-lg transition-all duration-200 md:py-5 md:text-xl lg:text-xl"
+              data-testid="button-continue"
+            >
+              Continue
+            </button>
+          </div>
         </div>
       </div>
 
