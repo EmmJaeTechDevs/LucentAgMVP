@@ -4,9 +4,9 @@ export const Splash = (): JSX.Element => {
   return (
     <main className="relative w-[360px] h-[691px] bg-white">
 
-      <section className="flex flex-col items-center justify-center h-full">
+      <section className="flex flex-col items-center justify-center h-full w-full">
         <img
-          className="w-[229px] h-[132px]"
+          className="w-[229px] h-[132px] mx-auto"
           alt="Lucent Ag Logo"
           src="/figmaAssets/image-20.png"
         />
