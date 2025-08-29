@@ -135,13 +135,15 @@ export const FarmerOnboarding = (): JSX.Element => {
               {currentSlide === slides.length - 1 ? "Get Started" : "Next"}
             </button>
             
-            <button
-              onClick={handleSkip}
-              className="w-full text-gray-600 py-2 font-medium hover:text-gray-800 transition-colors duration-200"
-              data-testid="button-skip"
-            >
-              Skip
-            </button>
+            {currentSlide < slides.length - 1 && (
+              <button
+                onClick={handleSkip}
+                className="w-full text-gray-600 py-2 font-medium hover:text-gray-800 transition-colors duration-200"
+                data-testid="button-skip"
+              >
+                Skip
+              </button>
+            )}
           </div>
         </div>
 
@@ -221,15 +223,17 @@ export const FarmerOnboarding = (): JSX.Element => {
                 {currentSlide === slides.length - 1 ? "Get Started" : "Next"}
               </button>
               
-              <div>
-                <button
-                  onClick={handleSkip}
-                  className="text-gray-600 py-2 font-medium hover:text-gray-800 transition-colors duration-200 text-lg"
-                  data-testid="button-skip"
-                >
-                  Skip for now
-                </button>
-              </div>
+              {currentSlide < slides.length - 1 && (
+                <div>
+                  <button
+                    onClick={handleSkip}
+                    className="text-gray-600 py-2 font-medium hover:text-gray-800 transition-colors duration-200 text-lg"
+                    data-testid="button-skip"
+                  >
+                    Skip for now
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
