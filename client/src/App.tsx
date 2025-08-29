@@ -6,12 +6,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 
 import { Splash } from "@/pages/Splash";
+import { LanguageSelector } from "@/pages/LanguageSelector";
 
 function Router() {
   return (
     <Switch>
       {/* Add pages below */}
       <Route path="/" component={Splash} />
+      <Route path="/language-selector" component={LanguageSelector} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

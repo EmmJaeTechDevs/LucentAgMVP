@@ -1,6 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useLocation } from "wouter";
 
 export const Splash = (): JSX.Element => {
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLocation("/language-selector");
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [setLocation]);
+
   return (
     <main className="relative w-[360px] h-[691px] bg-white">
       <img
