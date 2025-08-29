@@ -52,7 +52,7 @@ export const LanguageSelector = (): JSX.Element => {
     <main className="relative w-full min-h-screen max-w-md mx-auto bg-gray-50 md:max-w-2xl lg:max-w-4xl xl:max-w-5xl flex flex-col">
 
       {/* Content */}
-      <div className="flex-1 px-6 pt-[40px] pb-4 md:px-8 md:pt-6 md:pb-6 lg:px-16 lg:pt-8 lg:pb-8 flex flex-col justify-center">
+      <div className="flex-1 px-6 pt-[230px] pb-4 md:px-8 md:pt-6 md:pb-6 lg:px-16 lg:pt-8 lg:pb-8 flex flex-col justify-center">
         <div className="max-w-3xl mx-auto w-full">
           <h1 className="text-2xl font-bold text-gray-900 mb-2 md:text-3xl lg:text-5xl md:mb-4 lg:mb-6 text-center">
             Choose Your Preferred Language
