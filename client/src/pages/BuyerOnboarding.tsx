@@ -4,6 +4,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useLoading } from "@/hooks/useLoading";
 import leafImage from "@assets/entypo_leaf_1756517515112.png";
 import deliveryImage from "@assets/image 13_1756529531399.png";
+import choiceImage from "@assets/image 14_1756529686449.png";
 
 export const BuyerOnboarding = (): JSX.Element => {
   const [, setLocation] = useLocation();
@@ -31,7 +32,7 @@ export const BuyerOnboarding = (): JSX.Element => {
       id: 3,
       title: "Pick What You Love",
       description: "Choose from a wide range of fresh produce grown with care. Freshness, your way",
-      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+      image: choiceImage
     }
   ];
 
