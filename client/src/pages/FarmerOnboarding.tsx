@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useLoading } from "@/hooks/useLoading";
 import leafImage from "@assets/entypo_leaf_1756517515112.png";
+import farmerImage from "@assets/image 4_1756527774206.png";
 
 export const FarmerOnboarding = (): JSX.Element => {
   const [, setLocation] = useLocation();
@@ -18,7 +19,7 @@ export const FarmerOnboarding = (): JSX.Element => {
       id: 1,
       title: "Grow and Sell Easily",
       description: "Tell us what you're planting and when it will be ready. It helps you find buyers ahead of time!",
-      image: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+      image: farmerImage
     },
     {
       id: 2,
