@@ -2,7 +2,7 @@ import React from "react";
 
 export const Splash = (): JSX.Element => {
   return (
-    <main className="relative w-[360px] h-[932px] bg-white">
+    <main className="relative w-[360px] h-[691px] bg-white">
 
       <section className="flex flex-col items-center justify-center h-full">
         <img
