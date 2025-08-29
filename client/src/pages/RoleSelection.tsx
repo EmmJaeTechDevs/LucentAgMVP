@@ -35,8 +35,12 @@ export const RoleSelection = (): JSX.Element => {
 
   const handleContinue = () => {
     if (selectedRole) {
-      // For now, just show an alert - you can navigate to the next page later
-      alert(`Selected role: ${roles.find(r => r.id === selectedRole)?.title}`);
+      if (selectedRole === "farmer") {
+        setLocation("/farmer-onboarding");
+      } else {
+        // For now, just show an alert for buyer - you can add buyer onboarding later
+        alert(`Selected role: ${roles.find(r => r.id === selectedRole)?.title}`);
+      }
     }
   };
 
