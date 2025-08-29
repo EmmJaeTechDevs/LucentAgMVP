@@ -45,7 +45,7 @@ export const LanguageSelector = (): JSX.Element => {
     <main className="relative w-full min-h-screen max-w-md mx-auto bg-gray-50 md:max-w-lg lg:max-w-xl xl:max-w-2xl">
 
       {/* Content */}
-      <div className="px-6 py-4 mt-[30px] md:px-8 md:py-8 lg:px-12 lg:py-12">
+      <div className="px-6 py-4 mt-[40px] md:px-8 md:py-8 lg:px-12 lg:py-12">
         <h1 className="text-2xl font-bold text-gray-900 mb-2 md:text-3xl lg:text-4xl md:mb-4">
           Choose Your<br className="md:hidden" /><span className="hidden md:inline"> </span>Preferred Language
         </h1>
