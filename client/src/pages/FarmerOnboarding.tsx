@@ -236,7 +236,7 @@ export const FarmerOnboarding = (): JSX.Element => {
       </div>
 
       {/* Decorative element */}
-      <div className="absolute bottom-8 right-6 w-24 h-24 opacity-40 md:top-8 md:left-8 md:bottom-auto md:right-auto md:w-20 md:h-20 lg:w-24 lg:h-24">
+      <div className="absolute bottom-8 right-6 w-24 h-24 opacity-40 md:bottom-8 md:right-8 md:w-20 md:h-20 lg:w-24 lg:h-24">
         <img 
           src={leafImage} 
           alt="Decorative leaf"
