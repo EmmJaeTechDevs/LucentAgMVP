@@ -74,7 +74,9 @@ export const RoleSelection = (): JSX.Element => {
               >
                 {/* Background Image */}
                 <div 
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-300 hover:scale-110"
+                  className={`absolute inset-0 bg-cover transition-transform duration-300 hover:scale-110 ${
+                    role.id === "buyer" ? "bg-top" : "bg-center"
+                  }`}
                   style={{ backgroundImage: `url(${role.image})` }}
                 >
                   {/* Gradient overlay */}
@@ -159,7 +161,9 @@ export const RoleSelection = (): JSX.Element => {
               >
                 {/* Background Image */}
                 <div 
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                  className={`absolute inset-0 bg-cover transition-transform duration-500 group-hover:scale-110 ${
+                    role.id === "buyer" ? "bg-top" : "bg-center"
+                  }`}
                   style={{ backgroundImage: `url(${role.image})` }}
                 >
                   {/* Enhanced Gradient overlay */}
