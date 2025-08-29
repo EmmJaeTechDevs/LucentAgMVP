@@ -40,14 +40,14 @@ export const BuyerOnboarding = (): JSX.Element => {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      // Navigate to next page or complete onboarding
-      alert("Onboarding completed! Ready to proceed.");
+      // Navigate to welcome page
+      setLocation("/buyer-account-creation");
     }
   };
 
   const handleSkip = () => {
-    // Navigate to next page
-    alert("Skipping onboarding...");
+    // Navigate to welcome page
+    setLocation("/buyer-account-creation");
   };
 
   const goToSlide = (slideIndex: number) => {

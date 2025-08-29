@@ -12,6 +12,7 @@ import { RoleSelection } from "@/pages/RoleSelection";
 import { FarmerOnboarding } from "@/pages/FarmerOnboarding";
 import { BuyerOnboarding } from "@/pages/BuyerOnboarding";
 import { FarmerAccountCreation } from "@/pages/FarmerAccountCreation";
+import { BuyerAccountCreation } from "@/pages/BuyerAccountCreation";
 
 function Router() {
   return (
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/farmer-onboarding" component={FarmerOnboarding} />
       <Route path="/buyer-onboarding" component={BuyerOnboarding} />
       <Route path="/farmer-account-creation" component={FarmerAccountCreation} />
+      <Route path="/buyer-account-creation" component={BuyerAccountCreation} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
