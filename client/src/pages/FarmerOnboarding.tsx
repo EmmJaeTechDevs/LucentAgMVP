@@ -85,10 +85,10 @@ export const FarmerOnboarding = (): JSX.Element => {
                 >
                   <div className="w-full h-full rounded-3xl overflow-hidden shadow-2xl">
                     <div
-                      className="w-full h-full bg-cover bg-center"
+                      className="w-full h-full bg-cover bg-center rounded-3xl"
                       style={{ backgroundImage: `url(${slide.image})` }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-3xl"></div>
                     </div>
                   </div>
                   {/* Additional shadow layers for depth */}
@@ -168,10 +168,10 @@ export const FarmerOnboarding = (): JSX.Element => {
                   >
                     <div className="w-full h-full rounded-3xl overflow-hidden shadow-2xl">
                       <div
-                        className="w-full h-full bg-cover bg-center"
+                        className="w-full h-full bg-cover bg-center rounded-3xl"
                         style={{ backgroundImage: `url(${slide.image})` }}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-3xl"></div>
                       </div>
                     </div>
                     {/* Enhanced shadow layers for desktop */}
