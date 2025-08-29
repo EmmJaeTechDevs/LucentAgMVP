@@ -21,10 +21,10 @@ export const Splash = (): JSX.Element => {
   }
 
   return (
-    <main className="relative w-[360px] h-[691px] bg-white flex items-center justify-center">
-      <div className="text-center">
+    <main className="relative w-full min-h-screen max-w-md mx-auto bg-white flex items-center justify-center md:max-w-lg lg:max-w-xl xl:max-w-2xl">
+      <div className="text-center px-4">
         <img
-          className="w-[229px] h-[132px] mx-auto"
+          className="w-48 h-28 mx-auto md:w-56 md:h-32 lg:w-64 lg:h-36"
           alt="Lucent Ag Logo"
           src="/figmaAssets/image-20.png"
           onError={(e) => {
@@ -33,7 +33,7 @@ export const Splash = (): JSX.Element => {
             e.currentTarget.style.display = 'none';
           }}
         />
-        <div className="mt-4 text-lg font-semibold text-gray-800">
+        <div className="mt-4 text-lg font-semibold text-gray-800 md:text-xl lg:text-2xl">
           Lucent Ag
         </div>
       </div>
