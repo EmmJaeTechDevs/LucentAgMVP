@@ -62,12 +62,12 @@ export const LanguageSelector = (): JSX.Element => {
         </p>
 
         {/* Language Options */}
-        <div className="grid grid-cols-2 gap-4 mb-8 md:gap-6 md:mb-12 lg:grid-cols-4 lg:gap-8">
+        <div className="grid grid-cols-2 gap-4 mb-8 md:gap-8 md:mb-12 lg:gap-10">
           {languages.map((language) => (
             <button
               key={language.id}
               onClick={() => setSelectedLanguage(language.id)}
-              className={`relative p-4 rounded-2xl border-2 transition-all duration-200 hover:shadow-md md:p-6 lg:p-8 ${
+              className={`relative p-4 rounded-2xl border-2 transition-all duration-200 hover:shadow-md md:p-8 lg:p-10 ${
                 selectedLanguage === language.id
                   ? "border-green-600 bg-white"
                   : "border-gray-200 bg-white"
