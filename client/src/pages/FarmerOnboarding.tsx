@@ -41,14 +41,14 @@ export const FarmerOnboarding = (): JSX.Element => {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      // Navigate to next page or complete onboarding
-      alert("Onboarding completed! Ready to proceed.");
+      // Navigate to account creation
+      setLocation("/farmer-account-creation");
     }
   };
 
   const handleSkip = () => {
-    // Navigate to next page
-    alert("Skipping onboarding...");
+    // Navigate to account creation
+    setLocation("/farmer-account-creation");
   };
 
   const goToSlide = (slideIndex: number) => {

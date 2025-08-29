@@ -11,6 +11,7 @@ import { LanguageSelector } from "@/pages/LanguageSelector";
 import { RoleSelection } from "@/pages/RoleSelection";
 import { FarmerOnboarding } from "@/pages/FarmerOnboarding";
 import { BuyerOnboarding } from "@/pages/BuyerOnboarding";
+import { FarmerAccountCreation } from "@/pages/FarmerAccountCreation";
 
 function Router() {
   return (
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/role-selection" component={RoleSelection} />
       <Route path="/farmer-onboarding" component={FarmerOnboarding} />
       <Route path="/buyer-onboarding" component={BuyerOnboarding} />
+      <Route path="/farmer-account-creation" component={FarmerAccountCreation} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
