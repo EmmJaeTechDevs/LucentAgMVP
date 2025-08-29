@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useLoading } from "@/hooks/useLoading";
+import leafImage from "@assets/entypo_leaf_1756517515112.png";
 
 export const LanguageSelector = (): JSX.Element => {
   const [, setLocation] = useLocation();
@@ -112,7 +113,7 @@ export const LanguageSelector = (): JSX.Element => {
       {/* Bottom decorative element */}
       <div className="absolute bottom-8 right-6 w-16 h-16 opacity-20 md:bottom-12 md:right-8 md:w-20 md:h-20 lg:w-24 lg:h-24">
         <img 
-          src="@assets/entypo_leaf_1756517515112.png" 
+          src={leafImage} 
           alt="Decorative leaf"
           className="w-full h-full object-contain"
         />
