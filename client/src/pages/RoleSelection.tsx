@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useLoading } from "@/hooks/useLoading";
 import leafImage from "@assets/entypo_leaf_1756517515112.png";
+import farmerImage from "@assets/image 2_1756522296288.jpg";
 
 export const RoleSelection = (): JSX.Element => {
   const [, setLocation] = useLocation();
@@ -18,7 +19,7 @@ export const RoleSelection = (): JSX.Element => {
       id: "farmer",
       title: "I'm a Farmer",
       description: "I want to share my produce and connect with buyers.",
-      image: "https://images.unsplash.com/photo-1595515106969-2670b4df4e9d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+      image: farmerImage
     },
     {
       id: "buyer", 
