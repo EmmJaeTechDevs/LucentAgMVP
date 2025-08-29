@@ -111,7 +111,7 @@ export const LanguageSelector = (): JSX.Element => {
       </div>
 
       {/* Bottom decorative element */}
-      <div className="absolute bottom-8 right-6 w-16 h-16 opacity-20 md:bottom-12 md:right-8 md:w-20 md:h-20 lg:w-24 lg:h-24">
+      <div className="absolute bottom-8 right-6 w-24 h-24 opacity-40 md:bottom-12 md:right-8 md:w-20 md:h-20 lg:w-24 lg:h-24">
         <img 
           src={leafImage} 
           alt="Decorative leaf"
