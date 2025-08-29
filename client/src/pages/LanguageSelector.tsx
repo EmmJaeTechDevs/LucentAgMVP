@@ -52,7 +52,7 @@ export const LanguageSelector = (): JSX.Element => {
     <main className="relative w-full h-screen max-w-md mx-auto bg-gray-50 md:max-w-2xl lg:max-w-4xl xl:max-w-5xl overflow-hidden flex flex-col">
 
       {/* Content */}
-      <div className="flex-1 px-6 pt-[100px] pb-4 md:px-8 md:pt-6 md:pb-6 lg:px-16 lg:pt-8 lg:pb-8 flex flex-col justify-center">
+      <div className="flex-1 px-6 pt-[40px] pb-4 md:px-8 md:pt-6 md:pb-6 lg:px-16 lg:pt-8 lg:pb-8 flex flex-col justify-center">
         <div className="max-w-3xl mx-auto w-full">
           <h1 className="text-2xl font-bold text-gray-900 mb-2 md:text-3xl lg:text-5xl md:mb-4 lg:mb-6 text-center">
             Choose Your Preferred Language
@@ -99,7 +99,7 @@ export const LanguageSelector = (): JSX.Element => {
           {/* Continue Button */}
           <button
             onClick={handleContinue}
-            className="w-full max-w-md mx-auto bg-green-700 text-white py-4 rounded-2xl font-semibold text-lg hover:bg-green-800 hover:shadow-lg transition-all duration-200 md:py-5 md:text-xl lg:text-xl"
+            className="w-full bg-green-700 text-white py-4 rounded-2xl font-semibold text-lg hover:bg-green-800 hover:shadow-lg transition-all duration-200 md:py-5 md:text-xl lg:text-xl md:max-w-md md:mx-auto"
             data-testid="button-continue"
           >
             Continue
