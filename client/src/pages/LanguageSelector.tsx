@@ -96,7 +96,7 @@ export const LanguageSelector = (): JSX.Element => {
                   className="w-12 h-8 md:w-16 md:h-10 lg:w-20 lg:h-12 object-cover rounded-sm"
                 />
               </div>
-              <div className="text-left">
+              <div className="text-center">
                 <h3 className="font-semibold text-gray-900 md:text-lg lg:text-xl">{language.name}</h3>
                 <p className="text-sm text-gray-500 md:text-base">{language.subtitle}</p>
               </div>
