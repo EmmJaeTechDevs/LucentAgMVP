@@ -4,6 +4,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useLoading } from "@/hooks/useLoading";
 import leafImage from "@assets/entypo_leaf_1756517515112.png";
 import farmerImage from "@assets/image 2_1756522296288.jpg";
+import buyerImage from "@assets/image 3_1756527456608.png";
 
 export const RoleSelection = (): JSX.Element => {
   const [, setLocation] = useLocation();
@@ -25,7 +26,7 @@ export const RoleSelection = (): JSX.Element => {
       id: "buyer", 
       title: "I'm a Buyer",
       description: "I want to find and purchase fresh produce from local farmers.",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+      image: buyerImage
     }
   ];
 
