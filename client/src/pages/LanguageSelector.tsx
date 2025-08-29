@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useLoading } from "@/hooks/useLoading";
+import { useLanguage, type Language } from "@/contexts/LanguageContext";
 import leafImage from "@assets/entypo_leaf_1756517515112.png";
 
 export const LanguageSelector = (): JSX.Element => {
   const [, setLocation] = useLocation();
-  const [selectedLanguage, setSelectedLanguage] = useState("english");
+  const { selectedLanguage, setSelectedLanguage } = useLanguage();
+  const [localSelectedLanguage, setLocalSelectedLanguage] = useState<Language>(selectedLanguage);
   const { isLoading } = useLoading({ minimumLoadTime: 600 });
 
   if (isLoading) {
@@ -45,8 +47,10 @@ export const LanguageSelector = (): JSX.Element => {
   ];
 
   const handleContinue = () => {
-    // For now, just show an alert - you can navigate to the next page later
-    alert(`Selected language: ${languages.find(l => l.id === selectedLanguage)?.name}`);
+    // Save the selected language to global state
+    setSelectedLanguage(localSelectedLanguage);
+    // Navigate to role selection page
+    setLocation("/role-selection");
   };
 
   return (
@@ -67,15 +71,15 @@ export const LanguageSelector = (): JSX.Element => {
             {languages.map((language) => (
               <button
                 key={language.id}
-                onClick={() => setSelectedLanguage(language.id)}
+                onClick={() => setLocalSelectedLanguage(language.id as Language)}
                 className={`relative p-4 rounded-2xl border-2 transition-all duration-200 hover:shadow-lg hover:scale-105 md:p-6 lg:p-8 ${
-                  selectedLanguage === language.id
+                  localSelectedLanguage === language.id
                     ? "border-green-600 bg-white shadow-lg"
                     : "border-gray-200 bg-white hover:border-gray-300"
                 }`}
                 data-testid={`language-option-${language.id}`}
               >
-                {selectedLanguage === language.id && (
+                {localSelectedLanguage === language.id && (
                   <div className="absolute top-2 right-2 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center md:w-7 md:h-7 lg:w-8 lg:h-8">
                     <svg className="w-4 h-4 text-white md:w-4 md:h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
