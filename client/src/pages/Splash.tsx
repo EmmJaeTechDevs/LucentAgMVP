@@ -6,7 +6,6 @@ import { useLoading } from "@/hooks/useLoading";
 export const Splash = (): JSX.Element => {
   const [, setLocation] = useLocation();
   const [isVisible, setIsVisible] = useState(true);
-  const { isLoading } = useLoading({ minimumLoadTime: 1000 });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -21,10 +20,6 @@ export const Splash = (): JSX.Element => {
 
   if (!isVisible) {
     return <LoadingSpinner fullScreen message="Transitioning..." />;
-  }
-
-  if (isLoading) {
-    return <LoadingSpinner fullScreen message="Initializing..." />;
   }
 
   return (
