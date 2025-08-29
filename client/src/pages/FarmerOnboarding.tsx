@@ -31,8 +31,8 @@ export const FarmerOnboarding = (): JSX.Element => {
     },
     {
       id: 3,
-      title: "Manage Your Harvest",
-      description: "Keep track of your crops, plan your seasons, and maximize your profits with our tools.",
+      title: "Sell Quickly, Save More",
+      description: "No more wasting fresh produce. You harvest only what's needed and get paid faster",
       image: harvestImage
     }
   ];
