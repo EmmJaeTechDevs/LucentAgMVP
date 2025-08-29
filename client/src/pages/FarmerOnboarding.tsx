@@ -25,8 +25,8 @@ export const FarmerOnboarding = (): JSX.Element => {
     },
     {
       id: 2,
-      title: "Connect with Buyers",
-      description: "Build lasting relationships with local buyers who value fresh, quality produce from your farm.",
+      title: "Get Buyers Before Harvest",
+      description: "When you tell us early, customers can order from you before your plants are ready",
       image: connectImage
     },
     {
