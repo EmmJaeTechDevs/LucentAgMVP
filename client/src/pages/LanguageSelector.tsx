@@ -110,9 +110,12 @@ export const LanguageSelector = (): JSX.Element => {
       </div>
 
       {/* Bottom decorative element */}
-      <div className="absolute bottom-4 right-4 w-24 h-24 opacity-5 md:w-32 md:h-32 lg:w-40 lg:h-40">
+      <div className="absolute bottom-8 right-6 w-32 h-32 opacity-15 md:bottom-12 md:right-8 md:w-40 md:h-40 lg:w-48 lg:h-48 text-green-600">
         <svg viewBox="0 0 100 100" className="w-full h-full">
-          <path d="M20,80 Q50,20 80,80" fill="none" stroke="currentColor" strokeWidth="15" opacity="0.3"/>
+          <path d="M30,70 Q50,30 70,70" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.6"/>
+          <path d="M25,75 Q45,35 65,75" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.4"/>
+          <path d="M35,65 Q55,25 75,65" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.4"/>
+          <circle cx="50" cy="80" r="2" fill="currentColor" opacity="0.3"/>
         </svg>
       </div>
     </main>
