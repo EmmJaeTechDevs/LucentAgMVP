@@ -4,6 +4,8 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useLoading } from "@/hooks/useLoading";
 import leafImage from "@assets/entypo_leaf_1756517515112.png";
 import farmerImage from "@assets/image 4_1756527774206.png";
+import connectImage from "@assets/image 11_1756527834945.png";
+import harvestImage from "@assets/image 5_1756527846541.png";
 
 export const FarmerOnboarding = (): JSX.Element => {
   const [, setLocation] = useLocation();
@@ -25,13 +27,13 @@ export const FarmerOnboarding = (): JSX.Element => {
       id: 2,
       title: "Connect with Buyers",
       description: "Build lasting relationships with local buyers who value fresh, quality produce from your farm.",
-      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+      image: connectImage
     },
     {
       id: 3,
       title: "Manage Your Harvest",
       description: "Keep track of your crops, plan your seasons, and maximize your profits with our tools.",
-      image: "https://images.unsplash.com/photo-1595515106969-2670b4df4e9d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+      image: harvestImage
     }
   ];
 
