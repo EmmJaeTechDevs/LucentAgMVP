@@ -98,7 +98,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
       <div className="flex-1 px-6 py-8 md:px-8 lg:px-16">
         {/* Mobile Layout */}
         <div className="md:hidden max-w-md mx-auto w-full animate-fadeInUp">
-          <div className="bg-white rounded-3xl shadow-lg p-6 mb-6">
+          <div className="p-6 mb-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
               Create your account
             </h1>
