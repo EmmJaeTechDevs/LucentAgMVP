@@ -286,9 +286,10 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <select
                       value={formData.state}
                       onChange={(e) => handleInputChange("state", e.target.value)}
-                      className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all relative z-10"
                       data-testid="select-state"
                       required
+                      style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select State</option>
                       {nigerianStates.map(state => (
@@ -303,10 +304,11 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <select
                       value={formData.lga}
                       onChange={(e) => handleInputChange("lga", e.target.value)}
-                      className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all relative z-10"
                       data-testid="select-lga"
                       required
                       disabled={!formData.state}
+                      style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select LGA</option>
                       {formData.state && getStateLGAs(formData.state).map(lga => (
@@ -325,10 +327,11 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <select
                       value={formData.cityTown}
                       onChange={(e) => handleInputChange("cityTown", e.target.value)}
-                      className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all relative z-10"
                       data-testid="select-city-town"
                       required
                       disabled={!formData.state}
+                      style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select City/Town</option>
                       {formData.state && getStateCities(formData.state).map(city => (
@@ -511,9 +514,10 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <select
                       value={formData.state}
                       onChange={(e) => handleInputChange("state", e.target.value)}
-                      className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
+                      className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg relative z-10"
                       data-testid="select-state-desktop"
                       required
+                      style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select State</option>
                       {nigerianStates.map(state => (
@@ -528,10 +532,11 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <select
                       value={formData.lga}
                       onChange={(e) => handleInputChange("lga", e.target.value)}
-                      className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
+                      className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg relative z-10"
                       data-testid="select-lga-desktop"
                       required
                       disabled={!formData.state}
+                      style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select LGA</option>
                       {formData.state && getStateLGAs(formData.state).map(lga => (
@@ -550,9 +555,10 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <select
                       value={formData.cityTown}
                       onChange={(e) => handleInputChange("cityTown", e.target.value)}
-                      className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
+                      className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg relative z-10"
                       data-testid="select-city-town-desktop"
                       required
+                      style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select City/Town</option>
                       {formData.state && getStateCities(formData.state).map(city => (
