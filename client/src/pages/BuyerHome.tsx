@@ -150,7 +150,7 @@ export function BuyerHome() {
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Fresh Today
             </h2>
-            <div className="flex gap-4 overflow-x-auto pb-2">
+            <div className="flex gap-4 overflow-x-hidden pb-2">
               {freshTodayProducts.map(product => (
                 <div
                   key={product.id}
@@ -188,7 +188,7 @@ export function BuyerHome() {
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Harvesting Soon
             </h2>
-            <div className="flex gap-4 overflow-x-auto pb-2">
+            <div className="flex gap-4 overflow-x-hidden pb-2">
               {harvestingSoonProducts.map(product => (
                 <div
                   key={product.id}
