@@ -7,6 +7,7 @@ export function FarmerVerification() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [countdown, setCountdown] = useState(45);
+  const [hasError, setHasError] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Countdown timer for resend
@@ -20,6 +21,11 @@ export function FarmerVerification() {
 
   const handleInputChange = (index: number, value: string) => {
     if (value.length > 1) return; // Only allow single digit
+    
+    // Clear error state when user starts typing
+    if (hasError) {
+      setHasError(false);
+    }
     
     const newCode = [...code];
     newCode[index] = value;
@@ -42,16 +48,31 @@ export function FarmerVerification() {
     if (verificationCode.length !== 6) return;
 
     setIsVerifying(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsVerifying(false);
+    setHasError(false);
     
-    // Navigate to dashboard or next step
-    setLocation("/dashboard"); // You can update this to your desired next page
+    try {
+      // Simulate API call - randomly fail for demo (you can replace with real API)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Simulate validation - for demo, reject code "123456"
+      if (verificationCode === "123456") {
+        setHasError(true);
+        return;
+      }
+      
+      // Navigate to dashboard or next step on success
+      setLocation("/dashboard");
+    } catch (error) {
+      setHasError(true);
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const handleResend = () => {
     setCountdown(45);
+    setHasError(false); // Clear error on resend
+    setCode(["", "", "", "", "", ""]); // Clear code inputs
     // Simulate resend API call
     console.log("Resending verification code...");
   };
@@ -76,7 +97,7 @@ export function FarmerVerification() {
           </p>
 
           {/* 6-digit code input */}
-          <div className="flex gap-3 mb-8 justify-center">
+          <div className="flex gap-3 mb-4 justify-center">
             {code.map((digit, index) => (
               <input
                 key={index}
@@ -87,12 +108,28 @@ export function FarmerVerification() {
                 value={digit}
                 onChange={(e) => handleInputChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-12 h-12 text-center text-lg font-semibold border-2 border-gray-200 rounded-lg focus:border-green-600 focus:outline-none transition-colors"
+                className={`w-12 h-12 text-center text-lg font-semibold border-2 rounded-lg focus:outline-none transition-colors ${
+                  hasError 
+                    ? "border-red-500 focus:border-red-600" 
+                    : "border-gray-200 focus:border-green-600"
+                }`}
                 maxLength={1}
                 data-testid={`input-code-${index}`}
               />
             ))}
           </div>
+
+          {/* Error message */}
+          {hasError && (
+            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+              <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-xs font-bold">!</span>
+              </div>
+              <p className="text-red-700 text-sm font-medium">
+                Invalid code. Please check and try again.
+              </p>
+            </div>
+          )}
 
           {/* Resend code */}
           <div className="text-center mb-8">
@@ -144,7 +181,7 @@ export function FarmerVerification() {
           </p>
 
           {/* 6-digit code input */}
-          <div className="flex gap-4 mb-8 justify-center">
+          <div className="flex gap-4 mb-4 justify-center">
             {code.map((digit, index) => (
               <input
                 key={index}
@@ -155,12 +192,28 @@ export function FarmerVerification() {
                 value={digit}
                 onChange={(e) => handleInputChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-14 h-14 text-center text-xl font-semibold border-2 border-gray-200 rounded-xl focus:border-green-600 focus:outline-none transition-colors"
+                className={`w-14 h-14 text-center text-xl font-semibold border-2 rounded-xl focus:outline-none transition-colors ${
+                  hasError 
+                    ? "border-red-500 focus:border-red-600" 
+                    : "border-gray-200 focus:border-green-600"
+                }`}
                 maxLength={1}
                 data-testid={`input-code-${index}`}
               />
             ))}
           </div>
+
+          {/* Error message */}
+          {hasError && (
+            <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-sm font-bold">!</span>
+              </div>
+              <p className="text-red-700 font-medium">
+                Invalid code. Please check and try again.
+              </p>
+            </div>
+          )}
 
           {/* Resend code */}
           <div className="text-center mb-8">
