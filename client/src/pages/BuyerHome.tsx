@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Search, ShoppingCart } from "lucide-react";
-import TomatoesImage from "@assets/image15.png";
+import TomatoesImage from "@assets/image 15.png";
 
 export function BuyerHome() {
   const [searchQuery, setSearchQuery] = useState("");
