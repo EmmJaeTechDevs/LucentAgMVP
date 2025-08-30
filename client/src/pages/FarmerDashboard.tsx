@@ -22,11 +22,11 @@ export function FarmerDashboard() {
   };
 
   const handleViewCrops = () => {
-    console.log("View your crops clicked");
+    setLocation("/view-crops");
   };
 
   const handleCheckOrders = () => {
-    console.log("Check orders clicked");
+    setLocation("/check-orders");
   };
 
   const handleNotifications = () => {
