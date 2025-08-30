@@ -60,9 +60,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      alert("Account created successfully!");
-      // Navigate to next page after successful creation
-      // setLocation("/farmer-dashboard");
+      // Navigate to verification page
+      setLocation("/farmer-verification");
       
     } catch (error) {
       console.error("Error creating account:", error);
