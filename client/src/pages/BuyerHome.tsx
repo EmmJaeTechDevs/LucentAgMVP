@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { Search, ShoppingCart } from "lucide-react";
 import TomatoesImage from "@assets/image 15.png";
+import SweetPotatoImage from "@assets/image 17.png";
+import CabbageImage from "@assets/image 11_1756527834945.png";
+import PlantainImage from "@assets/image 13_1756529531399.png";
+import GroundnutsImage from "@assets/image 14_1756529686449.png";
+import GreenBeansImage from "@assets/image 2_1756522296288.jpg";
 
 export function BuyerHome() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,7 +30,7 @@ export function BuyerHome() {
       farm: "Chika & Sons Farms",
       price: "₦3,500",
       unit: "per Bag",
-      image: "🥔",
+      image: SweetPotatoImage,
       stockLeft: "",
     },
     {
@@ -34,7 +39,7 @@ export function BuyerHome() {
       farm: "Emeka Farms",
       price: "₦1,800",
       unit: "per Basket",
-      image: "🫘",
+      image: GreenBeansImage,
       stockLeft: "",
     },
   ];
@@ -46,7 +51,7 @@ export function BuyerHome() {
       farm: "Northern Farms",
       price: "₦2,500",
       unit: "per Basket",
-      image: "🥬",
+      image: CabbageImage,
       stockLeft: "",
     },
     {
@@ -55,7 +60,7 @@ export function BuyerHome() {
       farm: "Kaduna Co-op",
       price: "₦4,200",
       unit: "per Bag",
-      image: "🥜",
+      image: GroundnutsImage,
       stockLeft: "",
     },
     {
@@ -64,7 +69,7 @@ export function BuyerHome() {
       farm: "Oyo Plantain Farm",
       price: "₦3,000",
       unit: "per Bunch",
-      image: "🍌",
+      image: PlantainImage,
       stockLeft: "",
     },
   ];
@@ -158,8 +163,18 @@ export function BuyerHome() {
                   data-testid={`product-${product.id}`}
                 >
                   <div className="relative">
-                    <div className="w-full h-32 bg-gray-100 rounded-t-xl flex items-center justify-center text-4xl">
-                      {product.image}
+                    <div className="w-full h-32 bg-gray-100 rounded-t-xl overflow-hidden">
+                      {typeof product.image === 'string' && product.image.startsWith('/') ? (
+                        <img 
+                          src={product.image} 
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl">
+                          {product.image}
+                        </div>
+                      )}
                     </div>
                     {product.stockLeft && (
                       <div className="absolute top-2 left-2 bg-orange-100 text-orange-800 px-2 py-1 rounded-lg text-xs font-medium">
@@ -200,8 +215,18 @@ export function BuyerHome() {
                   className="flex-shrink-0 w-48 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                   data-testid={`product-${product.id}`}
                 >
-                  <div className="w-full h-32 bg-gray-100 rounded-t-xl flex items-center justify-center text-4xl">
-                    {product.image}
+                  <div className="w-full h-32 bg-gray-100 rounded-t-xl overflow-hidden">
+                    {typeof product.image === 'string' && product.image.startsWith('/') ? (
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl">
+                        {product.image}
+                      </div>
+                    )}
                   </div>
                   <div className="p-4">
                     <h3 className="font-semibold text-gray-900 mb-1">
@@ -292,8 +317,18 @@ export function BuyerHome() {
                   data-testid={`product-desktop-${product.id}`}
                 >
                   <div className="relative">
-                    <div className="w-full h-48 bg-gray-100 rounded-t-xl flex items-center justify-center text-6xl">
-                      {product.image}
+                    <div className="w-full h-48 bg-gray-100 rounded-t-xl overflow-hidden">
+                      {typeof product.image === 'string' && product.image.startsWith('/') ? (
+                        <img 
+                          src={product.image} 
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-6xl">
+                          {product.image}
+                        </div>
+                      )}
                     </div>
                     {product.stockLeft && (
                       <div className="absolute top-3 left-3 bg-orange-100 text-orange-800 px-3 py-1 rounded-lg text-sm font-medium">
@@ -334,8 +369,18 @@ export function BuyerHome() {
                   className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer hover:scale-105"
                   data-testid={`product-desktop-${product.id}`}
                 >
-                  <div className="w-full h-48 bg-gray-100 rounded-t-xl flex items-center justify-center text-6xl">
-                    {product.image}
+                  <div className="w-full h-48 bg-gray-100 rounded-t-xl overflow-hidden">
+                    {typeof product.image === 'string' && product.image.startsWith('/') ? (
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-6xl">
+                        {product.image}
+                      </div>
+                    )}
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
