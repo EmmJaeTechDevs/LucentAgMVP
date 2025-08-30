@@ -31,10 +31,10 @@ export function BuyerWelcome() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // TODO: Navigate to buyer dashboard or next onboarding step
       console.log("Buyer welcome data:", formData);
-      // For now, just log - will implement buyer dashboard later
-      alert("Welcome complete! Buyer dashboard coming soon.");
+      
+      // Navigate to buyer notification preferences
+      setLocation("/buyer-notification-preferences");
       
     } catch (error) {
       console.error("Error saving welcome data:", error);
@@ -44,9 +44,9 @@ export function BuyerWelcome() {
   };
 
   const handleSkip = () => {
-    // TODO: Navigate to buyer dashboard or next step
     console.log("Buyer skipped welcome form");
-    alert("Skipped welcome! Buyer dashboard coming soon.");
+    // Navigate to buyer notification preferences
+    setLocation("/buyer-notification-preferences");
   };
 
   return (
