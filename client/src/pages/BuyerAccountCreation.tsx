@@ -28,9 +28,8 @@ export const BuyerAccountCreation = (): JSX.Element => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      alert("Phone number verified! Proceeding to next step.");
-      // Navigate to next page after verification
-      // setLocation("/buyer-dashboard");
+      // Navigate to buyer verification page
+      setLocation("/buyer-verification");
       
     } catch (error) {
       console.error("Error verifying phone number:", error);

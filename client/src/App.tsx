@@ -22,6 +22,8 @@ import { ViewCrops } from "@/pages/ViewCrops";
 import { CheckOrders } from "@/pages/CheckOrders";
 import { Notifications } from "@/pages/Notifications";
 import { AddNewCrop } from "@/pages/AddNewCrop";
+import { BuyerVerification } from "@/pages/BuyerVerification";
+import { BuyerWelcome } from "@/pages/BuyerWelcome";
 
 function Router() {
   return (
@@ -43,6 +45,8 @@ function Router() {
       <Route path="/check-orders" component={CheckOrders} />
       <Route path="/notifications" component={Notifications} />
       <Route path="/add-new-crop" component={AddNewCrop} />
+      <Route path="/buyer-verification" component={BuyerVerification} />
+      <Route path="/buyer-welcome" component={BuyerWelcome} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
