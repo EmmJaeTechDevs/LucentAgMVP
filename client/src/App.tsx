@@ -21,6 +21,7 @@ import { FarmerDashboard } from "@/pages/FarmerDashboard";
 import { ViewCrops } from "@/pages/ViewCrops";
 import { CheckOrders } from "@/pages/CheckOrders";
 import { Notifications } from "@/pages/Notifications";
+import { AddNewCrop } from "@/pages/AddNewCrop";
 
 function Router() {
   return (
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/view-crops" component={ViewCrops} />
       <Route path="/check-orders" component={CheckOrders} />
       <Route path="/notifications" component={Notifications} />
+      <Route path="/add-new-crop" component={AddNewCrop} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

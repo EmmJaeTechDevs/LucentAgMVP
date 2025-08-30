@@ -10,8 +10,7 @@ export function ViewCrops() {
   };
 
   const handleAddNewCrop = () => {
-    // Navigate to add crop page
-    console.log("Add new crop clicked from view crops");
+    setLocation("/add-new-crop");
   };
 
   return (
