@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Search, ShoppingCart } from "lucide-react";
 import TomatoesImage from "@assets/image 15.png";
-import SweetPotatoImage from "@assets/image 17.png";
-import CabbageImage from "@assets/image 11_1756527834945.png";
+import SweetPotatoImage from "@assets/Frame 8.png";
+import CabbageImage from "@assets/Frame 9.png";
 import PlantainImage from "@assets/image 13_1756529531399.png";
-import GroundnutsImage from "@assets/image 14_1756529686449.png";
+import GroundnutsImage from "@assets/image 17.png";
 import GreenBeansImage from "@assets/image 2_1756522296288.jpg";
 
 export function BuyerHome() {
@@ -132,7 +132,7 @@ export function BuyerHome() {
           </form>
 
           {/* Categories */}
-          <div className="flex gap-3 mb-8 overflow-x-auto pb-2">
+          <div className="flex gap-3 mb-8 overflow-x-auto scrollbar-hide pb-2">
             {categories.map((category) => (
               <button
                 key={category}
@@ -154,7 +154,7 @@ export function BuyerHome() {
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Fresh Today
             </h2>
-            <div className="flex gap-4 overflow-x-hidden pb-2">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
               {freshTodayProducts.map((product) => (
                 <div
                   key={product.id}
@@ -207,7 +207,7 @@ export function BuyerHome() {
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Harvesting Soon
             </h2>
-            <div className="flex gap-4 overflow-x-hidden pb-2">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
               {harvestingSoonProducts.map((product) => (
                 <div
                   key={product.id}
