@@ -92,6 +92,42 @@ export const FarmerAccountCreation = (): JSX.Element => {
     "Lagos Island", "Lagos Mainland", "Mushin", "Ojo", "Oshodi-Isolo", "Shomolu", "Surulere"
   ];
 
+  // Sample LGAs for other states
+  const getStateLGAs = (state: string): string[] => {
+    switch (state) {
+      case "Lagos":
+        return lagosLGAs;
+      case "Ogun":
+        return ["Abeokuta North", "Abeokuta South", "Ado-Odo/Ota", "Ewekoro", "Ifo", "Ijebu East", "Ijebu North", "Ijebu North East", "Ijebu Ode", "Ikenne", "Imeko Afon", "Ipokia", "Obafemi Owode", "Odeda", "Odogbolu", "Ogun Waterside", "Remo North", "Sagamu", "Yewa North", "Yewa South"];
+      case "Kano":
+        return ["Ajingi", "Albasu", "Bagwai", "Bebeji", "Bichi", "Bunkure", "Dala", "Dambatta", "Dawakin Kudu", "Dawakin Tofa", "Doguwa", "Fagge", "Gabasawa", "Garko", "Garun Mallam", "Gaya", "Gezawa", "Gwale", "Gwarzo", "Kabo", "Kano Municipal", "Karaye", "Kibiya", "Kiru", "Kumbotso", "Kunchi", "Kura", "Madobi", "Makoda", "Minjibir", "Nasarawa", "Rano", "Rimin Gado", "Rogo", "Shanono", "Sumaila", "Takai", "Tarauni", "Tofa", "Tsanyawa", "Tudun Wada", "Ungogo", "Warawa", "Wudil"];
+      case "FCT":
+        return ["Abaji", "Bwari", "Gwagwalada", "Kuje", "Municipal Area Council", "Kwali"];
+      case "Rivers":
+        return ["Abua/Odual", "Ahoada East", "Ahoada West", "Akuku-Toru", "Andoni", "Asari-Toru", "Bonny", "Degema", "Eleme", "Emuoha", "Etche", "Gokana", "Ikwerre", "Khana", "Obio/Akpor", "Ogba/Egbema/Ndoni", "Ogu/Bolo", "Okrika", "Omuma", "Opobo/Nkoro", "Oyigbo", "Port Harcourt", "Tai"];
+      default:
+        return ["Municipal", "Central", "North", "South", "East", "West"];
+    }
+  };
+
+  // Get cities/towns based on state
+  const getStateCities = (state: string): string[] => {
+    switch (state) {
+      case "Lagos":
+        return ["Lagos", "Ikeja", "Victoria Island", "Ikoyi", "Lekki", "Surulere", "Yaba", "Maryland", "Magodo", "Gbagada", "Ajah", "Ikorodu", "Badagry", "Epe"];
+      case "Ogun":
+        return ["Abeokuta", "Sagamu", "Ijebu Ode", "Ota", "Ilaro", "Ayetoro", "Imeko", "Ipokia"];
+      case "Kano":
+        return ["Kano", "Wudil", "Gwarzo", "Rano", "Karaye", "Rogo", "Bagwai", "Dawakin Kudu"];
+      case "FCT":
+        return ["Abuja", "Gwagwalada", "Kuje", "Bwari", "Kwali", "Garki", "Wuse", "Maitama", "Asokoro", "Gwarinpa"];
+      case "Rivers":
+        return ["Port Harcourt", "Obio-Akpor", "Okrika", "Eleme", "Ikwerre", "Etche", "Oyigbo", "Degema", "Ahoada", "Bonny"];
+      default:
+        return ["Main City", "Central", "North", "South", "East", "West", "Other"];
+    }
+  };
+
   return (
     <main className="relative w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col overflow-hidden">
       {/* Content */}
@@ -263,12 +299,9 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       disabled={!formData.state}
                     >
                       <option value="">Select LGA</option>
-                      {formData.state === "Lagos" && lagosLGAs.map(lga => (
+                      {formData.state && getStateLGAs(formData.state).map(lga => (
                         <option key={lga} value={lga}>{lga}</option>
                       ))}
-                      {formData.state && formData.state !== "Lagos" && (
-                        <option value="Other">Other (Please specify)</option>
-                      )}
                     </select>
                   </div>
                 </div>
@@ -285,13 +318,12 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                       data-testid="select-city-town"
                       required
+                      disabled={!formData.state}
                     >
                       <option value="">Select City/Town</option>
-                      <option value="Lagos">Lagos</option>
-                      <option value="Ikeja">Ikeja</option>
-                      <option value="Victoria Island">Victoria Island</option>
-                      <option value="Lekki">Lekki</option>
-                      <option value="Other">Other</option>
+                      {formData.state && getStateCities(formData.state).map(city => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -492,12 +524,9 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       disabled={!formData.state}
                     >
                       <option value="">Select LGA</option>
-                      {formData.state === "Lagos" && lagosLGAs.map(lga => (
+                      {formData.state && getStateLGAs(formData.state).map(lga => (
                         <option key={lga} value={lga}>{lga}</option>
                       ))}
-                      {formData.state && formData.state !== "Lagos" && (
-                        <option value="Other">Other (Please specify)</option>
-                      )}
                     </select>
                   </div>
                 </div>
@@ -516,11 +545,9 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       required
                     >
                       <option value="">Select City/Town</option>
-                      <option value="Lagos">Lagos</option>
-                      <option value="Ikeja">Ikeja</option>
-                      <option value="Victoria Island">Victoria Island</option>
-                      <option value="Lekki">Lekki</option>
-                      <option value="Other">Other</option>
+                      {formData.state && getStateCities(formData.state).map(city => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
                     </select>
                   </div>
                   <div>
