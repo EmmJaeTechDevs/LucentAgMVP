@@ -15,6 +15,8 @@ import { FarmerAccountCreation } from "@/pages/FarmerAccountCreation";
 import { BuyerAccountCreation } from "@/pages/BuyerAccountCreation";
 import { FarmerVerification } from "@/pages/FarmerVerification";
 import { NotificationPreferences } from "@/pages/NotificationPreferences";
+import { CropSelection } from "@/pages/CropSelection";
+import { CropProcessing } from "@/pages/CropProcessing";
 
 function Router() {
   return (
@@ -29,6 +31,8 @@ function Router() {
       <Route path="/buyer-account-creation" component={BuyerAccountCreation} />
       <Route path="/farmer-verification" component={FarmerVerification} />
       <Route path="/notification-preferences" component={NotificationPreferences} />
+      <Route path="/crop-selection" component={CropSelection} />
+      <Route path="/crop-processing" component={CropProcessing} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

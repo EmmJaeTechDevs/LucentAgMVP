@@ -49,14 +49,14 @@ export function NotificationPreferences() {
 
   const handleSaveChoices = () => {
     console.log("Notification preferences saved:", preferences);
-    // Navigate to dashboard or next step
-    setLocation("/dashboard");
+    // Navigate to crop selection
+    setLocation("/crop-selection");
   };
 
   const handleSkipForNow = () => {
     console.log("Skipped notification preferences");
-    // Navigate to dashboard or next step
-    setLocation("/dashboard");
+    // Navigate to crop selection
+    setLocation("/crop-selection");
   };
 
   return (
