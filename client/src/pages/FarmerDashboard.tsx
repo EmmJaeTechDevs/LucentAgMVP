@@ -30,7 +30,7 @@ export function FarmerDashboard() {
   };
 
   const handleNotifications = () => {
-    console.log("Notifications clicked");
+    setLocation("/notifications");
   };
 
   const handleSettings = () => {

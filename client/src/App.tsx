@@ -20,6 +20,7 @@ import { CropProcessing } from "@/pages/CropProcessing";
 import { FarmerDashboard } from "@/pages/FarmerDashboard";
 import { ViewCrops } from "@/pages/ViewCrops";
 import { CheckOrders } from "@/pages/CheckOrders";
+import { Notifications } from "@/pages/Notifications";
 
 function Router() {
   return (
@@ -39,6 +40,7 @@ function Router() {
       <Route path="/farmer-dashboard" component={FarmerDashboard} />
       <Route path="/view-crops" component={ViewCrops} />
       <Route path="/check-orders" component={CheckOrders} />
+      <Route path="/notifications" component={Notifications} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
