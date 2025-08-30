@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Search, ShoppingCart } from "lucide-react";
+import TomatoesImage from "@assets/image15.png";
 
 export function BuyerHome() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,8 +16,8 @@ export function BuyerHome() {
       farm: "Oshuporu Farms",
       price: "₦2,000",
       unit: "per Basket",
-      image: "🍅",
-      stockLeft: "8 Baskets Left"
+      image: TomatoesImage,
+      stockLeft: "8 Baskets Left",
     },
     {
       id: 2,
@@ -25,7 +26,7 @@ export function BuyerHome() {
       price: "₦3,500",
       unit: "per Bag",
       image: "🥔",
-      stockLeft: ""
+      stockLeft: "",
     },
     {
       id: 3,
@@ -34,8 +35,8 @@ export function BuyerHome() {
       price: "₦1,800",
       unit: "per Basket",
       image: "🫘",
-      stockLeft: ""
-    }
+      stockLeft: "",
+    },
   ];
 
   const harvestingSoonProducts = [
@@ -46,7 +47,7 @@ export function BuyerHome() {
       price: "₦2,500",
       unit: "per Basket",
       image: "🥬",
-      stockLeft: ""
+      stockLeft: "",
     },
     {
       id: 5,
@@ -55,7 +56,7 @@ export function BuyerHome() {
       price: "₦4,200",
       unit: "per Bag",
       image: "🥜",
-      stockLeft: ""
+      stockLeft: "",
     },
     {
       id: 6,
@@ -64,8 +65,8 @@ export function BuyerHome() {
       price: "₦3,000",
       unit: "per Bunch",
       image: "🍌",
-      stockLeft: ""
-    }
+      stockLeft: "",
+    },
   ];
 
   const handleSearch = (e: React.FormEvent) => {
@@ -96,9 +97,7 @@ export function BuyerHome() {
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Hello John!
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">Hello John!</h1>
               <p className="text-gray-600 text-sm">
                 Ready for something fresh today?
               </p>
@@ -129,7 +128,7 @@ export function BuyerHome() {
 
           {/* Categories */}
           <div className="flex gap-3 mb-8 overflow-x-auto pb-2">
-            {categories.map(category => (
+            {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => handleCategorySelect(category)}
@@ -138,7 +137,7 @@ export function BuyerHome() {
                     ? "bg-green-700 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
-                data-testid={`category-${category.toLowerCase().replace(' ', '-')}`}
+                data-testid={`category-${category.toLowerCase().replace(" ", "-")}`}
               >
                 {category}
               </button>
@@ -151,7 +150,7 @@ export function BuyerHome() {
               Fresh Today
             </h2>
             <div className="flex gap-4 overflow-x-hidden pb-2">
-              {freshTodayProducts.map(product => (
+              {freshTodayProducts.map((product) => (
                 <div
                   key={product.id}
                   onClick={() => handleProductClick(product.id)}
@@ -169,13 +168,18 @@ export function BuyerHome() {
                     )}
                   </div>
                   <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-1">{product.name}</h3>
+                    <h3 className="font-semibold text-gray-900 mb-1">
+                      {product.name}
+                    </h3>
                     <p className="text-gray-600 text-sm mb-2 flex items-center gap-1">
                       <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                       {product.farm}
                     </p>
                     <p className="font-bold text-gray-900">
-                      {product.price} <span className="font-normal text-sm text-gray-600">{product.unit}</span>
+                      {product.price}{" "}
+                      <span className="font-normal text-sm text-gray-600">
+                        {product.unit}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -189,7 +193,7 @@ export function BuyerHome() {
               Harvesting Soon
             </h2>
             <div className="flex gap-4 overflow-x-hidden pb-2">
-              {harvestingSoonProducts.map(product => (
+              {harvestingSoonProducts.map((product) => (
                 <div
                   key={product.id}
                   onClick={() => handleProductClick(product.id)}
@@ -200,13 +204,18 @@ export function BuyerHome() {
                     {product.image}
                   </div>
                   <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-1">{product.name}</h3>
+                    <h3 className="font-semibold text-gray-900 mb-1">
+                      {product.name}
+                    </h3>
                     <p className="text-gray-600 text-sm mb-2 flex items-center gap-1">
                       <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                       {product.farm}
                     </p>
                     <p className="font-bold text-gray-900">
-                      {product.price} <span className="font-normal text-sm text-gray-600">{product.unit}</span>
+                      {product.price}{" "}
+                      <span className="font-normal text-sm text-gray-600">
+                        {product.unit}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -222,9 +231,7 @@ export function BuyerHome() {
           {/* Header */}
           <div className="flex items-center justify-between mb-10">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900">
-                Hello John!
-              </h1>
+              <h1 className="text-4xl font-bold text-gray-900">Hello John!</h1>
               <p className="text-gray-600 text-xl">
                 Ready for something fresh today?
               </p>
@@ -255,7 +262,7 @@ export function BuyerHome() {
 
           {/* Categories */}
           <div className="flex gap-4 mb-12">
-            {categories.map(category => (
+            {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => handleCategorySelect(category)}
@@ -264,7 +271,7 @@ export function BuyerHome() {
                     ? "bg-green-700 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
-                data-testid={`category-desktop-${category.toLowerCase().replace(' ', '-')}`}
+                data-testid={`category-desktop-${category.toLowerCase().replace(" ", "-")}`}
               >
                 {category}
               </button>
@@ -277,7 +284,7 @@ export function BuyerHome() {
               Fresh Today
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {freshTodayProducts.map(product => (
+              {freshTodayProducts.map((product) => (
                 <div
                   key={product.id}
                   onClick={() => handleProductClick(product.id)}
@@ -295,13 +302,18 @@ export function BuyerHome() {
                     )}
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{product.name}</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {product.name}
+                    </h3>
                     <p className="text-gray-600 mb-3 flex items-center gap-2">
                       <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                       {product.farm}
                     </p>
                     <p className="text-xl font-bold text-gray-900">
-                      {product.price} <span className="font-normal text-base text-gray-600">{product.unit}</span>
+                      {product.price}{" "}
+                      <span className="font-normal text-base text-gray-600">
+                        {product.unit}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -315,7 +327,7 @@ export function BuyerHome() {
               Harvesting Soon
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {harvestingSoonProducts.map(product => (
+              {harvestingSoonProducts.map((product) => (
                 <div
                   key={product.id}
                   onClick={() => handleProductClick(product.id)}
@@ -326,13 +338,18 @@ export function BuyerHome() {
                     {product.image}
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{product.name}</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {product.name}
+                    </h3>
                     <p className="text-gray-600 mb-3 flex items-center gap-2">
                       <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                       {product.farm}
                     </p>
                     <p className="text-xl font-bold text-gray-900">
-                      {product.price} <span className="font-normal text-base text-gray-600">{product.unit}</span>
+                      {product.price}{" "}
+                      <span className="font-normal text-base text-gray-600">
+                        {product.unit}
+                      </span>
                     </p>
                   </div>
                 </div>
