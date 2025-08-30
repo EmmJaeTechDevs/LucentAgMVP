@@ -43,10 +43,20 @@ export const FarmerAccountCreation = (): JSX.Element => {
   }
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value
+      };
+      
+      // Reset dependent fields when state changes
+      if (field === 'state') {
+        newData.lga = '';
+        newData.cityTown = '';
+      }
+      
+      return newData;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
