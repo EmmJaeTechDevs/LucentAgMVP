@@ -17,6 +17,7 @@ import { FarmerVerification } from "@/pages/FarmerVerification";
 import { NotificationPreferences } from "@/pages/NotificationPreferences";
 import { CropSelection } from "@/pages/CropSelection";
 import { CropProcessing } from "@/pages/CropProcessing";
+import { FarmerDashboard } from "@/pages/FarmerDashboard";
 
 function Router() {
   return (
@@ -33,6 +34,7 @@ function Router() {
       <Route path="/notification-preferences" component={NotificationPreferences} />
       <Route path="/crop-selection" component={CropSelection} />
       <Route path="/crop-processing" component={CropProcessing} />
+      <Route path="/farmer-dashboard" component={FarmerDashboard} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

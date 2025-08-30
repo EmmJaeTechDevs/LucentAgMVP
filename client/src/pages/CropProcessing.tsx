@@ -58,8 +58,8 @@ export function CropProcessing() {
 
   const handleSave = () => {
     console.log("Crop processing data:", cropProcessing);
-    // Navigate to dashboard or next step
-    setLocation("/dashboard");
+    // Navigate to farmer dashboard
+    setLocation("/farmer-dashboard");
   };
 
   return (
