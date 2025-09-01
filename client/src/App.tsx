@@ -26,6 +26,8 @@ import { BuyerVerification } from "@/pages/BuyerVerification";
 import { BuyerWelcome } from "@/pages/BuyerWelcome";
 import { BuyerNotificationPreferences } from "@/pages/BuyerNotificationPreferences";
 import { BuyerHome } from "@/pages/BuyerHome";
+import { Cart } from "@/pages/Cart";
+import { Checkout } from "@/pages/Checkout";
 
 function Router() {
   return (
@@ -51,6 +53,8 @@ function Router() {
       <Route path="/buyer-welcome" component={BuyerWelcome} />
       <Route path="/buyer-notification-preferences" component={BuyerNotificationPreferences} />
       <Route path="/buyer-home" component={BuyerHome} />
+      <Route path="/cart" component={Cart} />
+      <Route path="/checkout" component={Checkout} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

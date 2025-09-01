@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Search, ShoppingCart } from "lucide-react";
+import { useLocation } from "wouter";
 import TomatoesImage from "@assets/image 15.png";
 import SweetPotatoImage from "@assets/Frame 8.png";
 import CabbageImage from "@assets/Frame 9.png";
@@ -10,6 +11,7 @@ import { ProductDetailsModal } from "@/components/ProductDetailsModal";
 import { HarvestingSoonModal } from "@/components/HarvestingSoonModal";
 
 export function BuyerHome() {
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -125,8 +127,7 @@ export function BuyerHome() {
   };
 
   const handleCartClick = () => {
-    console.log("Cart clicked");
-    // TODO: Navigate to cart
+    setLocation("/cart");
   };
 
   return (
