@@ -17,8 +17,8 @@ export function DeliveryNoteModal({ isOpen, onClose, onNoteSet, currentNote }: D
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl w-full max-w-md p-8 max-h-[80vh] overflow-y-auto scrollbar-styled">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50 md:items-center md:p-4">
+      <div className="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md p-8 max-h-[90vh] md:max-h-[80vh] overflow-y-auto scrollbar-hide md:scrollbar-styled">
         {/* Title */}
         <h2 className="text-2xl font-semibold text-gray-900 mb-8">Delivery Note</h2>
 
