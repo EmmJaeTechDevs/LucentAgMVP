@@ -209,26 +209,26 @@
 
   .scrollbar-styled {
     scrollbar-width: thin;
-    scrollbar-color: #d1d5db #f9fafb;
+    scrollbar-color: rgba(209, 213, 219, 0.6) transparent;
   }
   
   .scrollbar-styled::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
   
   .scrollbar-styled::-webkit-scrollbar-track {
-    background: #f9fafb;
-    border-radius: 10px;
+    background: transparent;
   }
   
   .scrollbar-styled::-webkit-scrollbar-thumb {
-    background: #d1d5db;
-    border-radius: 10px;
+    background: rgba(209, 213, 219, 0.6);
+    border-radius: 4px;
+    min-height: 40px;
     transition: background 0.2s ease;
   }
   
   .scrollbar-styled::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
+    background: rgba(156, 163, 175, 0.8);
   }
 }
 
