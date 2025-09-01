@@ -21,7 +21,12 @@ interface HarvestingSoonModalProps {
   onNotifyMe: (product: Product) => void;
 }
 
-export function HarvestingSoonModal({ product, isOpen, onClose, onNotifyMe }: HarvestingSoonModalProps) {
+export function HarvestingSoonModal({
+  product,
+  isOpen,
+  onClose,
+  onNotifyMe,
+}: HarvestingSoonModalProps) {
   if (!isOpen || !product) return null;
 
   const handleNotifyMe = () => {
@@ -30,7 +35,7 @@ export function HarvestingSoonModal({ product, isOpen, onClose, onNotifyMe }: Ha
   };
 
   const getImageSrc = () => {
-    if (typeof product.image === 'string' && product.image.startsWith('/')) {
+    if (typeof product.image === "string" && product.image.startsWith("/")) {
       return product.image;
     }
     return null;
@@ -38,7 +43,7 @@ export function HarvestingSoonModal({ product, isOpen, onClose, onNotifyMe }: Ha
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50 md:items-center">
-      <div className="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md mx-4 max-h-[90vh] md:max-h-[70vh] md:min-h-[500px] overflow-hidden">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -51,8 +56,8 @@ export function HarvestingSoonModal({ product, isOpen, onClose, onNotifyMe }: Ha
         {/* Product Image */}
         <div className="relative h-64">
           {getImageSrc() ? (
-            <img 
-              src={getImageSrc()!} 
+            <img
+              src={getImageSrc()!}
               alt={product.name}
               className="w-full h-full object-cover"
             />
@@ -77,7 +82,9 @@ export function HarvestingSoonModal({ product, isOpen, onClose, onNotifyMe }: Ha
           </div>
 
           {/* Product Name */}
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">{product.name}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            {product.name}
+          </h2>
 
           {/* Available Quantity */}
           {product.availableQuantity && (
