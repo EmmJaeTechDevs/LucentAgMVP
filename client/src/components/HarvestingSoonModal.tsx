@@ -43,7 +43,7 @@ export function HarvestingSoonModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50 md:items-center">
-      <div className="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md mx-4 max-h-[90vh] md:max-h-[70vh] md:min-h-[500px] overflow-hidden">
+      <div className="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md mx-4 max-h-[90vh] md:max-h-[80vh] overflow-y-auto">
         {/* Close button */}
         <button
           onClick={onClose}
