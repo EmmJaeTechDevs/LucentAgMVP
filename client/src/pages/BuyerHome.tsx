@@ -6,10 +6,15 @@ import CabbageImage from "@assets/Frame 9.png";
 import PlantainImage from "@assets/image 13_1756529531399.png";
 import GroundnutsImage from "@assets/image 17.png";
 import GreenBeansImage from "@assets/image 2_1756522296288.jpg";
+import { ProductDetailsModal } from "@/components/ProductDetailsModal";
+import { HarvestingSoonModal } from "@/components/HarvestingSoonModal";
 
 export function BuyerHome() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isHarvestingModalOpen, setIsHarvestingModalOpen] = useState(false);
 
   const categories = ["All", "Leafy Greens", "Fruits", "Grains", "Vegetables"];
 
@@ -48,29 +53,38 @@ export function BuyerHome() {
     {
       id: 4,
       name: "Cabbage",
-      farm: "Northern Farms",
+      farm: "Grace Farms",
       price: "₦2,500",
       unit: "per Basket",
       image: CabbageImage,
       stockLeft: "",
+      availableQuantity: "50 Bags Available",
+      location: "Grown in Lagos, Nigeria",
+      harvestDate: "Ready by September 23, 2025",
     },
     {
       id: 5,
       name: "Groundnuts",
-      farm: "Kaduna Co-op",
+      farm: "Grace Farms",
       price: "₦4,200",
       unit: "per Bag",
       image: GroundnutsImage,
       stockLeft: "",
+      availableQuantity: "30 Bags Available",
+      location: "Grown in Kaduna, Nigeria",
+      harvestDate: "Ready by October 15, 2025",
     },
     {
       id: 6,
       name: "Plantain",
-      farm: "Oyo Plantain Farm",
+      farm: "Grace Farms",
       price: "₦3,000",
       unit: "per Bunch",
       image: PlantainImage,
       stockLeft: "",
+      availableQuantity: "100 Bunches Available",
+      location: "Grown in Oyo, Nigeria",
+      harvestDate: "Ready by September 30, 2025",
     },
   ];
 
@@ -85,8 +99,29 @@ export function BuyerHome() {
   };
 
   const handleProductClick = (productId: number) => {
-    console.log("Product clicked:", productId);
-    // TODO: Navigate to product details
+    const product = freshTodayProducts.find(p => p.id === productId);
+    if (product) {
+      setSelectedProduct(product);
+      setIsProductModalOpen(true);
+    }
+  };
+
+  const handleHarvestingProductClick = (productId: number) => {
+    const product = harvestingSoonProducts.find(p => p.id === productId);
+    if (product) {
+      setSelectedProduct(product);
+      setIsHarvestingModalOpen(true);
+    }
+  };
+
+  const handleAddToCart = (product: any, quantity: number) => {
+    console.log("Adding to cart:", product.name, "Quantity:", quantity);
+    // TODO: Implement add to cart functionality
+  };
+
+  const handleNotifyMe = (product: any) => {
+    console.log("Notify me for:", product.name);
+    // TODO: Implement notification signup
   };
 
   const handleCartClick = () => {
@@ -211,7 +246,7 @@ export function BuyerHome() {
               {harvestingSoonProducts.map((product) => (
                 <div
                   key={product.id}
-                  onClick={() => handleProductClick(product.id)}
+                  onClick={() => handleHarvestingProductClick(product.id)}
                   className="flex-shrink-0 w-48 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                   data-testid={`product-${product.id}`}
                 >
@@ -365,7 +400,7 @@ export function BuyerHome() {
               {harvestingSoonProducts.map((product) => (
                 <div
                   key={product.id}
-                  onClick={() => handleProductClick(product.id)}
+                  onClick={() => handleHarvestingProductClick(product.id)}
                   className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer hover:scale-105"
                   data-testid={`product-desktop-${product.id}`}
                 >
@@ -403,6 +438,21 @@ export function BuyerHome() {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <ProductDetailsModal
+        product={selectedProduct}
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        onAddToCart={handleAddToCart}
+      />
+      
+      <HarvestingSoonModal
+        product={selectedProduct}
+        isOpen={isHarvestingModalOpen}
+        onClose={() => setIsHarvestingModalOpen(false)}
+        onNotifyMe={handleNotifyMe}
+      />
     </div>
   );
 }
