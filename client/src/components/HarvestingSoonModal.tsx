@@ -1,5 +1,5 @@
 import React from "react";
-import { Bell, MapPin, Clock, Leaf } from "lucide-react";
+import { Bell, MapPin, Clock, Leaf, X } from "lucide-react";
 
 interface Product {
   id: number;
@@ -39,6 +39,15 @@ export function HarvestingSoonModal({ product, isOpen, onClose, onNotifyMe }: Ha
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50 md:items-center">
       <div className="bg-white rounded-t-3xl md:rounded-3xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 w-8 h-8 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full flex items-center justify-center transition-all"
+          data-testid="button-close-harvesting-modal-x"
+        >
+          <X className="w-4 h-4 text-gray-700" />
+        </button>
+
         {/* Product Image */}
         <div className="relative h-64">
           {getImageSrc() ? (
