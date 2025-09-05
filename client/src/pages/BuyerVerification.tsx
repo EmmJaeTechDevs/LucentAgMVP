@@ -1,15 +1,18 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { makeSimpleCorsRequest } from "../utils/simpleCorsRequest";
 
 export function BuyerVerification() {
-  const [location, setLocation] = useLocation();
-  const [code, setCode] = useState(["", "", "", "", "", ""]);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [countdown, setCountdown] = useState(45);
-  const [hasError, setHasError] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [, setLocation] = useLocation();
+  const [userId, setUserId] = useState<string>("");
+  const [otpCode, setOtpCode] = useState("");
+  const [step, setStep] = useState<"initial" | "verify">("initial");
+  const [isLoading, setIsLoading] = useState(false);
+  const [canResend, setCanResend] = useState(false);
+  const [countdown, setCountdown] = useState(30);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [error, setError] = useState("");
 
   // Helper function to get buyer ID from sessionStorage or localStorage
   const getBuyerId = () => {
@@ -29,86 +32,64 @@ export function BuyerVerification() {
     return localStorage.getItem("buyerUserId");
   };
 
-  // Countdown timer for resend
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // Check for buyer ID on mount
-  useEffect(() => {
-    const buyerId = getBuyerId();
-    if (!buyerId) {
+    // Get userId from sessionStorage or localStorage
+    const storedUserId = getBuyerId();
+    if (storedUserId) {
+      setUserId(storedUserId);
+    } else {
       // If no userId, redirect back to registration
       setLocation("/buyer-account-creation");
     }
   }, [setLocation]);
 
-  const handleInputChange = (index: number, value: string) => {
-    if (value.length > 1) return; // Only allow single digit
-    
-    // Clear error state when user starts typing
-    if (hasError) {
-      setHasError(false);
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (step === "verify" && countdown > 0) {
+      timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+    } else if (countdown === 0) {
+      setCanResend(true);
     }
-    
-    const newCode = [...code];
-    newCode[index] = value;
-    setCode(newCode);
+    return () => clearTimeout(timer);
+  }, [step, countdown]);
 
-    // Auto-focus next input
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
+  const handleGoBack = () => {
+    setLocation("/buyer-account-creation");
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !code[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
+  const sendOTP = async () => {
+    const currentUserId = getBuyerId();
+    if (!currentUserId || currentUserId === "") {
+      console.log("❌ SEND OTP FAILED - No buyer ID found");
+      setError("User session expired. Please register again.");
+      return;
     }
-  };
 
-  const handleVerify = async () => {
-    const verificationCode = code.join("");
-    if (verificationCode.length !== 6) return;
+    setIsLoading(true);
+    setError("");
 
-    setIsVerifying(true);
-    setHasError(false);
-    
+    // Prepare request data
+    const requestData = {
+      userId: currentUserId,
+      type: "sms",
+      purpose: "verification",
+    };
+
+    console.log("=== SEND OTP REQUEST (BUYER) ===");
+    console.log(
+      "URL:",
+      "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
+    );
+    console.log("Method:", "POST");
+    console.log("Request Body:", JSON.stringify(requestData, null, 2));
+    console.log("Buyer ID:", currentUserId);
+
     try {
-      // Get buyer ID from sessionStorage or localStorage
-      const buyerId = getBuyerId();
-      
-      if (!buyerId) {
-        console.log("❌ VERIFY OTP FAILED - No buyer ID found");
-        alert("❌ User session expired. Please register again.");
-        return;
-      }
-      
-      // Prepare request data
-      const requestData = {
-        userId: buyerId,
-        otp: verificationCode
-      };
-      
-      console.log("=== VERIFY OTP REQUEST (BUYER) ===");
-      console.log("URL:", "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp");
-      console.log("Method:", "POST");
-      console.log("Headers:", {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-      });
-      console.log("Request Body:", JSON.stringify(requestData, null, 2));
-      console.log("Buyer ID:", buyerId);
-      console.log("OTP Code:", verificationCode);
-      
-      // Send POST request to verify OTP using CORS proxy
+      // Use the same fetch method as farmer verification for consistency
       const response = await fetch(
-        "https://cors-anywhere.herokuapp.com/https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
+        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
         {
           method: "POST",
           headers: {
@@ -117,108 +98,16 @@ export function BuyerVerification() {
             "X-Requested-With": "XMLHttpRequest",
           },
           body: JSON.stringify(requestData),
-        }
-      );
-      
-      console.log("=== VERIFY OTP RESPONSE (BUYER) ===");
-      console.log("Response Status:", response.status);
-      console.log("Response OK:", response.ok);
-      console.log("Response Headers:", Object.fromEntries(response.headers.entries()));
-      
-      // Parse response data
-      let responseData;
-      try {
-        responseData = await response.json();
-        console.log("Response Body:", responseData);
-      } catch (parseError) {
-        console.log("Failed to parse JSON response:", parseError);
-        const textResponse = await response.text();
-        console.log("Raw response text:", textResponse);
-      }
-      
-      if (response.status === 200) {
-        console.log("✅ VERIFICATION SUCCESSFUL - Status 200");
-        alert("✅ Verification successful! Your account has been verified.");
-        setShowSuccess(true);
-      } else if (response.status === 400) {
-        console.log("❌ VERIFICATION FAILED - Status 400 (Invalid OTP)");
-        alert("❌ Invalid or wrong OTP. Please check your code and try again.");
-        setHasError(true);
-      } else {
-        console.log(`❌ VERIFICATION FAILED - Status ${response.status}`);
-        alert(`❌ Verification failed with status: ${response.status}`);
-        setHasError(true);
-      }
-    } catch (error) {
-      console.error("=== VERIFY OTP ERROR (BUYER) ===");
-      console.error("Error verifying OTP:", error);
-      console.error("Error type:", error.constructor.name);
-      console.error("Error message:", error.message);
-      alert("❌ Network error. Please check your connection and try again.");
-      setHasError(true);
-    } finally {
-      setIsVerifying(false);
-      console.log("=== VERIFY OTP REQUEST COMPLETED (BUYER) ===");
-    }
-  };
-
-  const handleShowMeHow = () => {
-    // Navigate to onboarding/tutorial
-    setLocation("/dashboard");
-  };
-
-  const handleSkip = () => {
-    // Navigate to notification preferences
-    setLocation("/notification-preferences");
-  };
-
-  const handleResend = async () => {
-    try {
-      // Get buyer ID from sessionStorage or localStorage
-      const buyerId = getBuyerId();
-      
-      if (!buyerId) {
-        console.log("❌ RESEND OTP FAILED (BUYER) - No buyer ID found");
-        alert("❌ User session expired. Please register again.");
-        return;
-      }
-
-      // Prepare request data
-      const requestData = {
-        userId: buyerId,
-        type: "sms",
-        purpose: "verification"
-      };
-
-      console.log("=== RESEND OTP REQUEST (BUYER) ===");
-      console.log("URL:", "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp");
-      console.log("Method:", "POST");
-      console.log("Headers:", {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-      });
-      console.log("Request Body:", JSON.stringify(requestData, null, 2));
-      console.log("Buyer ID:", buyerId);
-
-      // Send POST request to resend OTP
-      const response = await fetch(
-        "https://cors-anywhere.herokuapp.com/https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-          body: JSON.stringify(requestData),
-        }
+        },
       );
 
-      console.log("=== RESEND OTP RESPONSE (BUYER) ===");
+      console.log("=== SEND OTP RESPONSE (BUYER) ===");
       console.log("Response Status:", response.status);
       console.log("Response OK:", response.ok);
-      console.log("Response Headers:", Object.fromEntries(response.headers.entries()));
+      console.log(
+        "Response Headers:",
+        Object.fromEntries(response.headers.entries()),
+      );
 
       // Parse response data
       let responseData;
@@ -232,304 +121,362 @@ export function BuyerVerification() {
       }
 
       if (response.ok) {
-        console.log("✅ RESEND OTP SUCCESSFUL (BUYER)");
-        // Reset countdown and clear inputs on successful resend
-        setCountdown(45);
-        setHasError(false);
-        setCode(["", "", "", "", "", ""]);
-        alert("✅ Verification code resent successfully!");
+        console.log("✅ SEND OTP SUCCESSFUL");
+        setStep("verify");
+        setCountdown(30);
+        setCanResend(false);
       } else {
-        console.log(`❌ RESEND OTP FAILED (BUYER) - Status ${response.status}`);
-        alert("❌ Failed to resend verification code. Please try again.");
+        console.log(`❌ SEND OTP FAILED - Status ${response.status}`);
+        setError(
+          `Failed to send OTP. Server responded with status: ${response.status}`,
+        );
       }
-    } catch (error) {
-      console.error("=== RESEND OTP ERROR (BUYER) ===");
-      console.error("Error resending OTP:", error);
+    } catch (error: any) {
+      console.error("=== SEND OTP ERROR (BUYER) ===");
+      console.error("Error sending OTP:", error);
       console.error("Error type:", error.constructor.name);
       console.error("Error message:", error.message);
-      alert("❌ Network error. Please check your connection and try again.");
+      console.log("❌ SEND OTP FAILED - Network/Other error");
+
+      setError("Network error. Please check your connection and try again.");
     } finally {
-      console.log("=== RESEND OTP REQUEST COMPLETED (BUYER) ===");
+      setIsLoading(false);
+      console.log("=== SEND OTP REQUEST COMPLETED (BUYER) ===");
     }
   };
 
-  const isCodeComplete = code.every(digit => digit !== "");
+  const verifyOTP = async () => {
+    const currentUserId = getBuyerId();
+    if (!currentUserId || currentUserId === "" || !otpCode) {
+      console.log("❌ VERIFY OTP FAILED - Missing data");
+      console.log("User ID:", currentUserId);
+      console.log("OTP Code:", otpCode);
+      return;
+    }
 
-  // Show success message if verification successful
-  if (showSuccess) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        {/* Mobile Success Layout */}
-        <div className="block md:hidden flex-1 px-6 pt-20 pb-8">
-          <div className="max-w-sm mx-auto text-center">
-            {/* Celebration icon */}
-            <div className="mb-8">
-              <div className="w-32 h-32 mx-auto relative">
-                {/* Party/celebration emoji style icon */}
-                <div className="text-6xl">🎉</div>
-                <div className="absolute -top-2 -right-2 text-2xl animate-bounce">✨</div>
-                <div className="absolute -bottom-2 -left-2 text-2xl animate-bounce delay-300">🎊</div>
-              </div>
-            </div>
+    setIsLoading(true);
+    setError("");
 
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Welcome to Lucent Ag
-            </h1>
-            
-            <p className="text-gray-600 text-base leading-relaxed mb-12">
-              We're glad to have you here. We'll show you how to use the app, step by step. It's quick and easy.
-            </p>
+    // Prepare request data
+    const RequestData = {
+      userId: currentUserId,
+      code: otpCode,
+      type: "sms",
+    };
 
-            {/* Action buttons */}
-            <div className="space-y-3">
-              <Button
-                onClick={handleShowMeHow}
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-medium rounded-xl transition-colors"
-                data-testid="button-show-me-how"
-              >
-                Show Me How
-              </Button>
-              
-              <div className="relative group">
-                <Button
-                  onClick={handleSkip}
-                  variant="outline"
-                  className="w-full border-2 border-green-600 text-green-600 hover:bg-green-50 py-4 text-lg font-medium rounded-xl transition-colors"
-                  data-testid="button-skip"
-                >
-                  Skip
-                </Button>
-                {/* Tooltip */}
-                <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                  You can access this later in the help section
-                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop Success Layout */}
-        <div className="hidden md:flex min-h-screen items-center justify-center p-8">
-          <div className="bg-white rounded-3xl shadow-xl p-12 w-full max-w-md text-center">
-            {/* Celebration icon */}
-            <div className="mb-8">
-              <div className="w-40 h-40 mx-auto relative">
-                {/* Party/celebration emoji style icon */}
-                <div className="text-8xl">🎉</div>
-                <div className="absolute -top-4 -right-4 text-3xl animate-bounce">✨</div>
-                <div className="absolute -bottom-4 -left-4 text-3xl animate-bounce delay-300">🎊</div>
-              </div>
-            </div>
-
-            <h1 className="text-4xl font-bold text-gray-900 mb-6">
-              Welcome to Lucent Ag
-            </h1>
-            
-            <p className="text-gray-600 text-lg leading-relaxed mb-12">
-              We're glad to have you here. We'll show you how to use the app, step by step. It's quick and easy.
-            </p>
-
-            {/* Action buttons */}
-            <div className="space-y-4">
-              <Button
-                onClick={handleShowMeHow}
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-xl font-medium rounded-xl transition-all hover:scale-105"
-                data-testid="button-show-me-how-desktop"
-              >
-                Show Me How
-              </Button>
-              
-              <div className="relative group">
-                <Button
-                  onClick={handleSkip}
-                  variant="outline"
-                  className="w-full border-2 border-green-600 text-green-600 hover:bg-green-50 py-4 text-xl font-medium rounded-xl transition-all hover:scale-105"
-                  data-testid="button-skip-desktop"
-                >
-                  Skip
-                </Button>
-                {/* Tooltip */}
-                <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                  You can access this later in the help section
-                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    console.log("=== VERIFY OTP REQUEST (BUYER) ===");
+    console.log(
+      "URL:",
+      "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
     );
-  }
+    console.log("Method:", "POST");
+    console.log("Headers:", {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    });
+    console.log("Request Body:", JSON.stringify(RequestData, null, 2));
+    console.log("Buyer ID:", currentUserId);
+    console.log("OTP Code:", otpCode);
+
+    try {
+      // Use the same fetch method as farmer verification for consistency
+      const response = await fetch(
+        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: JSON.stringify(RequestData),
+        },
+      );
+
+      console.log("=== VERIFY OTP RESPONSE (BUYER) ===");
+      console.log("Response Status:", response.status);
+      console.log("Response OK:", response.ok);
+      console.log(
+        "Response Headers:",
+        Object.fromEntries(response.headers.entries()),
+      );
+
+      // Parse response data
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log("Response Body:", responseData);
+      } catch (parseError) {
+        console.log("Failed to parse JSON response:", parseError);
+        const textResponse = await response.text();
+        console.log("Raw response text:", textResponse);
+      }
+
+      if (response.status === 200) {
+        console.log("✅ VERIFICATION SUCCESSFUL - Status 200");
+        setShowSuccessAlert(true);
+        // Clear stored userId from both storage types
+        localStorage.removeItem("buyerUserId");
+        sessionStorage.removeItem("buyerSession");
+        // Redirect after showing success message
+        setTimeout(() => {
+          setLocation("/");
+        }, 3000);
+      } else if (response.status === 400) {
+        console.log("❌ VERIFICATION FAILED - Status 400 (Invalid OTP)");
+        setError("Invalid or wrong OTP. Please check your code and try again.");
+      } else {
+        console.log(`❌ VERIFICATION FAILED - Status ${response.status}`);
+        setError(`Verification failed with status: ${response.status}`);
+      }
+    } catch (error: any) {
+      console.error("=== VERIFY OTP ERROR (BUYER) ===");
+      console.error("Error verifying OTP:", error);
+      console.error("Error type:", error.constructor.name);
+      console.error("Error message:", error.message);
+      console.log("❌ VERIFICATION FAILED - Network/Other error");
+
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setIsLoading(false);
+      console.log("=== VERIFY OTP REQUEST COMPLETED (BUYER) ===");
+    }
+  };
+
+  const handleResend = () => {
+    console.log("=== RESEND OTP TRIGGERED (BUYER) ===");
+    setCountdown(30);
+    setCanResend(false);
+    sendOTP();
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Mobile Layout */}
-      <div className="block md:hidden flex-1 px-6 pt-16 pb-8">
-        <div className="max-w-sm mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Verify your account
-          </h1>
-          
-          <p className="text-base font-medium text-gray-900 mb-6">
-            Almost There!
-          </p>
-
-          <p className="text-gray-600 text-sm leading-relaxed mb-8">
-            We've sent a 6-digit code to your email or phone number. Enter the code below to verify your account and continue.
-          </p>
-
-          {/* 6-digit code input */}
-          <div className="flex gap-3 mb-4 justify-center">
-            {code.map((digit, index) => (
-              <input
-                key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={digit}
-                onChange={(e) => handleInputChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                className={`w-12 h-12 text-center text-lg font-semibold border-2 rounded-lg focus:outline-none transition-colors ${
-                  hasError 
-                    ? "border-red-500 focus:border-red-600" 
-                    : "border-gray-200 focus:border-green-600"
-                }`}
-                maxLength={1}
-                data-testid={`input-code-${index}`}
-              />
-            ))}
-          </div>
-
-          {/* Error message */}
-          {hasError && (
-            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-              <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-xs font-bold">!</span>
-              </div>
-              <p className="text-red-700 text-sm font-medium">
-                Invalid code. Please check and try again.
-              </p>
-            </div>
-          )}
-
-          {/* Resend code */}
-          <div className="text-center mb-8">
-            {countdown > 0 ? (
-              <p className="text-gray-600 text-sm">
-                Didn't receive the code? (Resend in {countdown}s)
-              </p>
-            ) : (
-              <button
-                onClick={handleResend}
-                className="text-green-600 text-sm font-medium hover:text-green-700 transition-colors"
-                data-testid="button-resend"
-              >
-                Didn't receive the code? Resend
-              </button>
-            )}
-          </div>
-
-          {/* Verify button */}
-          <Button
-            onClick={handleVerify}
-            disabled={!isCodeComplete || isVerifying}
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-base font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            data-testid="button-verify"
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+      }}
+    >
+      {/* Success Alert Modal */}
+      {showSuccessAlert && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              padding: "40px",
+              borderRadius: "15px",
+              textAlign: "center",
+              maxWidth: "400px",
+              margin: "20px",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
+            }}
           >
-            {isVerifying ? "Verifying..." : "Verify and Continue"}
-          </Button>
-        </div>
-
-        {/* Decorative leaf */}
-        <div className="fixed bottom-0 right-0 w-32 h-32 opacity-10">
-          <div className="w-full h-full bg-green-600 rounded-tl-full transform rotate-45"></div>
-        </div>
-      </div>
-
-      {/* Desktop Layout */}
-      <div className="hidden md:flex min-h-screen items-center justify-center p-8">
-        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">
-            Verify your account
-          </h1>
-          
-          <p className="text-lg font-medium text-gray-900 mb-6">
-            Almost There!
-          </p>
-
-          <p className="text-gray-600 leading-relaxed mb-8">
-            We've sent a 6-digit code to your email or phone number. Enter the code below to verify your account and continue.
-          </p>
-
-          {/* 6-digit code input */}
-          <div className="flex gap-4 mb-4 justify-center">
-            {code.map((digit, index) => (
-              <input
-                key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={digit}
-                onChange={(e) => handleInputChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                className={`w-14 h-14 text-center text-xl font-semibold border-2 rounded-xl focus:outline-none transition-colors ${
-                  hasError 
-                    ? "border-red-500 focus:border-red-600" 
-                    : "border-gray-200 focus:border-green-600"
-                }`}
-                maxLength={1}
-                data-testid={`input-code-${index}`}
-              />
-            ))}
-          </div>
-
-          {/* Error message */}
-          {hasError && (
-            <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
-              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-sm font-bold">!</span>
-              </div>
-              <p className="text-red-700 font-medium">
-                Invalid code. Please check and try again.
-              </p>
+            <div
+              style={{
+                width: "80px",
+                height: "80px",
+                backgroundColor: "#4caf50",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 20px",
+                fontSize: "40px",
+                color: "white",
+              }}
+            >
+              ✓
             </div>
-          )}
-
-          {/* Resend code */}
-          <div className="text-center mb-8">
-            {countdown > 0 ? (
-              <p className="text-gray-600">
-                Didn't receive the code? (Resend in {countdown}s)
-              </p>
-            ) : (
-              <button
-                onClick={handleResend}
-                className="text-green-600 font-medium hover:text-green-700 transition-colors"
-                data-testid="button-resend"
-              >
-                Didn't receive the code? Resend
-              </button>
-            )}
-          </div>
-
-          {/* Verify button */}
-          <Button
-            onClick={handleVerify}
-            disabled={!isCodeComplete || isVerifying}
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            data-testid="button-verify"
-          >
-            {isVerifying ? "Verifying..." : "Verify and Continue"}
-          </Button>
-
-          {/* Decorative leaf */}
-          <div className="absolute bottom-8 right-8 w-24 h-24 opacity-10">
-            <div className="w-full h-full bg-green-600 rounded-tl-full transform rotate-45"></div>
+            <h2
+              style={{
+                color: "#2e7d32",
+                marginBottom: "15px",
+                fontSize: "1.5rem",
+              }}
+            >
+              Verification Successful!
+            </h2>
+            <p
+              style={{
+                color: "#666",
+                marginBottom: "20px",
+              }}
+            >
+              Your account has been verified successfully. You will be
+              redirected shortly.
+            </p>
           </div>
         </div>
+      )}
+
+      <div
+        style={{
+          backgroundColor: "white",
+          padding: "40px",
+          borderRadius: "15px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+          width: "100%",
+          maxWidth: "450px",
+        }}
+      >
+        {/* Back Button */}
+        <button
+          onClick={handleGoBack}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            background: "none",
+            border: "none",
+            color: "#2e7d32",
+            fontSize: "16px",
+            cursor: "pointer",
+            marginBottom: "30px",
+            padding: "5px",
+          }}
+          data-testid="button-back"
+        >
+          <ArrowLeft size={20} />
+          Back
+        </button>
+
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+          <h1
+            style={{
+              fontSize: "1.8rem",
+              fontWeight: "bold",
+              color: "#2e7d32",
+              marginBottom: "15px",
+            }}
+          >
+            VERIFY YOUR ACCOUNT
+          </h1>
+          <p style={{ color: "#666", fontSize: "1.1rem" }}>
+            {step === "initial"
+              ? "Click the button below to receive an OTP verification code"
+              : "Enter the 6-digit code sent to your phone"}
+          </p>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div
+            style={{
+              backgroundColor: "#ffebee",
+              color: "#c62828",
+              padding: "15px",
+              borderRadius: "8px",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {/* OTP Input Field (only show in verify step) */}
+        {step === "verify" && (
+          <div style={{ marginBottom: "25px" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "8px",
+                color: "#2e7d32",
+                fontWeight: "600",
+              }}
+            >
+              Verification Code
+            </label>
+            <input
+              type="text"
+              value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value)}
+              placeholder="Enter 6-digit code"
+              maxLength={6}
+              style={{
+                width: "100%",
+                padding: "15px",
+                border: "2px solid #e0e0e0",
+                borderRadius: "8px",
+                fontSize: "18px",
+                textAlign: "center",
+                letterSpacing: "3px",
+              }}
+              data-testid="input-otp-code"
+            />
+          </div>
+        )}
+
+        {/* Main Action Button */}
+        <button
+          onClick={step === "initial" ? sendOTP : verifyOTP}
+          disabled={isLoading || (step === "verify" && otpCode.length !== 6)}
+          style={{
+            width: "100%",
+            padding: "15px",
+            backgroundColor:
+              step === "verify" && otpCode.length !== 6 ? "#cccccc" : "#2e7d32",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "16px",
+            fontWeight: "600",
+            cursor:
+              step === "verify" && otpCode.length !== 6
+                ? "not-allowed"
+                : "pointer",
+            marginBottom: "20px",
+          }}
+          data-testid={
+            step === "initial" ? "button-send-otp" : "button-verify-otp"
+          }
+        >
+          {isLoading
+            ? "Processing..."
+            : step === "initial"
+              ? "SEND OTP"
+              : "VERIFY OTP"}
+        </button>
+
+        {/* Resend Button (only show in verify step) */}
+        {step === "verify" && (
+          <div style={{ textAlign: "center" }}>
+            <button
+              onClick={handleResend}
+              disabled={!canResend}
+              style={{
+                background: "none",
+                border: "none",
+                color: canResend ? "#2e7d32" : "#cccccc",
+                fontSize: "16px",
+                cursor: canResend ? "pointer" : "not-allowed",
+                textDecoration: canResend ? "underline" : "none",
+              }}
+              data-testid="button-resend-otp"
+            >
+              Resend OTP {!canResend && `(${countdown}s)`}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
