@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
-import { makeSimpleCorsRequest } from "../utils/simpleCorsRequest";
+import axios from "axios";
 
 // THIS IS THE NEW BUYER REGISTRATION FORM
 // ALL FIELDS MATCH BACKEND REQUIREMENTS EXACTLY
@@ -73,18 +73,25 @@ export const BuyerAccountCreation = (): JSX.Element => {
 
       console.log("Sending buyer data:", backendData);
       
-      // Call your external backend API using simple CORS request
-      const response = await makeSimpleCorsRequest(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer", 
-        backendData
+      // Call your external backend API using Axios POST request
+      const response = await axios.post(
+        "https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer",
+        backendData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          timeout: 15000,
+          withCredentials: false
+        }
       );
       
-      console.log("Registration response:", response);
+      console.log("Registration response:", response.data);
       
-      // Since the request went through successfully, assume registration worked
-      // Store a temporary userId for verification page (backend should provide this)
-      const tempUserId = response.userId || `temp_${Date.now()}`;
-      localStorage.setItem("buyerUserId", tempUserId);
+      // Store userId for verification page
+      const userId = response.data.userId || `temp_${Date.now()}`;
+      localStorage.setItem("buyerUserId", userId);
       
       // Show success message
       alert("Registration successful! Please verify your account.");
@@ -94,7 +101,18 @@ export const BuyerAccountCreation = (): JSX.Element => {
       
     } catch (error: any) {
       console.error("Error creating account:", error);
-      alert("Error creating account. Please try again.");
+      
+      if (error.response) {
+        // Server responded with error status
+        const errorMessage = error.response.data?.message || "Registration failed";
+        alert(`Error: ${errorMessage}`);
+      } else if (error.request) {
+        // Network error
+        alert("Network error. Please check your connection and try again.");
+      } else {
+        // Other error
+        alert("Error creating account. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
