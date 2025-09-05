@@ -84,35 +84,53 @@ export function BuyerVerification() {
     console.log("Buyer ID:", currentUserId);
     
     try {
-      const response = await makeSimpleCorsRequest(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
-        requestData
+      // Use the same fetch method as farmer verification for consistency
+      const response = await fetch(
+        "https://cors-anywhere.herokuapp.com/https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: JSON.stringify(requestData),
+        }
       );
 
       console.log("=== SEND OTP RESPONSE (BUYER) ===");
-      console.log("✅ SEND OTP SUCCESSFUL");
-      console.log("Response:", response);
+      console.log("Response Status:", response.status);
+      console.log("Response OK:", response.ok);
+      console.log("Response Headers:", Object.fromEntries(response.headers.entries()));
+      
+      // Parse response data
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log("Response Body:", responseData);
+      } catch (parseError) {
+        console.log("Failed to parse JSON response:", parseError);
+        const textResponse = await response.text();
+        console.log("Raw response text:", textResponse);
+      }
 
-      setStep("verify");
-      setCountdown(30);
-      setCanResend(false);
+      if (response.ok) {
+        console.log("✅ SEND OTP SUCCESSFUL");
+        setStep("verify");
+        setCountdown(30);
+        setCanResend(false);
+      } else {
+        console.log(`❌ SEND OTP FAILED - Status ${response.status}`);
+        setError(`Failed to send OTP. Server responded with status: ${response.status}`);
+      }
     } catch (error: any) {
       console.error("=== SEND OTP ERROR (BUYER) ===");
       console.error("Error sending OTP:", error);
       console.error("Error type:", error.constructor.name);
       console.error("Error message:", error.message);
+      console.log("❌ SEND OTP FAILED - Network/Other error");
       
-      if (error.response) {
-        console.log(`❌ SEND OTP FAILED - Status ${error.response.status}`);
-        console.log("Error response data:", error.response.data);
-        setError(error.response.data?.message || "Failed to send OTP");
-      } else if (error.request) {
-        console.log("❌ SEND OTP FAILED - Network error");
-        setError("Network error. Please check your connection and try again.");
-      } else {
-        console.log("❌ SEND OTP FAILED - Other error");
-        setError("Failed to send OTP. Please try again.");
-      }
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setIsLoading(false);
       console.log("=== SEND OTP REQUEST COMPLETED (BUYER) ===");
@@ -140,46 +158,71 @@ export function BuyerVerification() {
     console.log("=== VERIFY OTP REQUEST (BUYER) ===");
     console.log("URL:", "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp");
     console.log("Method:", "POST");
+    console.log("Headers:", {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    });
     console.log("Request Body:", JSON.stringify(requestData, null, 2));
     console.log("Buyer ID:", currentUserId);
     console.log("OTP Code:", otpCode);
     
     try {
-      const response = await makeSimpleCorsRequest(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
-        requestData
+      // Use the same fetch method as farmer verification for consistency
+      const response = await fetch(
+        "https://cors-anywhere.herokuapp.com/https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: JSON.stringify(requestData),
+        }
       );
 
       console.log("=== VERIFY OTP RESPONSE (BUYER) ===");
-      console.log("✅ VERIFICATION SUCCESSFUL - Status 200");
-      console.log("Response:", response);
-
-      // Success response - assume success if no error thrown
-      setShowSuccessAlert(true);
-      // Clear stored userId from both storage types
-      localStorage.removeItem("buyerUserId");
-      sessionStorage.removeItem("buyerSession");
-      // Redirect after showing success message
-      setTimeout(() => {
-        setLocation("/");
-      }, 3000);
+      console.log("Response Status:", response.status);
+      console.log("Response OK:", response.ok);
+      console.log("Response Headers:", Object.fromEntries(response.headers.entries()));
+      
+      // Parse response data
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log("Response Body:", responseData);
+      } catch (parseError) {
+        console.log("Failed to parse JSON response:", parseError);
+        const textResponse = await response.text();
+        console.log("Raw response text:", textResponse);
+      }
+      
+      if (response.status === 200) {
+        console.log("✅ VERIFICATION SUCCESSFUL - Status 200");
+        setShowSuccessAlert(true);
+        // Clear stored userId from both storage types
+        localStorage.removeItem("buyerUserId");
+        sessionStorage.removeItem("buyerSession");
+        // Redirect after showing success message
+        setTimeout(() => {
+          setLocation("/");
+        }, 3000);
+      } else if (response.status === 400) {
+        console.log("❌ VERIFICATION FAILED - Status 400 (Invalid OTP)");
+        setError("Invalid or wrong OTP. Please check your code and try again.");
+      } else {
+        console.log(`❌ VERIFICATION FAILED - Status ${response.status}`);
+        setError(`Verification failed with status: ${response.status}`);
+      }
     } catch (error: any) {
       console.error("=== VERIFY OTP ERROR (BUYER) ===");
       console.error("Error verifying OTP:", error);
       console.error("Error type:", error.constructor.name);
       console.error("Error message:", error.message);
+      console.log("❌ VERIFICATION FAILED - Network/Other error");
       
-      if (error.response) {
-        console.log(`❌ VERIFICATION FAILED - Status ${error.response.status}`);
-        console.log("Error response data:", error.response.data);
-        if (error.response.status === 400) {
-          console.log("❌ VERIFICATION FAILED - Status 400 (Invalid OTP)");
-        }
-      } else {
-        console.log("❌ VERIFICATION FAILED - Network/Other error");
-      }
-      
-      setError("Verification failed. Please try again.");
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setIsLoading(false);
       console.log("=== VERIFY OTP REQUEST COMPLETED (BUYER) ===");
