@@ -80,10 +80,19 @@ export const BuyerAccountCreation = (): JSX.Element => {
       });
       
       if (response.ok) {
+        const responseData = await response.json();
+        console.log("Registration response:", responseData);
+        
+        // Store userId for verification page
+        if (responseData.userId) {
+          localStorage.setItem("buyerUserId", responseData.userId);
+        }
+        
         alert("Registration successful!");
         setLocation("/buyer-verification");
       } else {
-        throw new Error("Registration failed");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed");
       }
       
     } catch (error) {

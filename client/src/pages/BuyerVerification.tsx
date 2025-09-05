@@ -1,269 +1,332 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 
 export function BuyerVerification() {
   const [, setLocation] = useLocation();
-  const [code, setCode] = useState(["", "", "", ""]);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [otpCode, setOtpCode] = useState("");
+  const [step, setStep] = useState<"initial" | "verify">("initial");
+  const [isLoading, setIsLoading] = useState(false);
+  const [canResend, setCanResend] = useState(false);
+  const [countdown, setCountdown] = useState(30);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const inputRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
 
   useEffect(() => {
-    // Focus first input on mount
-    inputRefs[0].current?.focus();
-  }, []);
+    // Get userId from localStorage
+    const storedUserId = localStorage.getItem("buyerUserId");
+    if (storedUserId) {
+      setUserId(storedUserId);
+    } else {
+      // If no userId, redirect back to registration
+      setLocation("/buyer-account-creation");
+    }
+  }, [setLocation]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (step === "verify" && countdown > 0) {
+      timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+    } else if (countdown === 0) {
+      setCanResend(true);
+    }
+    return () => clearTimeout(timer);
+  }, [step, countdown]);
 
   const handleGoBack = () => {
     setLocation("/buyer-account-creation");
   };
 
-  const handleInputChange = (index: number, value: string) => {
-    if (value.length > 1) return; // Only allow single digit
+  const sendOTP = async () => {
+    if (!userId) return;
     
-    const newCode = [...code];
-    newCode[index] = value;
-    setCode(newCode);
-    setError(""); // Clear error when user types
-
-    // Auto-focus next input
-    if (value && index < 3) {
-      inputRefs[index + 1].current?.focus();
-    }
-  };
-
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !code[index] && index > 0) {
-      // Focus previous input on backspace if current is empty
-      inputRefs[index - 1].current?.focus();
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").slice(0, 4);
-    const newCode = pastedData.split("").concat(["", "", "", ""]).slice(0, 4);
-    setCode(newCode);
+    setIsLoading(true);
     setError("");
     
-    // Focus last filled input or first empty
-    const lastIndex = Math.min(pastedData.length - 1, 3);
-    inputRefs[lastIndex].current?.focus();
-  };
-
-  const handleVerify = async () => {
-    const fullCode = code.join("");
-    
-    if (fullCode.length !== 4) {
-      setError("Please enter the complete 4-digit code");
-      return;
-    }
-
-    setIsSubmitting(true);
-    setError("");
-
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Demo validation - reject specific code to show error state
-      if (fullCode === "1234") {
-        setError("Invalid verification code. Please try again.");
-        setIsSubmitting(false);
-        return;
-      }
+      const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/auth/request-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: userId,
+          type: "sms",
+          purpose: "verification"
+        })
+      });
 
-      // Navigate to buyer welcome page
-      setLocation("/buyer-welcome");
-      
+      if (response.ok) {
+        setStep("verify");
+        setCountdown(30);
+        setCanResend(false);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to send OTP");
+      }
     } catch (error) {
+      console.error("Error sending OTP:", error);
+      setError("Failed to send OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyOTP = async () => {
+    if (!userId || !otpCode) return;
+    
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: userId,
+          code: otpCode,
+          type: "sms"
+        })
+      });
+
+      if (response.status === 200) {
+        const responseData = await response.json();
+        if (responseData.message === "OTP verified successfully") {
+          setShowSuccessAlert(true);
+          // Clear stored userId
+          localStorage.removeItem("buyerUserId");
+          // Redirect after showing success message
+          setTimeout(() => {
+            setLocation("/");
+          }, 3000);
+        }
+      } else if (response.status === 400) {
+        const errorData = await response.json();
+        if (errorData.message === "Invalid or expired OTP code") {
+          setError("Invalid or expired OTP code");
+        } else {
+          setError(errorData.message || "Verification failed");
+        }
+      } else {
+        setError("Verification failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
       setError("Verification failed. Please try again.");
-      setIsSubmitting(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleResend = () => {
-    // TODO: Implement resend logic
-    console.log("Resend verification code");
-    setError("");
-    setCode(["", "", "", ""]);
-    inputRefs[0].current?.focus();
+    setCountdown(30);
+    setCanResend(false);
+    sendOTP();
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Mobile Layout */}
-      <div className="block md:hidden flex-1 px-6 pt-16 pb-8">
-        <div className="max-w-sm mx-auto">
-          {/* Header with back button */}
-          <div className="flex items-center mb-8">
-            <button
-              onClick={handleGoBack}
-              className="p-2 -ml-2 hover:bg-gray-100 rounded-lg transition-colors"
-              data-testid="button-back"
-            >
-              <ArrowLeft className="w-6 h-6 text-gray-900" />
-            </button>
-          </div>
-
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">
-              Verify Phone Number
-            </h1>
-            <p className="text-gray-600 text-base leading-relaxed">
-              We sent a 4-digit code to your number.{" "}
-              <br />
-              Enter it below
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px"
+    }}>
+      {/* Success Alert Modal */}
+      {showSuccessAlert && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: "white",
+            padding: "40px",
+            borderRadius: "15px",
+            textAlign: "center",
+            maxWidth: "400px",
+            margin: "20px",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.1)"
+          }}>
+            <div style={{
+              width: "80px",
+              height: "80px",
+              backgroundColor: "#4caf50",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 20px",
+              fontSize: "40px",
+              color: "white"
+            }}>
+              ✓
+            </div>
+            <h2 style={{
+              color: "#2e7d32",
+              marginBottom: "15px",
+              fontSize: "1.5rem"
+            }}>
+              Verification Successful!
+            </h2>
+            <p style={{
+              color: "#666",
+              marginBottom: "20px"
+            }}>
+              Your account has been verified successfully. You will be redirected shortly.
             </p>
           </div>
+        </div>
+      )}
 
-          {/* Code Input */}
-          <div className="mb-8">
-            <div className="flex gap-4 justify-center mb-6">
-              {code.map((digit, index) => (
-                <input
-                  key={index}
-                  ref={inputRefs[index]}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleInputChange(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  onPaste={index === 0 ? handlePaste : undefined}
-                  className={`w-16 h-16 text-center text-2xl font-bold border-2 rounded-xl transition-all ${
-                    error 
-                      ? "border-red-400 bg-red-50" 
-                      : digit 
-                        ? "border-green-500 bg-green-50" 
-                        : "border-gray-300 bg-white"
-                  } focus:ring-2 focus:ring-green-500 focus:border-transparent`}
-                  data-testid={`input-code-${index}`}
-                />
-              ))}
-            </div>
+      <div style={{
+        backgroundColor: "white",
+        padding: "40px",
+        borderRadius: "15px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+        width: "100%",
+        maxWidth: "450px"
+      }}>
+        
+        {/* Back Button */}
+        <button 
+          onClick={handleGoBack}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            background: "none",
+            border: "none",
+            color: "#2e7d32",
+            fontSize: "16px",
+            cursor: "pointer",
+            marginBottom: "30px",
+            padding: "5px"
+          }}
+          data-testid="button-back"
+        >
+          <ArrowLeft size={20} />
+          Back
+        </button>
 
-            {error && (
-              <div className="text-red-600 text-sm text-center mb-4" data-testid="text-error">
-                {error}
-              </div>
-            )}
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+          <h1 style={{ 
+            fontSize: "1.8rem", 
+            fontWeight: "bold", 
+            color: "#2e7d32", 
+            marginBottom: "15px" 
+          }}>
+            VERIFY YOUR ACCOUNT
+          </h1>
+          <p style={{ color: "#666", fontSize: "1.1rem" }}>
+            {step === "initial" 
+              ? "Click the button below to receive an OTP verification code"
+              : "Enter the 6-digit code sent to your phone"
+            }
+          </p>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div style={{
+            backgroundColor: "#ffebee",
+            color: "#c62828",
+            padding: "15px",
+            borderRadius: "8px",
+            marginBottom: "20px",
+            textAlign: "center"
+          }}>
+            {error}
           </div>
+        )}
 
-          {/* Verify Button */}
-          <button
-            onClick={handleVerify}
-            disabled={isSubmitting || code.join("").length !== 4}
-            className="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-6"
-            data-testid="button-verify"
-          >
-            {isSubmitting ? "Verifying..." : "Verify and Continue"}
-          </button>
+        {/* OTP Input Field (only show in verify step) */}
+        {step === "verify" && (
+          <div style={{ marginBottom: "25px" }}>
+            <label style={{
+              display: "block",
+              marginBottom: "8px",
+              color: "#2e7d32",
+              fontWeight: "600"
+            }}>
+              Verification Code
+            </label>
+            <input
+              type="text"
+              value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value)}
+              placeholder="Enter 6-digit code"
+              maxLength={6}
+              style={{
+                width: "100%",
+                padding: "15px",
+                border: "2px solid #e0e0e0",
+                borderRadius: "8px",
+                fontSize: "18px",
+                textAlign: "center",
+                letterSpacing: "3px"
+              }}
+              data-testid="input-otp-code"
+            />
+          </div>
+        )}
 
-          {/* Resend Link */}
-          <div className="text-center">
+        {/* Main Action Button */}
+        <button
+          onClick={step === "initial" ? sendOTP : verifyOTP}
+          disabled={isLoading || (step === "verify" && otpCode.length !== 6)}
+          style={{
+            width: "100%",
+            padding: "15px",
+            backgroundColor: step === "verify" && otpCode.length !== 6 ? "#cccccc" : "#2e7d32",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "16px",
+            fontWeight: "600",
+            cursor: step === "verify" && otpCode.length !== 6 ? "not-allowed" : "pointer",
+            marginBottom: "20px"
+          }}
+          data-testid={step === "initial" ? "button-send-otp" : "button-verify-otp"}
+        >
+          {isLoading 
+            ? "Processing..." 
+            : step === "initial" 
+              ? "SEND OTP" 
+              : "VERIFY OTP"
+          }
+        </button>
+
+        {/* Resend Button (only show in verify step) */}
+        {step === "verify" && (
+          <div style={{ textAlign: "center" }}>
             <button
               onClick={handleResend}
-              className="text-gray-600 hover:text-gray-800 transition-colors"
-              data-testid="button-resend"
+              disabled={!canResend}
+              style={{
+                background: "none",
+                border: "none",
+                color: canResend ? "#2e7d32" : "#cccccc",
+                fontSize: "16px",
+                cursor: canResend ? "pointer" : "not-allowed",
+                textDecoration: canResend ? "underline" : "none"
+              }}
+              data-testid="button-resend-otp"
             >
-              Didn't get the code? Resend
+              Resend OTP {!canResend && `(${countdown}s)`}
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Desktop Layout */}
-      <div className="hidden md:flex min-h-screen p-8">
-        <div className="w-full max-w-2xl mx-auto">
-          {/* Header with back button */}
-          <div className="flex items-center mb-12">
-            <button
-              onClick={handleGoBack}
-              className="p-3 -ml-3 hover:bg-gray-100 rounded-xl transition-colors"
-              data-testid="button-back-desktop"
-            >
-              <ArrowLeft className="w-8 h-8 text-gray-900" />
-            </button>
-          </div>
-
-          <div className="bg-white rounded-3xl shadow-xl p-12 text-center">
-            <div className="mb-12">
-              <h1 className="text-4xl font-bold text-gray-900 mb-6">
-                Verify Phone Number
-              </h1>
-              <p className="text-gray-600 text-xl leading-relaxed">
-                We sent a 4-digit code to your number.{" "}
-                <br />
-                Enter it below
-              </p>
-            </div>
-
-            {/* Code Input */}
-            <div className="mb-12">
-              <div className="flex gap-6 justify-center mb-8">
-                {code.map((digit, index) => (
-                  <input
-                    key={index}
-                    ref={inputRefs[index]}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleInputChange(index, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(index, e)}
-                    onPaste={index === 0 ? handlePaste : undefined}
-                    className={`w-20 h-20 text-center text-3xl font-bold border-2 rounded-xl transition-all ${
-                      error 
-                        ? "border-red-400 bg-red-50" 
-                        : digit 
-                          ? "border-green-500 bg-green-50" 
-                          : "border-gray-300 bg-white"
-                    } focus:ring-2 focus:ring-green-500 focus:border-transparent`}
-                    data-testid={`input-code-desktop-${index}`}
-                  />
-                ))}
-              </div>
-
-              {error && (
-                <div className="text-red-600 text-lg text-center mb-6" data-testid="text-error-desktop">
-                  {error}
-                </div>
-              )}
-            </div>
-
-            {/* Verify Button */}
-            <button
-              onClick={handleVerify}
-              disabled={isSubmitting || code.join("").length !== 4}
-              className="w-full bg-green-700 hover:bg-green-800 text-white py-6 rounded-xl font-semibold text-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed mb-8"
-              data-testid="button-verify-desktop"
-            >
-              {isSubmitting ? "Verifying..." : "Verify and Continue"}
-            </button>
-
-            {/* Resend Link */}
-            <div className="text-center">
-              <button
-                onClick={handleResend}
-                className="text-gray-600 hover:text-gray-800 transition-colors text-lg"
-                data-testid="button-resend-desktop"
-              >
-                Didn't get the code? Resend
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Decorative leaf at bottom */}
-      <div className="fixed bottom-0 right-0 w-32 h-32 opacity-20 pointer-events-none">
-        <svg viewBox="0 0 100 100" className="w-full h-full text-gray-300">
-          <path
-            d="M20,50 Q30,20 50,30 Q70,20 80,50 Q70,80 50,70 Q30,80 20,50"
-            fill="currentColor"
-          />
-        </svg>
+        )}
       </div>
     </div>
   );
