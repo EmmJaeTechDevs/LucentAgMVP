@@ -44,6 +44,24 @@ export function FarmerVerification() {
     }
   };
 
+  // Helper function to get farmer ID from sessionStorage or localStorage
+  const getFarmerId = () => {
+    // First try sessionStorage with expiry check
+    const sessionData = sessionStorage.getItem("farmerSession");
+    if (sessionData) {
+      const parsed = JSON.parse(sessionData);
+      const now = new Date().getTime();
+      if (now < parsed.expiry) {
+        return parsed.userId;
+      } else {
+        // Session expired, remove it
+        sessionStorage.removeItem("farmerSession");
+      }
+    }
+    // Fallback to localStorage
+    return localStorage.getItem("farmerUserId");
+  };
+
   const handleVerify = async () => {
     const verificationCode = code.join("");
     if (verificationCode.length !== 6) return;
@@ -52,8 +70,8 @@ export function FarmerVerification() {
     setHasError(false);
     
     try {
-      // Get farmer ID from localStorage (set during registration)
-      const farmerId = localStorage.getItem("farmerUserId");
+      // Get farmer ID from sessionStorage or localStorage
+      const farmerId = getFarmerId();
       
       // Send POST request to verify OTP
       const response = await fetch(
@@ -103,12 +121,47 @@ export function FarmerVerification() {
     setLocation("/notification-preferences");
   };
 
-  const handleResend = () => {
-    setCountdown(45);
-    setHasError(false); // Clear error on resend
-    setCode(["", "", "", "", "", ""]); // Clear code inputs
-    // Simulate resend API call
-    console.log("Resending verification code...");
+  const handleResend = async () => {
+    try {
+      // Get farmer ID from sessionStorage or localStorage
+      const farmerId = getFarmerId();
+      
+      if (!farmerId) {
+        alert("❌ User session expired. Please register again.");
+        return;
+      }
+
+      // Send POST request to resend OTP
+      const response = await fetch(
+        "https://cors-anywhere.herokuapp.com/https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+          body: JSON.stringify({
+            userId: farmerId,
+            type: "sms",
+            purpose: "verification"
+          }),
+        }
+      );
+
+      if (response.ok) {
+        // Reset countdown and clear inputs on successful resend
+        setCountdown(45);
+        setHasError(false);
+        setCode(["", "", "", "", "", ""]);
+        alert("✅ Verification code resent successfully!");
+      } else {
+        alert("❌ Failed to resend verification code. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error resending OTP:", error);
+      alert("❌ Network error. Please check your connection and try again.");
+    }
   };
 
   const isCodeComplete = code.every(digit => digit !== "");

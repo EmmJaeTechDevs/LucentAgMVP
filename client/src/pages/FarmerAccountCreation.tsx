@@ -95,8 +95,22 @@ export const FarmerAccountCreation = (): JSX.Element => {
         farmCountry: formData.farmCountry
       };
 
-      const response = await api.farmers.register(backendData);
+      const response = await api.farmers.register(backendData) as any;
       console.log("Registration successful:", response);
+      
+      // Store farmer userId in sessionStorage with 2-hour expiry
+      if (response?.userId) {
+        const now = new Date().getTime();
+        const expiryTime = now + (2 * 60 * 60 * 1000); // 2 hours from now
+        const sessionData = {
+          userId: response.userId,
+          expiry: expiryTime
+        };
+        sessionStorage.setItem("farmerSession", JSON.stringify(sessionData));
+        // Also store in localStorage for backward compatibility
+        localStorage.setItem("farmerUserId", response.userId);
+      }
+      
       setLocation("/farmer-verification");
       
     } catch (error) {
