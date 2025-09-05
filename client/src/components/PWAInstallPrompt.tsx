@@ -18,7 +18,7 @@ declare global {
 }
 
 export function PWAInstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | undefined>(undefined);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
@@ -43,7 +43,7 @@ export function PWAInstallPrompt() {
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setShowInstallPrompt(false);
-      setDeferredPrompt(null);
+      setDeferredPrompt(undefined);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -85,7 +85,7 @@ export function PWAInstallPrompt() {
     }
 
     // Clear the deferredPrompt
-    setDeferredPrompt(null);
+    setDeferredPrompt(undefined);
     setShowInstallPrompt(false);
   };
 

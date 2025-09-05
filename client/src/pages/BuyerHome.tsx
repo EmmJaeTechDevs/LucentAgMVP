@@ -14,7 +14,7 @@ export function BuyerHome() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<any>(undefined);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isHarvestingModalOpen, setIsHarvestingModalOpen] = useState(false);
 

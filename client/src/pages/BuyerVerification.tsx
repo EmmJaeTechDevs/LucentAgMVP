@@ -5,7 +5,7 @@ import axios from "axios";
 
 export function BuyerVerification() {
   const [, setLocation] = useLocation();
-  const [userId, setUserId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string>("");
   const [otpCode, setOtpCode] = useState("");
   const [step, setStep] = useState<"initial" | "verify">("initial");
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +42,7 @@ export function BuyerVerification() {
   };
 
   const sendOTP = async () => {
-    if (!userId) return;
+    if (!userId || userId === "") return;
     
     setIsLoading(true);
     setError("");
@@ -83,7 +83,7 @@ export function BuyerVerification() {
   };
 
   const verifyOTP = async () => {
-    if (!userId || !otpCode) return;
+    if (!userId || userId === "" || !otpCode) return;
     
     setIsLoading(true);
     setError("");
