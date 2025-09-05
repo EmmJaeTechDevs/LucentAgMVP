@@ -73,41 +73,76 @@ export function FarmerVerification() {
       // Get farmer ID from sessionStorage or localStorage
       const farmerId = getFarmerId();
       
-      // Send POST request to verify OTP
+      // Prepare request data
+      const requestData = {
+        userId: farmerId,
+        otp: verificationCode
+      };
+      
+      console.log("=== VERIFY OTP REQUEST ===");
+      console.log("URL:", "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp");
+      console.log("Method:", "POST");
+      console.log("Headers:", {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      });
+      console.log("Request Body:", JSON.stringify(requestData, null, 2));
+      console.log("Farmer ID:", farmerId);
+      console.log("OTP Code:", verificationCode);
+      
+      // Send POST request to verify OTP using CORS proxy
       const response = await fetch(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
+        "https://cors-anywhere.herokuapp.com/https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
           },
-          body: JSON.stringify({
-            userId: farmerId,
-            otp: verificationCode
-          }),
+          body: JSON.stringify(requestData),
         }
       );
       
+      console.log("=== VERIFY OTP RESPONSE ===");
+      console.log("Response Status:", response.status);
+      console.log("Response OK:", response.ok);
+      console.log("Response Headers:", Object.fromEntries(response.headers.entries()));
+      
+      // Parse response data
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log("Response Body:", responseData);
+      } catch (parseError) {
+        console.log("Failed to parse JSON response:", parseError);
+        console.log("Raw response text:", await response.text());
+      }
+      
       if (response.status === 200) {
-        // Show stylish success alert
+        console.log("✅ VERIFICATION SUCCESSFUL - Status 200");
         alert("✅ Verification successful! Your account has been verified.");
         setShowSuccess(true);
       } else if (response.status === 400) {
-        // Show error alert for invalid OTP
+        console.log("❌ VERIFICATION FAILED - Status 400 (Invalid OTP)");
         alert("❌ Invalid or wrong OTP. Please check your code and try again.");
         setHasError(true);
       } else {
-        // Handle other status codes
+        console.log(`❌ VERIFICATION FAILED - Status ${response.status}`);
         alert(`❌ Verification failed with status: ${response.status}`);
         setHasError(true);
       }
     } catch (error) {
+      console.error("=== VERIFY OTP ERROR ===");
       console.error("Error verifying OTP:", error);
+      console.error("Error type:", error.constructor.name);
+      console.error("Error message:", error.message);
       alert("❌ Network error. Please check your connection and try again.");
       setHasError(true);
     } finally {
       setIsVerifying(false);
+      console.log("=== VERIFY OTP REQUEST COMPLETED ===");
     }
   };
 
@@ -127,9 +162,28 @@ export function FarmerVerification() {
       const farmerId = getFarmerId();
       
       if (!farmerId) {
+        console.log("❌ RESEND OTP FAILED - No farmer ID found");
         alert("❌ User session expired. Please register again.");
         return;
       }
+
+      // Prepare request data
+      const requestData = {
+        userId: farmerId,
+        type: "sms",
+        purpose: "verification"
+      };
+
+      console.log("=== RESEND OTP REQUEST ===");
+      console.log("URL:", "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp");
+      console.log("Method:", "POST");
+      console.log("Headers:", {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      });
+      console.log("Request Body:", JSON.stringify(requestData, null, 2));
+      console.log("Farmer ID:", farmerId);
 
       // Send POST request to resend OTP
       const response = await fetch(
@@ -141,26 +195,45 @@ export function FarmerVerification() {
             Accept: "application/json",
             "X-Requested-With": "XMLHttpRequest",
           },
-          body: JSON.stringify({
-            userId: farmerId,
-            type: "sms",
-            purpose: "verification"
-          }),
+          body: JSON.stringify(requestData),
         }
       );
 
+      console.log("=== RESEND OTP RESPONSE ===");
+      console.log("Response Status:", response.status);
+      console.log("Response OK:", response.ok);
+      console.log("Response Headers:", Object.fromEntries(response.headers.entries()));
+
+      // Parse response data
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log("Response Body:", responseData);
+      } catch (parseError) {
+        console.log("Failed to parse JSON response:", parseError);
+        const textResponse = await response.text();
+        console.log("Raw response text:", textResponse);
+      }
+
       if (response.ok) {
+        console.log("✅ RESEND OTP SUCCESSFUL");
         // Reset countdown and clear inputs on successful resend
         setCountdown(45);
         setHasError(false);
         setCode(["", "", "", "", "", ""]);
         alert("✅ Verification code resent successfully!");
       } else {
+        console.log(`❌ RESEND OTP FAILED - Status ${response.status}`);
         alert("❌ Failed to resend verification code. Please try again.");
       }
     } catch (error) {
+      console.error("=== RESEND OTP ERROR ===");
       console.error("Error resending OTP:", error);
+      console.error("Error type:", error.constructor.name);
+      console.error("Error message:", error.message);
       alert("❌ Network error. Please check your connection and try again.");
+    } finally {
+      console.log("=== RESEND OTP REQUEST COMPLETED ===");
     }
   };
 
