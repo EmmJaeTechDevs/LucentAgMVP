@@ -215,14 +215,14 @@ export function BuyerVerification() {
 
       if (response.status === 200) {
         console.log("✅ VERIFICATION SUCCESSFUL - Status 200");
-        setShowSuccessAlert(true);
+        alert("✅ Verification successful! Your account has been verified.");
+        
         // Clear stored userId from both storage types
         localStorage.removeItem("buyerUserId");
         sessionStorage.removeItem("buyerSession");
-        // Redirect after showing success message
-        setTimeout(() => {
-          setLocation("/");
-        }, 3000);
+        
+        // Redirect to buyer home page
+        setLocation("/buyer-home");
       } else if (response.status === 400) {
         console.log("❌ VERIFICATION FAILED - Status 400 (Invalid OTP)");
         setError("Invalid or wrong OTP. Please check your code and try again.");
