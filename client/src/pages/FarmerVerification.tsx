@@ -52,18 +52,41 @@ export function FarmerVerification() {
     setHasError(false);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Get farmer ID from localStorage (set during registration)
+      const farmerId = localStorage.getItem("farmerUserId");
       
-      // Simulate validation - for demo, reject code "123456"
-      if (verificationCode === "123456") {
+      // Send POST request to verify OTP
+      const response = await fetch(
+        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            userId: farmerId,
+            otp: verificationCode
+          }),
+        }
+      );
+      
+      if (response.status === 200) {
+        // Show stylish success alert
+        alert("✅ Verification successful! Your account has been verified.");
+        setShowSuccess(true);
+      } else if (response.status === 400) {
+        // Show error alert for invalid OTP
+        alert("❌ Invalid or wrong OTP. Please check your code and try again.");
         setHasError(true);
-        return;
+      } else {
+        // Handle other status codes
+        alert(`❌ Verification failed with status: ${response.status}`);
+        setHasError(true);
       }
-      
-      // Show success message on successful verification
-      setShowSuccess(true);
     } catch (error) {
+      console.error("Error verifying OTP:", error);
+      alert("❌ Network error. Please check your connection and try again.");
       setHasError(true);
     } finally {
       setIsVerifying(false);
