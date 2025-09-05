@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useLoading } from "@/hooks/useLoading";
 import leafImage from "@assets/entypo_leaf_1756517515112.png";
+import { api } from "@/utils/api";
 
 interface FormData {
   firstName: string;
@@ -181,18 +182,17 @@ export const BuyerAccountCreation = (): JSX.Element => {
     setIsSubmitting(true);
     
     try {
-      // TODO: Replace with actual API call
-      console.log("Form data ready for API:", formData);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Call your backend API
+      const response = await api.buyers.register(formData);
+      console.log("Registration successful:", response);
       
       // Navigate to verification page
       setLocation("/buyer-verification");
       
     } catch (error) {
       console.error("Error creating account:", error);
-      alert("Error creating account. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Error creating account. Please try again.";
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
