@@ -22,12 +22,12 @@ export function FarmerVerification() {
 
   const handleInputChange = (index: number, value: string) => {
     if (value.length > 1) return; // Only allow single digit
-    
+
     // Clear error state when user starts typing
     if (hasError) {
       setHasError(false);
     }
-    
+
     const newCode = [...code];
     newCode[index] = value;
     setCode(newCode);
@@ -68,19 +68,22 @@ export function FarmerVerification() {
 
     setIsVerifying(true);
     setHasError(false);
-    
+
     try {
       // Get farmer ID from sessionStorage or localStorage
       const farmerId = getFarmerId();
-      
+
       // Prepare request data
       const requestData = {
         userId: farmerId,
-        otp: verificationCode
+        otp: verificationCode,
       };
-      
+
       console.log("=== VERIFY OTP REQUEST ===");
-      console.log("URL:", "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp");
+      console.log(
+        "URL:",
+        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
+      );
       console.log("Method:", "POST");
       console.log("Headers:", {
         "Content-Type": "application/json",
@@ -90,10 +93,10 @@ export function FarmerVerification() {
       console.log("Request Body:", JSON.stringify(requestData, null, 2));
       console.log("Farmer ID:", farmerId);
       console.log("OTP Code:", verificationCode);
-      
+
       // Send POST request to verify OTP using CORS proxy
       const response = await fetch(
-        "https://cors-anywhere.herokuapp.com/https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
+        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
         {
           method: "POST",
           headers: {
@@ -102,14 +105,17 @@ export function FarmerVerification() {
             "X-Requested-With": "XMLHttpRequest",
           },
           body: JSON.stringify(requestData),
-        }
+        },
       );
-      
+
       console.log("=== VERIFY OTP RESPONSE ===");
       console.log("Response Status:", response.status);
       console.log("Response OK:", response.ok);
-      console.log("Response Headers:", Object.fromEntries(response.headers.entries()));
-      
+      console.log(
+        "Response Headers:",
+        Object.fromEntries(response.headers.entries()),
+      );
+
       // Parse response data
       let responseData;
       try {
@@ -119,7 +125,7 @@ export function FarmerVerification() {
         console.log("Failed to parse JSON response:", parseError);
         console.log("Raw response text:", await response.text());
       }
-      
+
       if (response.status === 200) {
         console.log("✅ VERIFICATION SUCCESSFUL - Status 200");
         alert("✅ Verification successful! Your account has been verified.");
@@ -160,7 +166,7 @@ export function FarmerVerification() {
     try {
       // Get farmer ID from sessionStorage or localStorage
       const farmerId = getFarmerId();
-      
+
       if (!farmerId) {
         console.log("❌ RESEND OTP FAILED - No farmer ID found");
         alert("❌ User session expired. Please register again.");
@@ -171,11 +177,14 @@ export function FarmerVerification() {
       const requestData = {
         userId: farmerId,
         type: "sms",
-        purpose: "verification"
+        purpose: "verification",
       };
 
       console.log("=== RESEND OTP REQUEST ===");
-      console.log("URL:", "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp");
+      console.log(
+        "URL:",
+        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
+      );
       console.log("Method:", "POST");
       console.log("Headers:", {
         "Content-Type": "application/json",
@@ -187,7 +196,7 @@ export function FarmerVerification() {
 
       // Send POST request to resend OTP
       const response = await fetch(
-        "https://cors-anywhere.herokuapp.com/https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
+        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
         {
           method: "POST",
           headers: {
@@ -196,13 +205,16 @@ export function FarmerVerification() {
             "X-Requested-With": "XMLHttpRequest",
           },
           body: JSON.stringify(requestData),
-        }
+        },
       );
 
       console.log("=== RESEND OTP RESPONSE ===");
       console.log("Response Status:", response.status);
       console.log("Response OK:", response.ok);
-      console.log("Response Headers:", Object.fromEntries(response.headers.entries()));
+      console.log(
+        "Response Headers:",
+        Object.fromEntries(response.headers.entries()),
+      );
 
       // Parse response data
       let responseData;
@@ -237,7 +249,7 @@ export function FarmerVerification() {
     }
   };
 
-  const isCodeComplete = code.every(digit => digit !== "");
+  const isCodeComplete = code.every((digit) => digit !== "");
 
   // Show success message if verification successful
   if (showSuccess) {
@@ -251,17 +263,22 @@ export function FarmerVerification() {
               <div className="w-32 h-32 mx-auto relative">
                 {/* Party/celebration emoji style icon */}
                 <div className="text-6xl">🎉</div>
-                <div className="absolute -top-2 -right-2 text-2xl animate-bounce">✨</div>
-                <div className="absolute -bottom-2 -left-2 text-2xl animate-bounce delay-300">🎊</div>
+                <div className="absolute -top-2 -right-2 text-2xl animate-bounce">
+                  ✨
+                </div>
+                <div className="absolute -bottom-2 -left-2 text-2xl animate-bounce delay-300">
+                  🎊
+                </div>
               </div>
             </div>
 
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
               Welcome to Lucent Ag
             </h1>
-            
+
             <p className="text-gray-600 text-base leading-relaxed mb-12">
-              We're glad to have you here. We'll show you how to use the app, step by step. It's quick and easy.
+              We're glad to have you here. We'll show you how to use the app,
+              step by step. It's quick and easy.
             </p>
 
             {/* Action buttons */}
@@ -273,7 +290,7 @@ export function FarmerVerification() {
               >
                 Show Me How
               </Button>
-              
+
               <div className="relative group">
                 <Button
                   onClick={handleSkip}
@@ -301,17 +318,22 @@ export function FarmerVerification() {
               <div className="w-40 h-40 mx-auto relative">
                 {/* Party/celebration emoji style icon */}
                 <div className="text-8xl">🎉</div>
-                <div className="absolute -top-4 -right-4 text-3xl animate-bounce">✨</div>
-                <div className="absolute -bottom-4 -left-4 text-3xl animate-bounce delay-300">🎊</div>
+                <div className="absolute -top-4 -right-4 text-3xl animate-bounce">
+                  ✨
+                </div>
+                <div className="absolute -bottom-4 -left-4 text-3xl animate-bounce delay-300">
+                  🎊
+                </div>
               </div>
             </div>
 
             <h1 className="text-4xl font-bold text-gray-900 mb-6">
               Welcome to Lucent Ag
             </h1>
-            
+
             <p className="text-gray-600 text-lg leading-relaxed mb-12">
-              We're glad to have you here. We'll show you how to use the app, step by step. It's quick and easy.
+              We're glad to have you here. We'll show you how to use the app,
+              step by step. It's quick and easy.
             </p>
 
             {/* Action buttons */}
@@ -323,7 +345,7 @@ export function FarmerVerification() {
               >
                 Show Me How
               </Button>
-              
+
               <div className="relative group">
                 <Button
                   onClick={handleSkip}
@@ -354,13 +376,14 @@ export function FarmerVerification() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Verify your account
           </h1>
-          
+
           <p className="text-base font-medium text-gray-900 mb-6">
             Almost There!
           </p>
 
           <p className="text-gray-600 text-sm leading-relaxed mb-8">
-            We've sent a 6-digit code to your email or phone number. Enter the code below to verify your account and continue.
+            We've sent a 6-digit code to your email or phone number. Enter the
+            code below to verify your account and continue.
           </p>
 
           {/* 6-digit code input */}
@@ -376,8 +399,8 @@ export function FarmerVerification() {
                 onChange={(e) => handleInputChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className={`w-12 h-12 text-center text-lg font-semibold border-2 rounded-lg focus:outline-none transition-colors ${
-                  hasError 
-                    ? "border-red-500 focus:border-red-600" 
+                  hasError
+                    ? "border-red-500 focus:border-red-600"
                     : "border-gray-200 focus:border-green-600"
                 }`}
                 maxLength={1}
@@ -438,13 +461,14 @@ export function FarmerVerification() {
           <h1 className="text-3xl font-bold text-gray-900 mb-3">
             Verify your account
           </h1>
-          
+
           <p className="text-lg font-medium text-gray-900 mb-6">
             Almost There!
           </p>
 
           <p className="text-gray-600 leading-relaxed mb-8">
-            We've sent a 6-digit code to your email or phone number. Enter the code below to verify your account and continue.
+            We've sent a 6-digit code to your email or phone number. Enter the
+            code below to verify your account and continue.
           </p>
 
           {/* 6-digit code input */}
@@ -460,8 +484,8 @@ export function FarmerVerification() {
                 onChange={(e) => handleInputChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className={`w-14 h-14 text-center text-xl font-semibold border-2 rounded-xl focus:outline-none transition-colors ${
-                  hasError 
-                    ? "border-red-500 focus:border-red-600" 
+                  hasError
+                    ? "border-red-500 focus:border-red-600"
                     : "border-gray-200 focus:border-green-600"
                 }`}
                 maxLength={1}

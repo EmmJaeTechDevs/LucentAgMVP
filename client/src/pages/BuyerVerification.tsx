@@ -86,7 +86,7 @@ export function BuyerVerification() {
     try {
       // Use the same fetch method as farmer verification for consistency
       const response = await fetch(
-        "https://cors-anywhere.herokuapp.com/https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
+        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
         {
           method: "POST",
           headers: {
@@ -170,7 +170,7 @@ export function BuyerVerification() {
     try {
       // Use the same fetch method as farmer verification for consistency
       const response = await fetch(
-        "https://cors-anywhere.herokuapp.com/https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
+        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
         {
           method: "POST",
           headers: {
