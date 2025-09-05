@@ -90,13 +90,60 @@ class CORSHandler {
     }
   }
 
-  // Specific method for POST requests
+  // Specific method for POST requests that avoids CORS preflight
   async post(endpoint: string, data: any, options: AxiosRequestConfig = {}): Promise<AxiosResponse> {
-    return this.makeRequest(endpoint, {
-      method: 'POST',
-      data,
-      ...options,
-    });
+    // Use simple request to avoid CORS preflight
+    const url = this.getRequestURL(endpoint);
+    
+    try {
+      return await axios({
+        method: 'POST',
+        url,
+        data,
+        headers: {
+          'Content-Type': 'text/plain', // Use text/plain to avoid preflight
+        },
+        timeout: API_CONFIG.TIMEOUT,
+        withCredentials: false,
+        transformRequest: [(data) => {
+          // Transform data to JSON string for text/plain content type
+          return JSON.stringify(data);
+        }],
+        transformResponse: [(data) => {
+          // Parse JSON response
+          try {
+            return JSON.parse(data);
+          } catch (e) {
+            return data;
+          }
+        }],
+        ...options,
+      });
+    } catch (error: any) {
+      // Fallback: Try with form data encoding
+      if (error.code === 'ERR_NETWORK' || error.message.includes('CORS')) {
+        try {
+          const formData = new FormData();
+          formData.append('data', JSON.stringify(data));
+          
+          return await axios({
+            method: 'POST',
+            url,
+            data: formData,
+            headers: {
+              // Let browser set Content-Type for FormData
+            },
+            timeout: API_CONFIG.TIMEOUT,
+            withCredentials: false,
+            ...options,
+          });
+        } catch (formError) {
+          console.error('Both JSON and FormData requests failed');
+          throw error; // Throw original error
+        }
+      }
+      throw error;
+    }
   }
 
   // Method to enable/disable CORS proxy manually

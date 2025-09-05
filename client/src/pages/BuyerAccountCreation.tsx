@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
-import { corsHandler } from "../utils/corsHandler";
+import { makeSimpleCorsRequest } from "../utils/simpleCorsRequest";
 
 // THIS IS THE NEW BUYER REGISTRATION FORM
 // ALL FIELDS MATCH BACKEND REQUIREMENTS EXACTLY
@@ -73,14 +73,17 @@ export const BuyerAccountCreation = (): JSX.Element => {
 
       console.log("Sending buyer data:", backendData);
       
-      // Call your external backend API using CORS handler
-      const response = await corsHandler.post("/api/auth/register-buyer", backendData);
+      // Call your external backend API using simple CORS request
+      const response = await makeSimpleCorsRequest(
+        "https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer", 
+        backendData
+      );
       
-      console.log("Registration response:", response.data);
+      console.log("Registration response:", response);
       
       // Store userId for verification page
-      if (response.data.userId) {
-        localStorage.setItem("buyerUserId", response.data.userId);
+      if (response.userId) {
+        localStorage.setItem("buyerUserId", response.userId);
       }
       
       alert("Registration successful!");
@@ -88,18 +91,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
       
     } catch (error: any) {
       console.error("Error creating account:", error);
-      
-      if (error.response) {
-        // Server responded with error status
-        const errorMessage = error.response.data?.message || "Registration failed";
-        alert(`Error: ${errorMessage}`);
-      } else if (error.request) {
-        // Network error
-        alert("Network error. Please check your connection and try again.");
-      } else {
-        // Other error
-        alert("Error creating account. Please try again.");
-      }
+      alert("Error creating account. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
