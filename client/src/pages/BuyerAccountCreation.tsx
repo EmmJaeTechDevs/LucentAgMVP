@@ -72,6 +72,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
       };
 
       console.log("Sending buyer data:", backendData);
+      console.log("JSON stringified data:", JSON.stringify(backendData, null, 2));
       
       // Call your external backend API using Axios POST request
       const response = await axios.post(
@@ -104,11 +105,15 @@ export const BuyerAccountCreation = (): JSX.Element => {
       
     } catch (error: any) {
       console.error("Error creating account:", error);
+      console.error("Error response:", error.response);
+      console.error("Error response data:", error.response?.data);
+      console.error("Error response status:", error.response?.status);
       
       if (error.response) {
         // Server responded with error status
         const errorMessage = error.response.data?.message || "Registration failed";
-        alert(`Error: ${errorMessage}`);
+        console.log("Backend error message:", errorMessage);
+        alert(`Error ${error.response.status}: ${errorMessage}`);
       } else if (error.request) {
         // Network error
         alert("Network error. Please check your connection and try again.");
