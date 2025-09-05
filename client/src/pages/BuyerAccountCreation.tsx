@@ -115,12 +115,12 @@ export const BuyerAccountCreation = (): JSX.Element => {
         {/* HEADER */}
         <div style={{ textAlign: "center", marginBottom: "40px" }}>
           <h1 style={{ 
-            fontSize: "2.5rem", 
+            fontSize: "1.8rem", 
             fontWeight: "bold", 
             color: "#2e7d32", 
             marginBottom: "15px" 
           }}>
-            🛒 NEW BUYER REGISTRATION
+            NEW BUYER REGISTRATION
           </h1>
           <p style={{ color: "#666", fontSize: "1.1rem" }}>
             Fill all fields to create your buyer account
