@@ -1,52 +1,44 @@
-// Simple CORS request that avoids preflight
+// Simple POST request using XMLHttpRequest to avoid CORS preflight
 export async function makeSimpleCorsRequest(url: string, data: any): Promise<any> {
   return new Promise((resolve, reject) => {
-    // Create a form to submit data without triggering CORS preflight
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = url;
-    form.style.display = 'none';
+    const xhr = new XMLHttpRequest();
     
-    // Add data as hidden input
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'data';
-    input.value = JSON.stringify(data);
-    form.appendChild(input);
+    // Use POST method
+    xhr.open('POST', url, true);
     
-    // Create hidden iframe to capture response
-    const iframe = document.createElement('iframe');
-    iframe.name = 'response-frame';
-    iframe.style.display = 'none';
-    form.target = 'response-frame';
+    // Set minimal headers to avoid preflight
+    xhr.setRequestHeader('Content-Type', 'text/plain');
     
-    document.body.appendChild(form);
-    document.body.appendChild(iframe);
-    
-    // Handle iframe load
-    iframe.onload = () => {
-      try {
-        // Try to read response from iframe
-        const response = iframe.contentDocument?.body?.textContent || '{}';
-        const parsedResponse = JSON.parse(response);
-        resolve(parsedResponse);
-      } catch (error) {
-        resolve({ success: true }); // Assume success if we can't read response
-      } finally {
-        // Cleanup
-        document.body.removeChild(form);
-        document.body.removeChild(iframe);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4) {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            // Try to parse JSON response
+            const response = JSON.parse(xhr.responseText);
+            resolve(response);
+          } catch (e) {
+            // If not JSON, return raw response
+            resolve({ success: true, response: xhr.responseText });
+          }
+        } else {
+          reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
+        }
       }
     };
     
-    iframe.onerror = () => {
+    xhr.onerror = function() {
       reject(new Error('Network error'));
-      document.body.removeChild(form);
-      document.body.removeChild(iframe);
     };
     
-    // Submit form
-    form.submit();
+    xhr.ontimeout = function() {
+      reject(new Error('Request timeout'));
+    };
+    
+    // Set timeout
+    xhr.timeout = 15000;
+    
+    // Send data as JSON string
+    xhr.send(JSON.stringify(data));
   });
 }
 
