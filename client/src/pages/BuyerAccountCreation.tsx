@@ -102,6 +102,16 @@ export const BuyerAccountCreation = (): JSX.Element => {
       if (response.ok && (response.status === 200 || response.status === 201)) {
         // Store userId for verification page
         const userId = responseData?.userId || `temp_${Date.now()}`;
+        
+        // Store buyer userId in sessionStorage with 2-hour expiry
+        const now = new Date().getTime();
+        const expiryTime = now + (2 * 60 * 60 * 1000); // 2 hours from now
+        const sessionData = {
+          userId: userId,
+          expiry: expiryTime
+        };
+        sessionStorage.setItem("buyerSession", JSON.stringify(sessionData));
+        // Also store in localStorage for backward compatibility
         localStorage.setItem("buyerUserId", userId);
 
         // Show success message

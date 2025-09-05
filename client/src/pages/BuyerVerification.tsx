@@ -14,9 +14,27 @@ export function BuyerVerification() {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [error, setError] = useState("");
 
+  // Helper function to get buyer ID from sessionStorage or localStorage
+  const getBuyerId = () => {
+    // First try sessionStorage with expiry check
+    const sessionData = sessionStorage.getItem("buyerSession");
+    if (sessionData) {
+      const parsed = JSON.parse(sessionData);
+      const now = new Date().getTime();
+      if (now < parsed.expiry) {
+        return parsed.userId;
+      } else {
+        // Session expired, remove it
+        sessionStorage.removeItem("buyerSession");
+      }
+    }
+    // Fallback to localStorage
+    return localStorage.getItem("buyerUserId");
+  };
+
   useEffect(() => {
-    // Get userId from localStorage
-    const storedUserId = localStorage.getItem("buyerUserId");
+    // Get userId from sessionStorage or localStorage
+    const storedUserId = getBuyerId();
     if (storedUserId) {
       setUserId(storedUserId);
     } else {
@@ -42,72 +60,134 @@ export function BuyerVerification() {
   };
 
   const sendOTP = async () => {
-    if (!userId || userId === "") return;
+    const currentUserId = getBuyerId();
+    if (!currentUserId || currentUserId === "") {
+      console.log("❌ SEND OTP FAILED - No buyer ID found");
+      setError("User session expired. Please register again.");
+      return;
+    }
     
     setIsLoading(true);
     setError("");
     
+    // Prepare request data
+    const requestData = {
+      userId: currentUserId,
+      type: "sms",
+      purpose: "verification"
+    };
+
+    console.log("=== SEND OTP REQUEST (BUYER) ===");
+    console.log("URL:", "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp");
+    console.log("Method:", "POST");
+    console.log("Request Body:", JSON.stringify(requestData, null, 2));
+    console.log("Buyer ID:", currentUserId);
+    
     try {
       const response = await makeSimpleCorsRequest(
         "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
-        {
-          userId: userId,
-          type: "sms",
-          purpose: "verification"
-        }
+        requestData
       );
+
+      console.log("=== SEND OTP RESPONSE (BUYER) ===");
+      console.log("✅ SEND OTP SUCCESSFUL");
+      console.log("Response:", response);
 
       setStep("verify");
       setCountdown(30);
       setCanResend(false);
     } catch (error: any) {
+      console.error("=== SEND OTP ERROR (BUYER) ===");
       console.error("Error sending OTP:", error);
+      console.error("Error type:", error.constructor.name);
+      console.error("Error message:", error.message);
       
       if (error.response) {
+        console.log(`❌ SEND OTP FAILED - Status ${error.response.status}`);
+        console.log("Error response data:", error.response.data);
         setError(error.response.data?.message || "Failed to send OTP");
       } else if (error.request) {
+        console.log("❌ SEND OTP FAILED - Network error");
         setError("Network error. Please check your connection and try again.");
       } else {
+        console.log("❌ SEND OTP FAILED - Other error");
         setError("Failed to send OTP. Please try again.");
       }
     } finally {
       setIsLoading(false);
+      console.log("=== SEND OTP REQUEST COMPLETED (BUYER) ===");
     }
   };
 
   const verifyOTP = async () => {
-    if (!userId || userId === "" || !otpCode) return;
+    const currentUserId = getBuyerId();
+    if (!currentUserId || currentUserId === "" || !otpCode) {
+      console.log("❌ VERIFY OTP FAILED - Missing data");
+      console.log("User ID:", currentUserId);
+      console.log("OTP Code:", otpCode);
+      return;
+    }
     
     setIsLoading(true);
     setError("");
     
+    // Prepare request data
+    const requestData = {
+      userId: currentUserId,
+      otp: otpCode
+    };
+
+    console.log("=== VERIFY OTP REQUEST (BUYER) ===");
+    console.log("URL:", "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp");
+    console.log("Method:", "POST");
+    console.log("Request Body:", JSON.stringify(requestData, null, 2));
+    console.log("Buyer ID:", currentUserId);
+    console.log("OTP Code:", otpCode);
+    
     try {
       const response = await makeSimpleCorsRequest(
         "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
-        {
-          userId: userId,
-          code: otpCode,
-          type: "sms"
-        }
+        requestData
       );
+
+      console.log("=== VERIFY OTP RESPONSE (BUYER) ===");
+      console.log("✅ VERIFICATION SUCCESSFUL - Status 200");
+      console.log("Response:", response);
 
       // Success response - assume success if no error thrown
       setShowSuccessAlert(true);
-      // Clear stored userId
+      // Clear stored userId from both storage types
       localStorage.removeItem("buyerUserId");
+      sessionStorage.removeItem("buyerSession");
       // Redirect after showing success message
       setTimeout(() => {
         setLocation("/");
       }, 3000);
     } catch (error: any) {
+      console.error("=== VERIFY OTP ERROR (BUYER) ===");
       console.error("Error verifying OTP:", error);
+      console.error("Error type:", error.constructor.name);
+      console.error("Error message:", error.message);
+      
+      if (error.response) {
+        console.log(`❌ VERIFICATION FAILED - Status ${error.response.status}`);
+        console.log("Error response data:", error.response.data);
+        if (error.response.status === 400) {
+          console.log("❌ VERIFICATION FAILED - Status 400 (Invalid OTP)");
+        }
+      } else {
+        console.log("❌ VERIFICATION FAILED - Network/Other error");
+      }
+      
       setError("Verification failed. Please try again.");
     } finally {
       setIsLoading(false);
+      console.log("=== VERIFY OTP REQUEST COMPLETED (BUYER) ===");
     }
   };
 
   const handleResend = () => {
+    console.log("=== RESEND OTP TRIGGERED (BUYER) ===");
     setCountdown(30);
     setCanResend(false);
     sendOTP();
