@@ -66,23 +66,26 @@ export function BuyerVerification() {
       setError("User session expired. Please register again.");
       return;
     }
-    
+
     setIsLoading(true);
     setError("");
-    
+
     // Prepare request data
     const requestData = {
       userId: currentUserId,
       type: "sms",
-      purpose: "verification"
+      purpose: "verification",
     };
 
     console.log("=== SEND OTP REQUEST (BUYER) ===");
-    console.log("URL:", "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp");
+    console.log(
+      "URL:",
+      "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
+    );
     console.log("Method:", "POST");
     console.log("Request Body:", JSON.stringify(requestData, null, 2));
     console.log("Buyer ID:", currentUserId);
-    
+
     try {
       // Use the same fetch method as farmer verification for consistency
       const response = await fetch(
@@ -95,14 +98,17 @@ export function BuyerVerification() {
             "X-Requested-With": "XMLHttpRequest",
           },
           body: JSON.stringify(requestData),
-        }
+        },
       );
 
       console.log("=== SEND OTP RESPONSE (BUYER) ===");
       console.log("Response Status:", response.status);
       console.log("Response OK:", response.ok);
-      console.log("Response Headers:", Object.fromEntries(response.headers.entries()));
-      
+      console.log(
+        "Response Headers:",
+        Object.fromEntries(response.headers.entries()),
+      );
+
       // Parse response data
       let responseData;
       try {
@@ -121,7 +127,9 @@ export function BuyerVerification() {
         setCanResend(false);
       } else {
         console.log(`❌ SEND OTP FAILED - Status ${response.status}`);
-        setError(`Failed to send OTP. Server responded with status: ${response.status}`);
+        setError(
+          `Failed to send OTP. Server responded with status: ${response.status}`,
+        );
       }
     } catch (error: any) {
       console.error("=== SEND OTP ERROR (BUYER) ===");
@@ -129,7 +137,7 @@ export function BuyerVerification() {
       console.error("Error type:", error.constructor.name);
       console.error("Error message:", error.message);
       console.log("❌ SEND OTP FAILED - Network/Other error");
-      
+
       setError("Network error. Please check your connection and try again.");
     } finally {
       setIsLoading(false);
@@ -145,18 +153,22 @@ export function BuyerVerification() {
       console.log("OTP Code:", otpCode);
       return;
     }
-    
+
     setIsLoading(true);
     setError("");
-    
+
     // Prepare request data
     const requestData = {
       userId: currentUserId,
-      otp: otpCode
+      code: otpCode,
+      type: "sms",
     };
 
     console.log("=== VERIFY OTP REQUEST (BUYER) ===");
-    console.log("URL:", "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp");
+    console.log(
+      "URL:",
+      "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
+    );
     console.log("Method:", "POST");
     console.log("Headers:", {
       "Content-Type": "application/json",
@@ -166,7 +178,7 @@ export function BuyerVerification() {
     console.log("Request Body:", JSON.stringify(requestData, null, 2));
     console.log("Buyer ID:", currentUserId);
     console.log("OTP Code:", otpCode);
-    
+
     try {
       // Use the same fetch method as farmer verification for consistency
       const response = await fetch(
@@ -179,14 +191,17 @@ export function BuyerVerification() {
             "X-Requested-With": "XMLHttpRequest",
           },
           body: JSON.stringify(requestData),
-        }
+        },
       );
 
       console.log("=== VERIFY OTP RESPONSE (BUYER) ===");
       console.log("Response Status:", response.status);
       console.log("Response OK:", response.ok);
-      console.log("Response Headers:", Object.fromEntries(response.headers.entries()));
-      
+      console.log(
+        "Response Headers:",
+        Object.fromEntries(response.headers.entries()),
+      );
+
       // Parse response data
       let responseData;
       try {
@@ -197,7 +212,7 @@ export function BuyerVerification() {
         const textResponse = await response.text();
         console.log("Raw response text:", textResponse);
       }
-      
+
       if (response.status === 200) {
         console.log("✅ VERIFICATION SUCCESSFUL - Status 200");
         setShowSuccessAlert(true);
@@ -221,7 +236,7 @@ export function BuyerVerification() {
       console.error("Error type:", error.constructor.name);
       console.error("Error message:", error.message);
       console.log("❌ VERIFICATION FAILED - Network/Other error");
-      
+
       setError("Network error. Please check your connection and try again.");
     } finally {
       setIsLoading(false);
@@ -237,79 +252,93 @@ export function BuyerVerification() {
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "20px"
-    }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+      }}
+    >
       {/* Success Alert Modal */}
       {showSuccessAlert && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.5)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: "white",
-            padding: "40px",
-            borderRadius: "15px",
-            textAlign: "center",
-            maxWidth: "400px",
-            margin: "20px",
-            boxShadow: "0 20px 40px rgba(0,0,0,0.1)"
-          }}>
-            <div style={{
-              width: "80px",
-              height: "80px",
-              backgroundColor: "#4caf50",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 20px",
-              fontSize: "40px",
-              color: "white"
-            }}>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              padding: "40px",
+              borderRadius: "15px",
+              textAlign: "center",
+              maxWidth: "400px",
+              margin: "20px",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
+            }}
+          >
+            <div
+              style={{
+                width: "80px",
+                height: "80px",
+                backgroundColor: "#4caf50",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 20px",
+                fontSize: "40px",
+                color: "white",
+              }}
+            >
               ✓
             </div>
-            <h2 style={{
-              color: "#2e7d32",
-              marginBottom: "15px",
-              fontSize: "1.5rem"
-            }}>
+            <h2
+              style={{
+                color: "#2e7d32",
+                marginBottom: "15px",
+                fontSize: "1.5rem",
+              }}
+            >
               Verification Successful!
             </h2>
-            <p style={{
-              color: "#666",
-              marginBottom: "20px"
-            }}>
-              Your account has been verified successfully. You will be redirected shortly.
+            <p
+              style={{
+                color: "#666",
+                marginBottom: "20px",
+              }}
+            >
+              Your account has been verified successfully. You will be
+              redirected shortly.
             </p>
           </div>
         </div>
       )}
 
-      <div style={{
-        backgroundColor: "white",
-        padding: "40px",
-        borderRadius: "15px",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
-        width: "100%",
-        maxWidth: "450px"
-      }}>
-        
+      <div
+        style={{
+          backgroundColor: "white",
+          padding: "40px",
+          borderRadius: "15px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+          width: "100%",
+          maxWidth: "450px",
+        }}
+      >
         {/* Back Button */}
-        <button 
+        <button
           onClick={handleGoBack}
           style={{
             display: "flex",
@@ -321,7 +350,7 @@ export function BuyerVerification() {
             fontSize: "16px",
             cursor: "pointer",
             marginBottom: "30px",
-            padding: "5px"
+            padding: "5px",
           }}
           data-testid="button-back"
         >
@@ -331,32 +360,35 @@ export function BuyerVerification() {
 
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "40px" }}>
-          <h1 style={{ 
-            fontSize: "1.8rem", 
-            fontWeight: "bold", 
-            color: "#2e7d32", 
-            marginBottom: "15px" 
-          }}>
+          <h1
+            style={{
+              fontSize: "1.8rem",
+              fontWeight: "bold",
+              color: "#2e7d32",
+              marginBottom: "15px",
+            }}
+          >
             VERIFY YOUR ACCOUNT
           </h1>
           <p style={{ color: "#666", fontSize: "1.1rem" }}>
-            {step === "initial" 
+            {step === "initial"
               ? "Click the button below to receive an OTP verification code"
-              : "Enter the 6-digit code sent to your phone"
-            }
+              : "Enter the 6-digit code sent to your phone"}
           </p>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div style={{
-            backgroundColor: "#ffebee",
-            color: "#c62828",
-            padding: "15px",
-            borderRadius: "8px",
-            marginBottom: "20px",
-            textAlign: "center"
-          }}>
+          <div
+            style={{
+              backgroundColor: "#ffebee",
+              color: "#c62828",
+              padding: "15px",
+              borderRadius: "8px",
+              marginBottom: "20px",
+              textAlign: "center",
+            }}
+          >
             {error}
           </div>
         )}
@@ -364,12 +396,14 @@ export function BuyerVerification() {
         {/* OTP Input Field (only show in verify step) */}
         {step === "verify" && (
           <div style={{ marginBottom: "25px" }}>
-            <label style={{
-              display: "block",
-              marginBottom: "8px",
-              color: "#2e7d32",
-              fontWeight: "600"
-            }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "8px",
+                color: "#2e7d32",
+                fontWeight: "600",
+              }}
+            >
               Verification Code
             </label>
             <input
@@ -385,7 +419,7 @@ export function BuyerVerification() {
                 borderRadius: "8px",
                 fontSize: "18px",
                 textAlign: "center",
-                letterSpacing: "3px"
+                letterSpacing: "3px",
               }}
               data-testid="input-otp-code"
             />
@@ -399,23 +433,28 @@ export function BuyerVerification() {
           style={{
             width: "100%",
             padding: "15px",
-            backgroundColor: step === "verify" && otpCode.length !== 6 ? "#cccccc" : "#2e7d32",
+            backgroundColor:
+              step === "verify" && otpCode.length !== 6 ? "#cccccc" : "#2e7d32",
             color: "white",
             border: "none",
             borderRadius: "8px",
             fontSize: "16px",
             fontWeight: "600",
-            cursor: step === "verify" && otpCode.length !== 6 ? "not-allowed" : "pointer",
-            marginBottom: "20px"
+            cursor:
+              step === "verify" && otpCode.length !== 6
+                ? "not-allowed"
+                : "pointer",
+            marginBottom: "20px",
           }}
-          data-testid={step === "initial" ? "button-send-otp" : "button-verify-otp"}
-        >
-          {isLoading 
-            ? "Processing..." 
-            : step === "initial" 
-              ? "SEND OTP" 
-              : "VERIFY OTP"
+          data-testid={
+            step === "initial" ? "button-send-otp" : "button-verify-otp"
           }
+        >
+          {isLoading
+            ? "Processing..."
+            : step === "initial"
+              ? "SEND OTP"
+              : "VERIFY OTP"}
         </button>
 
         {/* Resend Button (only show in verify step) */}
@@ -430,7 +469,7 @@ export function BuyerVerification() {
                 color: canResend ? "#2e7d32" : "#cccccc",
                 fontSize: "16px",
                 cursor: canResend ? "pointer" : "not-allowed",
-                textDecoration: canResend ? "underline" : "none"
+                textDecoration: canResend ? "underline" : "none",
               }}
               data-testid="button-resend-otp"
             >
