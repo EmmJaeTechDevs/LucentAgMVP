@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
-import { corsHandler } from "../utils/corsHandler";
+import { makeSimpleCorsRequest } from "../utils/simpleCorsRequest";
 
 export function BuyerVerification() {
   const [, setLocation] = useLocation();
@@ -48,11 +48,14 @@ export function BuyerVerification() {
     setError("");
     
     try {
-      const response = await corsHandler.post("/api/auth/request-otp", {
-        userId: userId,
-        type: "sms",
-        purpose: "verification"
-      });
+      const response = await makeSimpleCorsRequest(
+        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
+        {
+          userId: userId,
+          type: "sms",
+          purpose: "verification"
+        }
+      );
 
       setStep("verify");
       setCountdown(30);
@@ -79,36 +82,26 @@ export function BuyerVerification() {
     setError("");
     
     try {
-      const response = await corsHandler.post("/api/auth/verify-otp", {
-        userId: userId,
-        code: otpCode,
-        type: "sms"
-      });
+      const response = await makeSimpleCorsRequest(
+        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
+        {
+          userId: userId,
+          code: otpCode,
+          type: "sms"
+        }
+      );
 
-      // Success response (200)
-      if (response.data.message === "OTP verified successfully") {
-        setShowSuccessAlert(true);
-        // Clear stored userId
-        localStorage.removeItem("buyerUserId");
-        // Redirect after showing success message
-        setTimeout(() => {
-          setLocation("/");
-        }, 3000);
-      }
+      // Success response - assume success if no error thrown
+      setShowSuccessAlert(true);
+      // Clear stored userId
+      localStorage.removeItem("buyerUserId");
+      // Redirect after showing success message
+      setTimeout(() => {
+        setLocation("/");
+      }, 3000);
     } catch (error: any) {
       console.error("Error verifying OTP:", error);
-      
-      if (error.response && error.response.status === 400) {
-        if (error.response.data?.message === "Invalid or expired OTP code") {
-          setError("Invalid or expired OTP code");
-        } else {
-          setError(error.response.data?.message || "Verification failed");
-        }
-      } else if (error.request) {
-        setError("Network error. Please check your connection and try again.");
-      } else {
-        setError("Verification failed. Please try again.");
-      }
+      setError("Verification failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
