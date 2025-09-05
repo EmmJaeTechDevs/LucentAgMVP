@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Leaf, Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Crop {
   id: string;
@@ -11,6 +12,7 @@ interface Crop {
 
 export function CropSelection() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [crops, setCrops] = useState<Crop[]>([
     { id: "maize", name: "Maize", selected: true },
     { id: "tomatoes", name: "Tomatoes", selected: false },
@@ -31,8 +33,11 @@ export function CropSelection() {
   };
 
   const handleAddNew = () => {
-    // For now, just show an alert - this could open a modal to add custom crops
-    alert("Add new crop functionality would be implemented here");
+    // For now, just show a toast - this could open a modal to add custom crops
+    toast({
+      title: "Feature Coming Soon",
+      description: "Add new crop functionality would be implemented here",
+    });
   };
 
   const handleNext = () => {

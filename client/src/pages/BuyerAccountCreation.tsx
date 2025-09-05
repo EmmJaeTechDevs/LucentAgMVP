@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 // THIS IS THE NEW BUYER REGISTRATION FORM
 // ALL FIELDS MATCH BACKEND REQUIREMENTS EXACTLY
@@ -39,6 +40,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const handleInputChange = (field: keyof BuyerFormData, value: string) => {
     setFormData((prev) => ({
@@ -94,7 +96,11 @@ export const BuyerAccountCreation = (): JSX.Element => {
         responseData?.message &&
         responseData.message.toLowerCase().includes("error")
       ) {
-        alert(`Registration failed: ${responseData.message}`);
+        toast({
+          variant: "destructive",
+          title: "Registration Failed",
+          description: responseData.message,
+        });
         return; // Stay on current page
       }
 
@@ -115,22 +121,37 @@ export const BuyerAccountCreation = (): JSX.Element => {
         localStorage.setItem("buyerUserId", userId);
 
         // Show success message
-        alert("Registration successful! Please verify your account.");
+        toast({
+          title: "✅ Registration Successful!",
+          description: "Please verify your account to continue.",
+        });
 
         // Redirect to verification page only on success
         setLocation("/buyer-verification");
       } else {
-        alert(`Registration failed with status: ${response.status}`);
+        toast({
+          variant: "destructive",
+          title: "Registration Failed",
+          description: `Registration failed with status: ${response.status}`,
+        });
       }
     } catch (error: any) {
       console.error("Error creating account:", error);
 
       if (error.name === "TypeError") {
         // Network error
-        alert("Network error. Please check your connection and try again.");
+        toast({
+          variant: "destructive",
+          title: "Network Error",
+          description: "Please check your connection and try again.",
+        });
       } else {
         // Other error
-        alert("Error creating account. Please try again.");
+        toast({
+          variant: "destructive",
+          title: "Registration Error",
+          description: "Error creating account. Please try again.",
+        });
       }
     } finally {
       setIsSubmitting(false);

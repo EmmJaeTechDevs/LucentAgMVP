@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export function FarmerVerification() {
   const [location, setLocation] = useLocation();
@@ -10,6 +11,7 @@ export function FarmerVerification() {
   const [hasError, setHasError] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const { toast } = useToast();
 
   // Countdown timer for resend
   useEffect(() => {
@@ -129,15 +131,26 @@ export function FarmerVerification() {
 
       if (response.status === 200) {
         console.log("✅ VERIFICATION SUCCESSFUL - Status 200");
-        alert("✅ Verification successful! Your account has been verified.");
+        toast({
+          title: "✅ Verification Successful!",
+          description: "Your account has been verified successfully.",
+        });
         setShowSuccess(true);
       } else if (response.status === 400) {
         console.log("❌ VERIFICATION FAILED - Status 400 (Invalid OTP)");
-        alert("❌ Invalid or wrong OTP. Please check your code and try again.");
+        toast({
+          variant: "destructive",
+          title: "Invalid OTP",
+          description: "Invalid or wrong OTP. Please check your code and try again.",
+        });
         setHasError(true);
       } else {
         console.log(`❌ VERIFICATION FAILED - Status ${response.status}`);
-        alert(`❌ Verification failed with status: ${response.status}`);
+        toast({
+          variant: "destructive",
+          title: "Verification Failed",
+          description: `Verification failed with status: ${response.status}`,
+        });
         setHasError(true);
       }
     } catch (error) {
@@ -145,7 +158,11 @@ export function FarmerVerification() {
       console.error("Error verifying OTP:", error);
       console.error("Error type:", error.constructor.name);
       console.error("Error message:", error.message);
-      alert("❌ Network error. Please check your connection and try again.");
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Please check your connection and try again.",
+      });
       setHasError(true);
     } finally {
       setIsVerifying(false);
@@ -170,7 +187,11 @@ export function FarmerVerification() {
 
       if (!farmerId) {
         console.log("❌ RESEND OTP FAILED - No farmer ID found");
-        alert("❌ User session expired. Please register again.");
+        toast({
+          variant: "destructive",
+          title: "Session Expired",
+          description: "User session expired. Please register again.",
+        });
         return;
       }
 
@@ -234,17 +255,28 @@ export function FarmerVerification() {
         setCountdown(45);
         setHasError(false);
         setCode(["", "", "", "", "", ""]);
-        alert("✅ Verification code resent successfully!");
+        toast({
+          title: "✅ Code Resent",
+          description: "Verification code resent successfully!",
+        });
       } else {
         console.log(`❌ RESEND OTP FAILED - Status ${response.status}`);
-        alert("❌ Failed to resend verification code. Please try again.");
+        toast({
+          variant: "destructive",
+          title: "Resend Failed",
+          description: "Failed to resend verification code. Please try again.",
+        });
       }
     } catch (error) {
       console.error("=== RESEND OTP ERROR ===");
       console.error("Error resending OTP:", error);
       console.error("Error type:", error.constructor.name);
       console.error("Error message:", error.message);
-      alert("❌ Network error. Please check your connection and try again.");
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Please check your connection and try again.",
+      });
     } finally {
       console.log("=== RESEND OTP REQUEST COMPLETED ===");
     }

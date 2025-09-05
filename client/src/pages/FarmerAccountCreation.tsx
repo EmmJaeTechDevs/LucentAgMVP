@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { api } from "@/utils/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface FormData {
   firstName: string;
@@ -30,6 +31,7 @@ interface FormData {
 
 export const FarmerAccountCreation = (): JSX.Element => {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -115,7 +117,11 @@ export const FarmerAccountCreation = (): JSX.Element => {
       
     } catch (error) {
       console.error("Error creating account:", error);
-      alert("Error creating account. Please try again.");
+      toast({
+        variant: "destructive",
+        title: "Registration Error",
+        description: "Error creating account. Please try again.",
+      });
     } finally {
       setIsSubmitting(false);
     }
