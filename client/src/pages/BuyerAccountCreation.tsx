@@ -93,15 +93,26 @@ export const BuyerAccountCreation = (): JSX.Element => {
       console.log("Response data:", response.data);
       console.log("Response headers:", response.headers);
       
-      // Store userId for verification page
-      const userId = response.data?.userId || `temp_${Date.now()}`;
-      localStorage.setItem("buyerUserId", userId);
+      // Check if response contains error message or indicates failure
+      if (response.data?.message && response.data.message.toLowerCase().includes('error')) {
+        alert(`Registration failed: ${response.data.message}`);
+        return; // Stay on current page
+      }
       
-      // Show success message with more details
-      alert(`Registration successful! Status: ${response.status}. Please verify your account.`);
-      
-      // Redirect to verification page
-      setLocation("/buyer-verification");
+      // Only proceed if registration was successful
+      if (response.status === 200 || response.status === 201) {
+        // Store userId for verification page
+        const userId = response.data?.userId || `temp_${Date.now()}`;
+        localStorage.setItem("buyerUserId", userId);
+        
+        // Show success message
+        alert("Registration successful! Please verify your account.");
+        
+        // Redirect to verification page only on success
+        setLocation("/buyer-verification");
+      } else {
+        alert(`Registration failed with status: ${response.status}`);
+      }
       
     } catch (error: any) {
       console.error("Error creating account:", error);
