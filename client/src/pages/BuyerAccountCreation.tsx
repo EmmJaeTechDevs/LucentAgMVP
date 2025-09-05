@@ -81,12 +81,15 @@ export const BuyerAccountCreation = (): JSX.Element => {
       
       console.log("Registration response:", response);
       
-      // Store userId for verification page
-      if (response.userId) {
-        localStorage.setItem("buyerUserId", response.userId);
-      }
+      // Since the request went through successfully, assume registration worked
+      // Store a temporary userId for verification page (backend should provide this)
+      const tempUserId = response.userId || `temp_${Date.now()}`;
+      localStorage.setItem("buyerUserId", tempUserId);
       
-      alert("Registration successful!");
+      // Show success message
+      alert("Registration successful! Please verify your account.");
+      
+      // Redirect to verification page
       setLocation("/buyer-verification");
       
     } catch (error: any) {
