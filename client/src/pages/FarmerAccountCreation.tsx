@@ -11,6 +11,7 @@ interface FormData {
   phoneNumber: string;
   email: string;
   password: string;
+  // Home Address
   houseNumber: string;
   street: string;
   nearestBusStop: string;
@@ -21,6 +22,16 @@ interface FormData {
   lga: string;
   cityTown: string;
   zipCode: string;
+  // Farm Address
+  farmHouseNumber: string;
+  farmStreet: string;
+  farmNearestBusStop: string;
+  farmAdditionalAddress: string;
+  farmCountry: string;
+  farmState: string;
+  farmLga: string;
+  farmCityTown: string;
+  farmZipCode: string;
 }
 
 export const FarmerAccountCreation = (): JSX.Element => {
@@ -33,6 +44,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
     phoneNumber: "",
     email: "",
     password: "",
+    // Home Address
     houseNumber: "",
     street: "",
     nearestBusStop: "",
@@ -42,7 +54,17 @@ export const FarmerAccountCreation = (): JSX.Element => {
     state: "",
     lga: "",
     cityTown: "",
-    zipCode: ""
+    zipCode: "",
+    // Farm Address
+    farmHouseNumber: "",
+    farmStreet: "",
+    farmNearestBusStop: "",
+    farmAdditionalAddress: "",
+    farmCountry: "",
+    farmState: "",
+    farmLga: "",
+    farmCityTown: "",
+    farmZipCode: ""
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,7 +80,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
         [field]: value
       };
       
-      // Reset dependent fields when country or state changes
+      // Reset dependent fields when country or state changes for home address
       if (field === 'country') {
         newData.state = '';
         newData.lga = '';
@@ -66,6 +88,16 @@ export const FarmerAccountCreation = (): JSX.Element => {
       } else if (field === 'state') {
         newData.lga = '';
         newData.cityTown = '';
+      }
+      
+      // Reset dependent fields when country or state changes for farm address
+      if (field === 'farmCountry') {
+        newData.farmState = '';
+        newData.farmLga = '';
+        newData.farmCityTown = '';
+      } else if (field === 'farmState') {
+        newData.farmLga = '';
+        newData.farmCityTown = '';
       }
       
       return newData;
@@ -93,14 +125,14 @@ export const FarmerAccountCreation = (): JSX.Element => {
         homePostcode: formData.zipCode,
         homeState: formData.state,
         homeCountry: formData.country,
-        farmStreet: formData.street, // Using same values for farm address for now
-        farmHouseNumber: formData.houseNumber,
-        farmAdditionalDesc: formData.additionalAddress,
-        farmBusStop: formData.nearestBusStop,
-        farmLocalGov: formData.lga,
-        farmPostcode: formData.zipCode,
-        farmState: formData.state,
-        farmCountry: formData.country
+        farmStreet: formData.farmStreet,
+        farmHouseNumber: formData.farmHouseNumber,
+        farmAdditionalDesc: formData.farmAdditionalAddress,
+        farmBusStop: formData.farmNearestBusStop,
+        farmLocalGov: formData.farmLga,
+        farmPostcode: formData.farmZipCode,
+        farmState: formData.farmState,
+        farmCountry: formData.farmCountry
       };
 
       // Call your backend API
@@ -496,6 +528,173 @@ export const FarmerAccountCreation = (): JSX.Element => {
                 </div>
               </div>
 
+              {/* Farm Address Section */}
+              <div className="pt-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Where is your farm located?
+                </h3>
+
+                {/* Farm House Number & Street */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Farm House Number
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Plot 5"
+                      value={formData.farmHouseNumber}
+                      onChange={(e) => handleInputChange("farmHouseNumber", e.target.value)}
+                      className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      data-testid="input-farm-house-number"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Farm Street
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Farm Land Road"
+                      value={formData.farmStreet}
+                      onChange={(e) => handleInputChange("farmStreet", e.target.value)}
+                      className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      data-testid="input-farm-street"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Farm Nearest Bus Stop */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nearest Bus Stop to Farm
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Farm Gate"
+                    value={formData.farmNearestBusStop}
+                    onChange={(e) => handleInputChange("farmNearestBusStop", e.target.value)}
+                    className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                    data-testid="input-farm-bus-stop"
+                    required
+                  />
+                </div>
+
+                {/* Farm Additional Address Information */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Additional Farm Address Information (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Behind the hill"
+                    value={formData.farmAdditionalAddress}
+                    onChange={(e) => handleInputChange("farmAdditionalAddress", e.target.value)}
+                    className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                    data-testid="input-farm-additional-address"
+                  />
+                </div>
+
+                {/* Farm Country */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Farm Country
+                  </label>
+                  <select
+                    value={formData.farmCountry}
+                    onChange={(e) => handleInputChange("farmCountry", e.target.value)}
+                    className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all relative z-10"
+                    data-testid="select-farm-country"
+                    required
+                    style={{ position: 'relative', zIndex: 10 }}
+                  >
+                    <option value="">Select Country</option>
+                    <option value="Nigeria">Nigeria</option>
+                    <option value="Ghana">Ghana</option>
+                  </select>
+                </div>
+
+                {/* Farm State & LGA */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Farm State
+                    </label>
+                    <select
+                      value={formData.farmState}
+                      onChange={(e) => handleInputChange("farmState", e.target.value)}
+                      className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all relative z-10"
+                      data-testid="select-farm-state"
+                      required
+                      disabled={!formData.farmCountry}
+                      style={{ position: 'relative', zIndex: 10 }}
+                    >
+                      <option value="">Select State</option>
+                      {formData.farmCountry && getStatesForCountry(formData.farmCountry).map(state => (
+                        <option key={state} value={state}>{state}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Farm LGA
+                    </label>
+                    <select
+                      value={formData.farmLga}
+                      onChange={(e) => handleInputChange("farmLga", e.target.value)}
+                      className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all relative z-10"
+                      data-testid="select-farm-lga"
+                      required
+                      disabled={!formData.farmState}
+                      style={{ position: 'relative', zIndex: 10 }}
+                    >
+                      <option value="">Select LGA</option>
+                      {formData.farmState && formData.farmCountry && getStateLGAs(formData.farmState, formData.farmCountry).map(lga => (
+                        <option key={lga} value={lga}>{lga}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Farm City/Town & ZIP */}
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Farm City/Town
+                    </label>
+                    <select
+                      value={formData.farmCityTown}
+                      onChange={(e) => handleInputChange("farmCityTown", e.target.value)}
+                      className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all relative z-10"
+                      data-testid="select-farm-city-town"
+                      required
+                      disabled={!formData.farmState}
+                      style={{ position: 'relative', zIndex: 10 }}
+                    >
+                      <option value="">Select City/Town</option>
+                      {formData.farmState && formData.farmCountry && getStateCities(formData.farmState, formData.farmCountry).map(city => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Farm ZIP Code (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 100002"
+                      value={formData.farmZipCode}
+                      onChange={(e) => handleInputChange("farmZipCode", e.target.value)}
+                      className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      data-testid="input-farm-zip-code"
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* Submit Button */}
               <button
                 type="submit"
@@ -769,6 +968,173 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       onChange={(e) => handleInputChange("zipCode", e.target.value)}
                       className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
                       data-testid="input-zip-code-desktop"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Farm Address Section */}
+              <div className="pt-6">
+                <h3 className="text-2xl font-semibold text-gray-900 mb-6">
+                  Where is your farm located?
+                </h3>
+
+                {/* Farm House Number & Street */}
+                <div className="grid grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Farm House Number
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Plot 5"
+                      value={formData.farmHouseNumber}
+                      onChange={(e) => handleInputChange("farmHouseNumber", e.target.value)}
+                      className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
+                      data-testid="input-farm-house-number-desktop"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Farm Street
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Farm Land Road"
+                      value={formData.farmStreet}
+                      onChange={(e) => handleInputChange("farmStreet", e.target.value)}
+                      className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
+                      data-testid="input-farm-street-desktop"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Farm Nearest Bus Stop */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nearest Bus Stop to Farm
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Farm Gate"
+                    value={formData.farmNearestBusStop}
+                    onChange={(e) => handleInputChange("farmNearestBusStop", e.target.value)}
+                    className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
+                    data-testid="input-farm-bus-stop-desktop"
+                    required
+                  />
+                </div>
+
+                {/* Farm Additional Address Information */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Additional Farm Address Information (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Behind the hill"
+                    value={formData.farmAdditionalAddress}
+                    onChange={(e) => handleInputChange("farmAdditionalAddress", e.target.value)}
+                    className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
+                    data-testid="input-farm-additional-address-desktop"
+                  />
+                </div>
+
+                {/* Farm Country */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Farm Country
+                  </label>
+                  <select
+                    value={formData.farmCountry}
+                    onChange={(e) => handleInputChange("farmCountry", e.target.value)}
+                    className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg relative z-10"
+                    data-testid="select-farm-country-desktop"
+                    required
+                    style={{ position: 'relative', zIndex: 10 }}
+                  >
+                    <option value="">Select Country</option>
+                    <option value="Nigeria">Nigeria</option>
+                    <option value="Ghana">Ghana</option>
+                  </select>
+                </div>
+
+                {/* Farm State & LGA */}
+                <div className="grid grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Farm State
+                    </label>
+                    <select
+                      value={formData.farmState}
+                      onChange={(e) => handleInputChange("farmState", e.target.value)}
+                      className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg relative z-10"
+                      data-testid="select-farm-state-desktop"
+                      required
+                      disabled={!formData.farmCountry}
+                      style={{ position: 'relative', zIndex: 10 }}
+                    >
+                      <option value="">Select State</option>
+                      {formData.farmCountry && getStatesForCountry(formData.farmCountry).map(state => (
+                        <option key={state} value={state}>{state}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Farm LGA
+                    </label>
+                    <select
+                      value={formData.farmLga}
+                      onChange={(e) => handleInputChange("farmLga", e.target.value)}
+                      className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg relative z-10"
+                      data-testid="select-farm-lga-desktop"
+                      required
+                      disabled={!formData.farmState}
+                      style={{ position: 'relative', zIndex: 10 }}
+                    >
+                      <option value="">Select LGA</option>
+                      {formData.farmState && formData.farmCountry && getStateLGAs(formData.farmState, formData.farmCountry).map(lga => (
+                        <option key={lga} value={lga}>{lga}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Farm City/Town & ZIP */}
+                <div className="grid grid-cols-2 gap-6 mb-8">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Farm City/Town
+                    </label>
+                    <select
+                      value={formData.farmCityTown}
+                      onChange={(e) => handleInputChange("farmCityTown", e.target.value)}
+                      className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg relative z-10"
+                      data-testid="select-farm-city-town-desktop"
+                      required
+                      disabled={!formData.farmState}
+                      style={{ position: 'relative', zIndex: 10 }}
+                    >
+                      <option value="">Select City/Town</option>
+                      {formData.farmState && formData.farmCountry && getStateCities(formData.farmState, formData.farmCountry).map(city => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Farm ZIP Code (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 100002"
+                      value={formData.farmZipCode}
+                      onChange={(e) => handleInputChange("farmZipCode", e.target.value)}
+                      className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
+                      data-testid="input-farm-zip-code-desktop"
                     />
                   </div>
                 </div>
