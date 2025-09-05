@@ -566,7 +566,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
         <div className="md:hidden max-w-md mx-auto w-full animate-fadeInUp">
           <div className="p-6 mb-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Create your account
+              🌱 Create your farmer account
             </h1>
             <p className="text-gray-600 mb-6">
               Already have an account?{" "}
@@ -1091,7 +1091,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
           <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl p-8 lg:p-12 animate-fadeInUp">
             <div className="text-center mb-8">
               <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-                Create your account
+                🌱 Create your farmer account
               </h1>
               <p className="text-gray-600 text-lg">
                 Already have an account?{" "}
