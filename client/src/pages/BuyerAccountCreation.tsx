@@ -97,7 +97,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
   return (
     <div style={{ 
       minHeight: "100vh", 
-      background: "linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)",
+      background: "linear-gradient(135deg, #e8f5e8 0%, #f1f8e9 100%)",
       padding: "20px",
       display: "flex",
       alignItems: "center",
@@ -117,7 +117,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
           <h1 style={{ 
             fontSize: "2.5rem", 
             fontWeight: "bold", 
-            color: "#1565c0", 
+            color: "#2e7d32", 
             marginBottom: "15px" 
           }}>
             🛒 NEW BUYER REGISTRATION
@@ -412,7 +412,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
             style={{
               width: "100%",
               padding: "15px",
-              backgroundColor: isSubmitting ? "#ccc" : "#1565c0",
+              backgroundColor: isSubmitting ? "#ccc" : "#2e7d32",
               color: "white",
               border: "none",
               borderRadius: "10px",
