@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
-import axios from "axios";
 
 // THIS IS THE NEW BUYER REGISTRATION FORM
 // ALL FIELDS MATCH BACKEND REQUIREMENTS EXACTLY
@@ -74,35 +73,37 @@ export const BuyerAccountCreation = (): JSX.Element => {
       console.log("Sending buyer data:", backendData);
       console.log("JSON stringified data:", JSON.stringify(backendData, null, 2));
       
-      // Call your external backend API using Axios POST request
-      const response = await axios.post(
+      // Call your external backend API using Fetch POST request
+      const response = await fetch(
         "https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer",
-        backendData,
         {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
-          timeout: 15000,
-          withCredentials: false
+          body: JSON.stringify(backendData)
         }
       );
       
       console.log("Full response:", response);
       console.log("Response status:", response.status);
-      console.log("Response data:", response.data);
-      console.log("Response headers:", response.headers);
+      console.log("Response ok:", response.ok);
+      
+      // Parse response data
+      const responseData = await response.json();
+      console.log("Response data:", responseData);
       
       // Check if response contains error message or indicates failure
-      if (response.data?.message && response.data.message.toLowerCase().includes('error')) {
-        alert(`Registration failed: ${response.data.message}`);
+      if (responseData?.message && responseData.message.toLowerCase().includes('error')) {
+        alert(`Registration failed: ${responseData.message}`);
         return; // Stay on current page
       }
       
       // Only proceed if registration was successful
-      if (response.status === 200 || response.status === 201) {
+      if (response.ok && (response.status === 200 || response.status === 201)) {
         // Store userId for verification page
-        const userId = response.data?.userId || `temp_${Date.now()}`;
+        const userId = responseData?.userId || `temp_${Date.now()}`;
         localStorage.setItem("buyerUserId", userId);
         
         // Show success message
@@ -116,16 +117,8 @@ export const BuyerAccountCreation = (): JSX.Element => {
       
     } catch (error: any) {
       console.error("Error creating account:", error);
-      console.error("Error response:", error.response);
-      console.error("Error response data:", error.response?.data);
-      console.error("Error response status:", error.response?.status);
       
-      if (error.response) {
-        // Server responded with error status
-        const errorMessage = error.response.data?.message || "Registration failed";
-        console.log("Backend error message:", errorMessage);
-        alert(`Error ${error.response.status}: ${errorMessage}`);
-      } else if (error.request) {
+      if (error.name === 'TypeError') {
         // Network error
         alert("Network error. Please check your connection and try again.");
       } else {
