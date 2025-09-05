@@ -86,7 +86,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            🛒 Create Buyer Account
+            🛒 BUYER REGISTRATION FORM
           </h1>
           <p className="text-gray-600">
             Fill in all required fields to create your buyer account
