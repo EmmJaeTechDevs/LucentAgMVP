@@ -75,7 +75,12 @@ export const BuyerAccountCreation = (): JSX.Element => {
       // Call your external backend API
       const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Origin": window.location.origin
+        },
+        mode: "cors",
         body: JSON.stringify(backendData)
       });
       
