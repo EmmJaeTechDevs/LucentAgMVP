@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
+import axios from "axios";
 
 export function BuyerVerification() {
   const [, setLocation] = useLocation();
@@ -47,27 +48,35 @@ export function BuyerVerification() {
     setError("");
     
     try {
-      const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/auth/request-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const response = await axios.post(
+        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
+        {
           userId: userId,
           type: "sms",
           purpose: "verification"
-        })
-      });
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          timeout: 10000
+        }
+      );
 
-      if (response.ok) {
-        setStep("verify");
-        setCountdown(30);
-        setCanResend(false);
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || "Failed to send OTP");
-      }
-    } catch (error) {
+      setStep("verify");
+      setCountdown(30);
+      setCanResend(false);
+    } catch (error: any) {
       console.error("Error sending OTP:", error);
-      setError("Failed to send OTP. Please try again.");
+      
+      if (error.response) {
+        setError(error.response.data?.message || "Failed to send OTP");
+      } else if (error.request) {
+        setError("Network error. Please check your connection and try again.");
+      } else {
+        setError("Failed to send OTP. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -80,40 +89,46 @@ export function BuyerVerification() {
     setError("");
     
     try {
-      const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const response = await axios.post(
+        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
+        {
           userId: userId,
           code: otpCode,
           type: "sms"
-        })
-      });
-
-      if (response.status === 200) {
-        const responseData = await response.json();
-        if (responseData.message === "OTP verified successfully") {
-          setShowSuccessAlert(true);
-          // Clear stored userId
-          localStorage.removeItem("buyerUserId");
-          // Redirect after showing success message
-          setTimeout(() => {
-            setLocation("/");
-          }, 3000);
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          timeout: 10000
         }
-      } else if (response.status === 400) {
-        const errorData = await response.json();
-        if (errorData.message === "Invalid or expired OTP code") {
+      );
+
+      // Success response (200)
+      if (response.data.message === "OTP verified successfully") {
+        setShowSuccessAlert(true);
+        // Clear stored userId
+        localStorage.removeItem("buyerUserId");
+        // Redirect after showing success message
+        setTimeout(() => {
+          setLocation("/");
+        }, 3000);
+      }
+    } catch (error: any) {
+      console.error("Error verifying OTP:", error);
+      
+      if (error.response && error.response.status === 400) {
+        if (error.response.data?.message === "Invalid or expired OTP code") {
           setError("Invalid or expired OTP code");
         } else {
-          setError(errorData.message || "Verification failed");
+          setError(error.response.data?.message || "Verification failed");
         }
+      } else if (error.request) {
+        setError("Network error. Please check your connection and try again.");
       } else {
         setError("Verification failed. Please try again.");
       }
-    } catch (error) {
-      console.error("Error verifying OTP:", error);
-      setError("Verification failed. Please try again.");
     } finally {
       setIsLoading(false);
     }

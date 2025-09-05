@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
+import axios from "axios";
 
 // THIS IS THE NEW BUYER REGISTRATION FORM
 // ALL FIELDS MATCH BACKEND REQUIREMENTS EXACTLY
@@ -72,37 +73,43 @@ export const BuyerAccountCreation = (): JSX.Element => {
 
       console.log("Sending buyer data:", backendData);
       
-      // Call your external backend API
-      const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Origin": window.location.origin
-        },
-        mode: "cors",
-        body: JSON.stringify(backendData)
-      });
-      
-      if (response.ok) {
-        const responseData = await response.json();
-        console.log("Registration response:", responseData);
-        
-        // Store userId for verification page
-        if (responseData.userId) {
-          localStorage.setItem("buyerUserId", responseData.userId);
+      // Call your external backend API using Axios
+      const response = await axios.post(
+        "https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer",
+        backendData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          timeout: 10000 // 10 second timeout
         }
-        
-        alert("Registration successful!");
-        setLocation("/buyer-verification");
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Registration failed");
+      );
+      
+      console.log("Registration response:", response.data);
+      
+      // Store userId for verification page
+      if (response.data.userId) {
+        localStorage.setItem("buyerUserId", response.data.userId);
       }
       
-    } catch (error) {
+      alert("Registration successful!");
+      setLocation("/buyer-verification");
+      
+    } catch (error: any) {
       console.error("Error creating account:", error);
-      alert("Error creating account. Please try again.");
+      
+      if (error.response) {
+        // Server responded with error status
+        const errorMessage = error.response.data?.message || "Registration failed";
+        alert(`Error: ${errorMessage}`);
+      } else if (error.request) {
+        // Network error
+        alert("Network error. Please check your connection and try again.");
+      } else {
+        // Other error
+        alert("Error creating account. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
