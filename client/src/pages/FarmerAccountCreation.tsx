@@ -10,6 +10,7 @@ interface FormData {
   lastName: string;
   phoneNumber: string;
   email: string;
+  password: string;
   houseNumber: string;
   street: string;
   nearestBusStop: string;
@@ -31,6 +32,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
     lastName: "",
     phoneNumber: "",
     email: "",
+    password: "",
     houseNumber: "",
     street: "",
     nearestBusStop: "",
@@ -75,8 +77,34 @@ export const FarmerAccountCreation = (): JSX.Element => {
     setIsSubmitting(true);
     
     try {
+      // Transform form data to match backend format
+      const backendData = {
+        userType: "farmer",
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phoneNumber,
+        email: formData.email,
+        password: formData.password,
+        homeStreet: formData.street,
+        homeHouseNumber: formData.houseNumber,
+        homeAdditionalDesc: formData.additionalAddress,
+        homeBusStop: formData.nearestBusStop,
+        homeLocalGov: formData.lga,
+        homePostcode: formData.zipCode,
+        homeState: formData.state,
+        homeCountry: formData.country,
+        farmStreet: formData.street, // Using same values for farm address for now
+        farmHouseNumber: formData.houseNumber,
+        farmAdditionalDesc: formData.additionalAddress,
+        farmBusStop: formData.nearestBusStop,
+        farmLocalGov: formData.lga,
+        farmPostcode: formData.zipCode,
+        farmState: formData.state,
+        farmCountry: formData.country
+      };
+
       // Call your backend API
-      const response = await api.farmers.register(formData);
+      const response = await api.farmers.register(backendData);
       console.log("Registration successful:", response);
       
       // Navigate to verification page
@@ -282,6 +310,22 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                   data-testid="input-email"
+                />
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  data-testid="input-password"
+                  required
                 />
               </div>
 
@@ -545,6 +589,22 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
                   data-testid="input-email-desktop"
+                />
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
+                  data-testid="input-password-desktop"
+                  required
                 />
               </div>
 

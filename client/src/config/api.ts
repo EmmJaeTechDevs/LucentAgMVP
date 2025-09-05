@@ -26,7 +26,7 @@ export const API_CONFIG = {
     
     // Farmer-specific endpoints
     FARMERS: {
-      REGISTER: '/farmers/register',
+      REGISTER: '/api/auth/register-farmer',
       PROFILE: '/farmers/profile',
       CROPS: '/farmers/crops',
       ORDERS: '/farmers/orders',
