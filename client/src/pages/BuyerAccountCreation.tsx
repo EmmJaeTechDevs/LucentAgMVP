@@ -72,8 +72,8 @@ export const BuyerAccountCreation = (): JSX.Element => {
 
       console.log("Sending buyer data:", backendData);
       
-      // Call API (you may need to replace this with your actual API call)
-      const response = await fetch("/api/auth/register-buyer", {
+      // Call your external backend API
+      const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(backendData)
