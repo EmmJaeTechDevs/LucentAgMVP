@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
-import axios from "axios";
+import { corsHandler } from "../utils/corsHandler";
 
 // THIS IS THE NEW BUYER REGISTRATION FORM
 // ALL FIELDS MATCH BACKEND REQUIREMENTS EXACTLY
@@ -73,18 +73,8 @@ export const BuyerAccountCreation = (): JSX.Element => {
 
       console.log("Sending buyer data:", backendData);
       
-      // Call your external backend API using Axios
-      const response = await axios.post(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer",
-        backendData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          timeout: 10000 // 10 second timeout
-        }
-      );
+      // Call your external backend API using CORS handler
+      const response = await corsHandler.post("/api/auth/register-buyer", backendData);
       
       console.log("Registration response:", response.data);
       

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
-import axios from "axios";
+import { corsHandler } from "../utils/corsHandler";
 
 export function BuyerVerification() {
   const [, setLocation] = useLocation();
@@ -48,21 +48,11 @@ export function BuyerVerification() {
     setError("");
     
     try {
-      const response = await axios.post(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
-        {
-          userId: userId,
-          type: "sms",
-          purpose: "verification"
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          timeout: 10000
-        }
-      );
+      const response = await corsHandler.post("/api/auth/request-otp", {
+        userId: userId,
+        type: "sms",
+        purpose: "verification"
+      });
 
       setStep("verify");
       setCountdown(30);
@@ -89,21 +79,11 @@ export function BuyerVerification() {
     setError("");
     
     try {
-      const response = await axios.post(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
-        {
-          userId: userId,
-          code: otpCode,
-          type: "sms"
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          timeout: 10000
-        }
-      );
+      const response = await corsHandler.post("/api/auth/verify-otp", {
+        userId: userId,
+        code: otpCode,
+        type: "sms"
+      });
 
       // Success response (200)
       if (response.data.message === "OTP verified successfully") {
