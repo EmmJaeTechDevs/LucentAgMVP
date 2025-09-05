@@ -35,22 +35,22 @@ export const BuyerAccountCreation = (): JSX.Element => {
     homeCountry: "",
     homeState: "",
     homeLocalGov: "",
-    homePostcode: ""
+    homePostcode: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (field: keyof BuyerFormData, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       // This matches your backend JSON structure exactly
       const backendData = {
@@ -67,58 +67,63 @@ export const BuyerAccountCreation = (): JSX.Element => {
         homeLocalGov: formData.homeLocalGov,
         homePostcode: formData.homePostcode,
         homeState: formData.homeState,
-        homeCountry: formData.homeCountry
+        homeCountry: formData.homeCountry,
       };
 
       console.log("Sending buyer data:", backendData);
-      console.log("JSON stringified data:", JSON.stringify(backendData, null, 2));
-      
+      console.log(
+        "JSON stringified data:",
+        JSON.stringify(backendData, null, 2),
+      );
+
       // Call your external backend API using Fetch POST request
       const response = await fetch(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer",
+        "https://lucent-ag-api-damidek.replit.app/api-docs/#/Farmers/post_api_auth_register_farmer",
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
+            "Content-Type": "application/json",
+            Accept: "application/json",
           },
-          body: JSON.stringify(backendData)
-        }
+          body: JSON.stringify(backendData),
+        },
       );
-      
+
       console.log("Full response:", response);
       console.log("Response status:", response.status);
       console.log("Response ok:", response.ok);
-      
+
       // Parse response data
       const responseData = await response.json();
       console.log("Response data:", responseData);
-      
+
       // Check if response contains error message or indicates failure
-      if (responseData?.message && responseData.message.toLowerCase().includes('error')) {
+      if (
+        responseData?.message &&
+        responseData.message.toLowerCase().includes("error")
+      ) {
         alert(`Registration failed: ${responseData.message}`);
         return; // Stay on current page
       }
-      
+
       // Only proceed if registration was successful
       if (response.ok && (response.status === 200 || response.status === 201)) {
         // Store userId for verification page
         const userId = responseData?.userId || `temp_${Date.now()}`;
         localStorage.setItem("buyerUserId", userId);
-        
+
         // Show success message
         alert("Registration successful! Please verify your account.");
-        
+
         // Redirect to verification page only on success
         setLocation("/buyer-verification");
       } else {
         alert(`Registration failed with status: ${response.status}`);
       }
-      
     } catch (error: any) {
       console.error("Error creating account:", error);
-      
-      if (error.name === 'TypeError') {
+
+      if (error.name === "TypeError") {
         // Network error
         alert("Network error. Please check your connection and try again.");
       } else {
@@ -131,31 +136,36 @@ export const BuyerAccountCreation = (): JSX.Element => {
   };
 
   return (
-    <div style={{ 
-      minHeight: "100vh", 
-      background: "linear-gradient(135deg, #e8f5e8 0%, #f1f8e9 100%)",
-      padding: "20px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }}>
-      <div style={{
-        width: "100%",
-        maxWidth: "600px",
-        backgroundColor: "white",
-        borderRadius: "20px",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
-        padding: "40px"
-      }}>
-        
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #e8f5e8 0%, #f1f8e9 100%)",
+        padding: "20px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "600px",
+          backgroundColor: "white",
+          borderRadius: "20px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+          padding: "40px",
+        }}
+      >
         {/* HEADER */}
         <div style={{ textAlign: "center", marginBottom: "40px" }}>
-          <h1 style={{ 
-            fontSize: "1.8rem", 
-            fontWeight: "bold", 
-            color: "#2e7d32", 
-            marginBottom: "15px" 
-          }}>
+          <h1
+            style={{
+              fontSize: "1.8rem",
+              fontWeight: "bold",
+              color: "#2e7d32",
+              marginBottom: "15px",
+            }}
+          >
             NEW BUYER REGISTRATION
           </h1>
           <p style={{ color: "#666", fontSize: "1.1rem" }}>
@@ -163,47 +173,81 @@ export const BuyerAccountCreation = (): JSX.Element => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-          
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+        >
           {/* PERSONAL INFORMATION */}
           <div>
-            <h2 style={{ fontSize: "1.3rem", fontWeight: "600", color: "#333", marginBottom: "15px" }}>
+            <h2
+              style={{
+                fontSize: "1.3rem",
+                fontWeight: "600",
+                color: "#333",
+                marginBottom: "15px",
+              }}
+            >
               👤 Personal Information
             </h2>
-            
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "15px",
+                marginBottom: "15px",
+              }}
+            >
               <div>
-                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontWeight: "500",
+                    color: "#333",
+                    marginBottom: "5px",
+                  }}
+                >
                   First Name *
                 </label>
                 <input
                   type="text"
                   value={formData.firstName}
-                  onChange={(e) => handleInputChange("firstName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("firstName", e.target.value)
+                  }
                   style={{
                     width: "100%",
                     padding: "12px",
                     border: "2px solid #ddd",
                     borderRadius: "8px",
-                    fontSize: "16px"
+                    fontSize: "16px",
                   }}
                   required
                 />
               </div>
               <div>
-                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontWeight: "500",
+                    color: "#333",
+                    marginBottom: "5px",
+                  }}
+                >
                   Last Name *
                 </label>
                 <input
                   type="text"
                   value={formData.lastName}
-                  onChange={(e) => handleInputChange("lastName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("lastName", e.target.value)
+                  }
                   style={{
                     width: "100%",
                     padding: "12px",
                     border: "2px solid #ddd",
                     borderRadius: "8px",
-                    fontSize: "16px"
+                    fontSize: "16px",
                   }}
                   required
                 />
@@ -211,7 +255,14 @@ export const BuyerAccountCreation = (): JSX.Element => {
             </div>
 
             <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  color: "#333",
+                  marginBottom: "5px",
+                }}
+              >
                 Phone Number *
               </label>
               <input
@@ -223,7 +274,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
                   padding: "12px",
                   border: "2px solid #ddd",
                   borderRadius: "8px",
-                  fontSize: "16px"
+                  fontSize: "16px",
                 }}
                 placeholder="+2348123456789"
                 required
@@ -231,7 +282,14 @@ export const BuyerAccountCreation = (): JSX.Element => {
             </div>
 
             <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  color: "#333",
+                  marginBottom: "5px",
+                }}
+              >
                 Email Address *
               </label>
               <input
@@ -243,7 +301,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
                   padding: "12px",
                   border: "2px solid #ddd",
                   borderRadius: "8px",
-                  fontSize: "16px"
+                  fontSize: "16px",
                 }}
                 placeholder="your@email.com"
                 required
@@ -251,7 +309,14 @@ export const BuyerAccountCreation = (): JSX.Element => {
             </div>
 
             <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  color: "#333",
+                  marginBottom: "5px",
+                }}
+              >
                 Password *
               </label>
               <input
@@ -263,7 +328,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
                   padding: "12px",
                   border: "2px solid #ddd",
                   borderRadius: "8px",
-                  fontSize: "16px"
+                  fontSize: "16px",
                 }}
                 placeholder="Enter secure password"
                 required
@@ -273,44 +338,76 @@ export const BuyerAccountCreation = (): JSX.Element => {
 
           {/* HOME ADDRESS */}
           <div>
-            <h2 style={{ fontSize: "1.3rem", fontWeight: "600", color: "#333", marginBottom: "15px" }}>
+            <h2
+              style={{
+                fontSize: "1.3rem",
+                fontWeight: "600",
+                color: "#333",
+                marginBottom: "15px",
+              }}
+            >
               🏠 Home Address
             </h2>
-            
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "15px",
+                marginBottom: "15px",
+              }}
+            >
               <div>
-                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontWeight: "500",
+                    color: "#333",
+                    marginBottom: "5px",
+                  }}
+                >
                   House Number *
                 </label>
                 <input
                   type="text"
                   value={formData.homeHouseNumber}
-                  onChange={(e) => handleInputChange("homeHouseNumber", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("homeHouseNumber", e.target.value)
+                  }
                   style={{
                     width: "100%",
                     padding: "12px",
                     border: "2px solid #ddd",
                     borderRadius: "8px",
-                    fontSize: "16px"
+                    fontSize: "16px",
                   }}
                   placeholder="45B"
                   required
                 />
               </div>
               <div>
-                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontWeight: "500",
+                    color: "#333",
+                    marginBottom: "5px",
+                  }}
+                >
                   Street *
                 </label>
                 <input
                   type="text"
                   value={formData.homeStreet}
-                  onChange={(e) => handleInputChange("homeStreet", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("homeStreet", e.target.value)
+                  }
                   style={{
                     width: "100%",
                     padding: "12px",
                     border: "2px solid #ddd",
                     borderRadius: "8px",
-                    fontSize: "16px"
+                    fontSize: "16px",
                   }}
                   placeholder="Shopping Street"
                   required
@@ -319,19 +416,28 @@ export const BuyerAccountCreation = (): JSX.Element => {
             </div>
 
             <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  color: "#333",
+                  marginBottom: "5px",
+                }}
+              >
                 Nearest Bus Stop *
               </label>
               <input
                 type="text"
                 value={formData.homeBusStop}
-                onChange={(e) => handleInputChange("homeBusStop", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("homeBusStop", e.target.value)
+                }
                 style={{
                   width: "100%",
                   padding: "12px",
                   border: "2px solid #ddd",
                   borderRadius: "8px",
-                  fontSize: "16px"
+                  fontSize: "16px",
                 }}
                 placeholder="Mall Junction"
                 required
@@ -339,38 +445,63 @@ export const BuyerAccountCreation = (): JSX.Element => {
             </div>
 
             <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontWeight: "500",
+                  color: "#333",
+                  marginBottom: "5px",
+                }}
+              >
                 Additional Description
               </label>
               <input
                 type="text"
                 value={formData.homeAdditionalDesc}
-                onChange={(e) => handleInputChange("homeAdditionalDesc", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("homeAdditionalDesc", e.target.value)
+                }
                 style={{
                   width: "100%",
                   padding: "12px",
                   border: "2px solid #ddd",
                   borderRadius: "8px",
-                  fontSize: "16px"
+                  fontSize: "16px",
                 }}
                 placeholder="Opposite the mall"
               />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "15px",
+                marginBottom: "15px",
+              }}
+            >
               <div>
-                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontWeight: "500",
+                    color: "#333",
+                    marginBottom: "5px",
+                  }}
+                >
                   Country *
                 </label>
                 <select
                   value={formData.homeCountry}
-                  onChange={(e) => handleInputChange("homeCountry", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("homeCountry", e.target.value)
+                  }
                   style={{
                     width: "100%",
                     padding: "12px",
                     border: "2px solid #ddd",
                     borderRadius: "8px",
-                    fontSize: "16px"
+                    fontSize: "16px",
                   }}
                   required
                 >
@@ -380,19 +511,28 @@ export const BuyerAccountCreation = (): JSX.Element => {
                 </select>
               </div>
               <div>
-                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontWeight: "500",
+                    color: "#333",
+                    marginBottom: "5px",
+                  }}
+                >
                   State *
                 </label>
                 <input
                   type="text"
                   value={formData.homeState}
-                  onChange={(e) => handleInputChange("homeState", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("homeState", e.target.value)
+                  }
                   style={{
                     width: "100%",
                     padding: "12px",
                     border: "2px solid #ddd",
                     borderRadius: "8px",
-                    fontSize: "16px"
+                    fontSize: "16px",
                   }}
                   placeholder="Lagos"
                   required
@@ -400,40 +540,65 @@ export const BuyerAccountCreation = (): JSX.Element => {
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "30px" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "15px",
+                marginBottom: "30px",
+              }}
+            >
               <div>
-                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontWeight: "500",
+                    color: "#333",
+                    marginBottom: "5px",
+                  }}
+                >
                   Local Government *
                 </label>
                 <input
                   type="text"
                   value={formData.homeLocalGov}
-                  onChange={(e) => handleInputChange("homeLocalGov", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("homeLocalGov", e.target.value)
+                  }
                   style={{
                     width: "100%",
                     padding: "12px",
                     border: "2px solid #ddd",
                     borderRadius: "8px",
-                    fontSize: "16px"
+                    fontSize: "16px",
                   }}
                   placeholder="Victoria Island"
                   required
                 />
               </div>
               <div>
-                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontWeight: "500",
+                    color: "#333",
+                    marginBottom: "5px",
+                  }}
+                >
                   Postcode
                 </label>
                 <input
                   type="text"
                   value={formData.homePostcode}
-                  onChange={(e) => handleInputChange("homePostcode", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("homePostcode", e.target.value)
+                  }
                   style={{
                     width: "100%",
                     padding: "12px",
                     border: "2px solid #ddd",
                     borderRadius: "8px",
-                    fontSize: "16px"
+                    fontSize: "16px",
                   }}
                   placeholder="101001"
                 />
@@ -455,7 +620,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
               fontSize: "1.2rem",
               fontWeight: "600",
               cursor: isSubmitting ? "not-allowed" : "pointer",
-              transition: "background-color 0.3s"
+              transition: "background-color 0.3s",
             }}
           >
             {isSubmitting ? "Creating Account..." : "CREATE BUYER ACCOUNT"}
