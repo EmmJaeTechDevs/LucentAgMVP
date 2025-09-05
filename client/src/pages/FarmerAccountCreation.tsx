@@ -8,30 +8,27 @@ import { api } from "@/utils/api";
 interface FormData {
   firstName: string;
   lastName: string;
-  phoneNumber: string;
+  phone: string;
   email: string;
   password: string;
   // Home Address
-  houseNumber: string;
-  street: string;
-  nearestBusStop: string;
-  streetName: string;
-  additionalAddress: string;
-  country: string;
-  state: string;
-  lga: string;
-  cityTown: string;
-  zipCode: string;
+  homeHouseNumber: string;
+  homeStreet: string;
+  homeBusStop: string;
+  homeAdditionalDesc: string;
+  homeCountry: string;
+  homeState: string;
+  homeLocalGov: string;
+  homePostcode: string;
   // Farm Address
   farmHouseNumber: string;
   farmStreet: string;
-  farmNearestBusStop: string;
-  farmAdditionalAddress: string;
+  farmBusStop: string;
+  farmAdditionalDesc: string;
   farmCountry: string;
   farmState: string;
-  farmLga: string;
-  farmCityTown: string;
-  farmZipCode: string;
+  farmLocalGov: string;
+  farmPostcode: string;
 }
 
 export const FarmerAccountCreation = (): JSX.Element => {
@@ -41,30 +38,27 @@ export const FarmerAccountCreation = (): JSX.Element => {
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
-    phoneNumber: "",
+    phone: "",
     email: "",
     password: "",
     // Home Address
-    houseNumber: "",
-    street: "",
-    nearestBusStop: "",
-    streetName: "",
-    additionalAddress: "",
-    country: "",
-    state: "",
-    lga: "",
-    cityTown: "",
-    zipCode: "",
+    homeHouseNumber: "",
+    homeStreet: "",
+    homeBusStop: "",
+    homeAdditionalDesc: "",
+    homeCountry: "",
+    homeState: "",
+    homeLocalGov: "",
+    homePostcode: "",
     // Farm Address
     farmHouseNumber: "",
     farmStreet: "",
-    farmNearestBusStop: "",
-    farmAdditionalAddress: "",
+    farmBusStop: "",
+    farmAdditionalDesc: "",
     farmCountry: "",
     farmState: "",
-    farmLga: "",
-    farmCityTown: "",
-    farmZipCode: ""
+    farmLocalGov: "",
+    farmPostcode: ""
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,23 +75,19 @@ export const FarmerAccountCreation = (): JSX.Element => {
       };
       
       // Reset dependent fields when country or state changes for home address
-      if (field === 'country') {
-        newData.state = '';
-        newData.lga = '';
-        newData.cityTown = '';
-      } else if (field === 'state') {
-        newData.lga = '';
-        newData.cityTown = '';
+      if (field === 'homeCountry') {
+        newData.homeState = '';
+        newData.homeLocalGov = '';
+      } else if (field === 'homeState') {
+        newData.homeLocalGov = '';
       }
       
       // Reset dependent fields when country or state changes for farm address
       if (field === 'farmCountry') {
         newData.farmState = '';
-        newData.farmLga = '';
-        newData.farmCityTown = '';
+        newData.farmLocalGov = '';
       } else if (field === 'farmState') {
-        newData.farmLga = '';
-        newData.farmCityTown = '';
+        newData.farmLocalGov = '';
       }
       
       return newData;
@@ -114,23 +104,23 @@ export const FarmerAccountCreation = (): JSX.Element => {
         userType: "farmer",
         firstName: formData.firstName,
         lastName: formData.lastName,
-        phone: formData.phoneNumber,
+        phone: formData.phone,
         email: formData.email,
         password: formData.password,
-        homeStreet: formData.street,
-        homeHouseNumber: formData.houseNumber,
-        homeAdditionalDesc: formData.additionalAddress,
-        homeBusStop: formData.nearestBusStop,
-        homeLocalGov: formData.lga,
-        homePostcode: formData.zipCode,
-        homeState: formData.state,
-        homeCountry: formData.country,
+        homeStreet: formData.homeStreet,
+        homeHouseNumber: formData.homeHouseNumber,
+        homeAdditionalDesc: formData.homeAdditionalDesc,
+        homeBusStop: formData.homeBusStop,
+        homeLocalGov: formData.homeLocalGov,
+        homePostcode: formData.homePostcode,
+        homeState: formData.homeState,
+        homeCountry: formData.homeCountry,
         farmStreet: formData.farmStreet,
         farmHouseNumber: formData.farmHouseNumber,
-        farmAdditionalDesc: formData.farmAdditionalAddress,
-        farmBusStop: formData.farmNearestBusStop,
-        farmLocalGov: formData.farmLga,
-        farmPostcode: formData.farmZipCode,
+        farmAdditionalDesc: formData.farmAdditionalDesc,
+        farmBusStop: formData.farmBusStop,
+        farmLocalGov: formData.farmLocalGov,
+        farmPostcode: formData.farmPostcode,
         farmState: formData.farmState,
         farmCountry: formData.farmCountry
       };
@@ -322,8 +312,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                 <input
                   type="tel"
                   placeholder="Enter your phone number"
-                  value={formData.phoneNumber}
-                  onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange("phone", e.target.value)}
                   className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                   data-testid="input-phone"
                   required
@@ -376,8 +366,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <input
                       type="text"
                       placeholder="e.g. 12"
-                      value={formData.houseNumber}
-                      onChange={(e) => handleInputChange("houseNumber", e.target.value)}
+                      value={formData.homeHouseNumber}
+                      onChange={(e) => handleInputChange("homeHouseNumber", e.target.value)}
                       className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                       data-testid="input-house-number"
                       required
@@ -390,8 +380,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <input
                       type="text"
                       placeholder="e.g. Jadesola Avenue"
-                      value={formData.street}
-                      onChange={(e) => handleInputChange("street", e.target.value)}
+                      value={formData.homeStreet}
+                      onChange={(e) => handleInputChange("homeStreet", e.target.value)}
                       className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                       data-testid="input-street"
                       required
@@ -407,8 +397,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   <input
                     type="text"
                     placeholder="e.g. Agindingbi"
-                    value={formData.nearestBusStop}
-                    onChange={(e) => handleInputChange("nearestBusStop", e.target.value)}
+                    value={formData.homeBusStop}
+                    onChange={(e) => handleInputChange("homeBusStop", e.target.value)}
                     className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                     data-testid="input-bus-stop"
                     required
@@ -423,8 +413,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   <input
                     type="text"
                     placeholder="e.g. Apartment 3B, Behind GTBank"
-                    value={formData.additionalAddress}
-                    onChange={(e) => handleInputChange("additionalAddress", e.target.value)}
+                    value={formData.homeAdditionalDesc}
+                    onChange={(e) => handleInputChange("homeAdditionalDesc", e.target.value)}
                     className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                     data-testid="input-additional-address"
                   />
@@ -436,8 +426,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     Country
                   </label>
                   <select
-                    value={formData.country}
-                    onChange={(e) => handleInputChange("country", e.target.value)}
+                    value={formData.homeCountry}
+                    onChange={(e) => handleInputChange("homeCountry", e.target.value)}
                     className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all relative z-10"
                     data-testid="select-country"
                     required
@@ -456,16 +446,16 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       State
                     </label>
                     <select
-                      value={formData.state}
-                      onChange={(e) => handleInputChange("state", e.target.value)}
+                      value={formData.homeState}
+                      onChange={(e) => handleInputChange("homeState", e.target.value)}
                       className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all relative z-10"
                       data-testid="select-state"
                       required
-                      disabled={!formData.country}
+                      disabled={!formData.homeCountry}
                       style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select State</option>
-                      {formData.country && getStatesForCountry(formData.country).map(state => (
+                      {formData.homeCountry && getStatesForCountry(formData.homeCountry).map(state => (
                         <option key={state} value={state}>{state}</option>
                       ))}
                     </select>
@@ -475,16 +465,16 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       LGA
                     </label>
                     <select
-                      value={formData.lga}
-                      onChange={(e) => handleInputChange("lga", e.target.value)}
+                      value={formData.homeLocalGov}
+                      onChange={(e) => handleInputChange("homeLocalGov", e.target.value)}
                       className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all relative z-10"
                       data-testid="select-lga"
                       required
-                      disabled={!formData.state}
+                      disabled={!formData.homeState}
                       style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select LGA</option>
-                      {formData.state && formData.country && getStateLGAs(formData.state, formData.country).map(lga => (
+                      {formData.homeState && formData.homeCountry && getStateLGAs(formData.homeState, formData.homeCountry).map(lga => (
                         <option key={lga} value={lga}>{lga}</option>
                       ))}
                     </select>
@@ -498,16 +488,16 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       City/Town
                     </label>
                     <select
-                      value={formData.cityTown}
-                      onChange={(e) => handleInputChange("cityTown", e.target.value)}
+                      value={formData.homeLocalGov}
+                      onChange={(e) => handleInputChange("homeLocalGov", e.target.value)}
                       className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all relative z-10"
                       data-testid="select-city-town"
                       required
-                      disabled={!formData.state}
+                      disabled={!formData.homeState}
                       style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select City/Town</option>
-                      {formData.state && formData.country && getStateCities(formData.state, formData.country).map(city => (
+                      {formData.homeState && formData.homeCountry && getStateCities(formData.homeState, formData.homeCountry).map(city => (
                         <option key={city} value={city}>{city}</option>
                       ))}
                     </select>
@@ -519,8 +509,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <input
                       type="text"
                       placeholder="e.g. 102420"
-                      value={formData.zipCode}
-                      onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                      value={formData.homePostcode}
+                      onChange={(e) => handleInputChange("homePostcode", e.target.value)}
                       className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                       data-testid="input-zip-code"
                     />
@@ -574,8 +564,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   <input
                     type="text"
                     placeholder="e.g. Farm Gate"
-                    value={formData.farmNearestBusStop}
-                    onChange={(e) => handleInputChange("farmNearestBusStop", e.target.value)}
+                    value={formData.farmBusStop}
+                    onChange={(e) => handleInputChange("farmBusStop", e.target.value)}
                     className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                     data-testid="input-farm-bus-stop"
                     required
@@ -590,8 +580,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   <input
                     type="text"
                     placeholder="e.g. Behind the hill"
-                    value={formData.farmAdditionalAddress}
-                    onChange={(e) => handleInputChange("farmAdditionalAddress", e.target.value)}
+                    value={formData.farmAdditionalDesc}
+                    onChange={(e) => handleInputChange("farmAdditionalDesc", e.target.value)}
                     className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                     data-testid="input-farm-additional-address"
                   />
@@ -642,8 +632,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       Farm LGA
                     </label>
                     <select
-                      value={formData.farmLga}
-                      onChange={(e) => handleInputChange("farmLga", e.target.value)}
+                      value={formData.farmLocalGov}
+                      onChange={(e) => handleInputChange("farmLocalGov", e.target.value)}
                       className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all relative z-10"
                       data-testid="select-farm-lga"
                       required
@@ -665,8 +655,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       Farm City/Town
                     </label>
                     <select
-                      value={formData.farmCityTown}
-                      onChange={(e) => handleInputChange("farmCityTown", e.target.value)}
+                      value={formData.farmLocalGov}
+                      onChange={(e) => handleInputChange("farmLocalGov", e.target.value)}
                       className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all relative z-10"
                       data-testid="select-farm-city-town"
                       required
@@ -674,7 +664,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select City/Town</option>
-                      {formData.farmState && formData.farmCountry && getStateCities(formData.farmState, formData.farmCountry).map(city => (
+                      {formData.farmState && formData.farmCountry && getStateLGAs(formData.farmState, formData.farmCountry).map(city => (
                         <option key={city} value={city}>{city}</option>
                       ))}
                     </select>
@@ -686,8 +676,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <input
                       type="text"
                       placeholder="e.g. 100002"
-                      value={formData.farmZipCode}
-                      onChange={(e) => handleInputChange("farmZipCode", e.target.value)}
+                      value={formData.farmPostcode}
+                      onChange={(e) => handleInputChange("farmPostcode", e.target.value)}
                       className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                       data-testid="input-farm-zip-code"
                     />
@@ -768,8 +758,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                 <input
                   type="tel"
                   placeholder="Enter your phone number"
-                  value={formData.phoneNumber}
-                  onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange("phone", e.target.value)}
                   className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
                   data-testid="input-phone-desktop"
                   required
@@ -822,8 +812,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <input
                       type="text"
                       placeholder="e.g. 12"
-                      value={formData.houseNumber}
-                      onChange={(e) => handleInputChange("houseNumber", e.target.value)}
+                      value={formData.homeHouseNumber}
+                      onChange={(e) => handleInputChange("homeHouseNumber", e.target.value)}
                       className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
                       data-testid="input-house-number-desktop"
                       required
@@ -836,8 +826,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <input
                       type="text"
                       placeholder="e.g. Jadesola Avenue"
-                      value={formData.street}
-                      onChange={(e) => handleInputChange("street", e.target.value)}
+                      value={formData.homeStreet}
+                      onChange={(e) => handleInputChange("homeStreet", e.target.value)}
                       className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
                       data-testid="input-street-desktop"
                       required
@@ -853,8 +843,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   <input
                     type="text"
                     placeholder="e.g. Agindingbi"
-                    value={formData.nearestBusStop}
-                    onChange={(e) => handleInputChange("nearestBusStop", e.target.value)}
+                    value={formData.homeBusStop}
+                    onChange={(e) => handleInputChange("homeBusStop", e.target.value)}
                     className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
                     data-testid="input-bus-stop-desktop"
                     required
@@ -869,8 +859,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   <input
                     type="text"
                     placeholder="e.g. Apartment 3B, Behind GTBank"
-                    value={formData.additionalAddress}
-                    onChange={(e) => handleInputChange("additionalAddress", e.target.value)}
+                    value={formData.homeAdditionalDesc}
+                    onChange={(e) => handleInputChange("homeAdditionalDesc", e.target.value)}
                     className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
                     data-testid="input-additional-address-desktop"
                   />
@@ -882,8 +872,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     Country
                   </label>
                   <select
-                    value={formData.country}
-                    onChange={(e) => handleInputChange("country", e.target.value)}
+                    value={formData.homeCountry}
+                    onChange={(e) => handleInputChange("homeCountry", e.target.value)}
                     className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg relative z-10"
                     data-testid="select-country-desktop"
                     required
@@ -902,16 +892,16 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       State
                     </label>
                     <select
-                      value={formData.state}
-                      onChange={(e) => handleInputChange("state", e.target.value)}
+                      value={formData.homeState}
+                      onChange={(e) => handleInputChange("homeState", e.target.value)}
                       className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg relative z-10"
                       data-testid="select-state-desktop"
                       required
-                      disabled={!formData.country}
+                      disabled={!formData.homeCountry}
                       style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select State</option>
-                      {formData.country && getStatesForCountry(formData.country).map(state => (
+                      {formData.homeCountry && getStatesForCountry(formData.homeCountry).map(state => (
                         <option key={state} value={state}>{state}</option>
                       ))}
                     </select>
@@ -921,16 +911,16 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       LGA
                     </label>
                     <select
-                      value={formData.lga}
-                      onChange={(e) => handleInputChange("lga", e.target.value)}
+                      value={formData.homeLocalGov}
+                      onChange={(e) => handleInputChange("homeLocalGov", e.target.value)}
                       className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg relative z-10"
                       data-testid="select-lga-desktop"
                       required
-                      disabled={!formData.state}
+                      disabled={!formData.homeState}
                       style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select LGA</option>
-                      {formData.state && formData.country && getStateLGAs(formData.state, formData.country).map(lga => (
+                      {formData.homeState && formData.homeCountry && getStateLGAs(formData.homeState, formData.homeCountry).map(lga => (
                         <option key={lga} value={lga}>{lga}</option>
                       ))}
                     </select>
@@ -944,15 +934,15 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       City/Town
                     </label>
                     <select
-                      value={formData.cityTown}
-                      onChange={(e) => handleInputChange("cityTown", e.target.value)}
+                      value={formData.homeLocalGov}
+                      onChange={(e) => handleInputChange("homeLocalGov", e.target.value)}
                       className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg relative z-10"
                       data-testid="select-city-town-desktop"
                       required
                       style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select City/Town</option>
-                      {formData.state && formData.country && getStateCities(formData.state, formData.country).map(city => (
+                      {formData.homeState && formData.homeCountry && getStateCities(formData.homeState, formData.homeCountry).map(city => (
                         <option key={city} value={city}>{city}</option>
                       ))}
                     </select>
@@ -964,8 +954,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <input
                       type="text"
                       placeholder="e.g. 102420"
-                      value={formData.zipCode}
-                      onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                      value={formData.homePostcode}
+                      onChange={(e) => handleInputChange("homePostcode", e.target.value)}
                       className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
                       data-testid="input-zip-code-desktop"
                     />
@@ -1019,8 +1009,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   <input
                     type="text"
                     placeholder="e.g. Farm Gate"
-                    value={formData.farmNearestBusStop}
-                    onChange={(e) => handleInputChange("farmNearestBusStop", e.target.value)}
+                    value={formData.farmBusStop}
+                    onChange={(e) => handleInputChange("farmBusStop", e.target.value)}
                     className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
                     data-testid="input-farm-bus-stop-desktop"
                     required
@@ -1035,8 +1025,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   <input
                     type="text"
                     placeholder="e.g. Behind the hill"
-                    value={formData.farmAdditionalAddress}
-                    onChange={(e) => handleInputChange("farmAdditionalAddress", e.target.value)}
+                    value={formData.farmAdditionalDesc}
+                    onChange={(e) => handleInputChange("farmAdditionalDesc", e.target.value)}
                     className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
                     data-testid="input-farm-additional-address-desktop"
                   />
@@ -1087,8 +1077,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       Farm LGA
                     </label>
                     <select
-                      value={formData.farmLga}
-                      onChange={(e) => handleInputChange("farmLga", e.target.value)}
+                      value={formData.farmLocalGov}
+                      onChange={(e) => handleInputChange("farmLocalGov", e.target.value)}
                       className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg relative z-10"
                       data-testid="select-farm-lga-desktop"
                       required
@@ -1110,8 +1100,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       Farm City/Town
                     </label>
                     <select
-                      value={formData.farmCityTown}
-                      onChange={(e) => handleInputChange("farmCityTown", e.target.value)}
+                      value={formData.farmLocalGov}
+                      onChange={(e) => handleInputChange("farmLocalGov", e.target.value)}
                       className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg relative z-10"
                       data-testid="select-farm-city-town-desktop"
                       required
@@ -1119,7 +1109,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       style={{ position: 'relative', zIndex: 10 }}
                     >
                       <option value="">Select City/Town</option>
-                      {formData.farmState && formData.farmCountry && getStateCities(formData.farmState, formData.farmCountry).map(city => (
+                      {formData.farmState && formData.farmCountry && getStateLGAs(formData.farmState, formData.farmCountry).map(city => (
                         <option key={city} value={city}>{city}</option>
                       ))}
                     </select>
@@ -1131,8 +1121,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
                     <input
                       type="text"
                       placeholder="e.g. 100002"
-                      value={formData.farmZipCode}
-                      onChange={(e) => handleInputChange("farmZipCode", e.target.value)}
+                      value={formData.farmPostcode}
+                      onChange={(e) => handleInputChange("farmPostcode", e.target.value)}
                       className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
                       data-testid="input-farm-zip-code-desktop"
                     />
