@@ -114,7 +114,7 @@ export function BuyerVerification() {
       
       // Send POST request to verify OTP using CORS proxy
       const response = await fetch(
-        "https://cors-anywhere.herokuapp.com/https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
+        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
         {
           method: "POST",
           headers: {
@@ -234,7 +234,7 @@ export function BuyerVerification() {
 
       // Send POST request to resend OTP
       const response = await fetch(
-        "https://cors-anywhere.herokuapp.com/https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
+        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
         {
           method: "POST",
           headers: {
