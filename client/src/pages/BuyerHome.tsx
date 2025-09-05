@@ -55,7 +55,7 @@ export function BuyerHome() {
     {
       id: 4,
       name: "Cabbage",
-      farm: "Grace Farms",
+      farm: "Lily Farms",
       price: "₦2,500",
       unit: "per Basket",
       image: CabbageImage,
@@ -67,7 +67,7 @@ export function BuyerHome() {
     {
       id: 5,
       name: "Groundnuts",
-      farm: "Grace Farms",
+      farm: "Lily Farms",
       price: "₦4,200",
       unit: "per Bag",
       image: GroundnutsImage,
@@ -79,7 +79,7 @@ export function BuyerHome() {
     {
       id: 6,
       name: "Plantain",
-      farm: "Grace Farms",
+      farm: "Lily Farms",
       price: "₦3,000",
       unit: "per Bunch",
       image: PlantainImage,
@@ -101,7 +101,7 @@ export function BuyerHome() {
   };
 
   const handleProductClick = (productId: number) => {
-    const product = freshTodayProducts.find(p => p.id === productId);
+    const product = freshTodayProducts.find((p) => p.id === productId);
     if (product) {
       setSelectedProduct(product);
       setIsProductModalOpen(true);
@@ -109,7 +109,7 @@ export function BuyerHome() {
   };
 
   const handleHarvestingProductClick = (productId: number) => {
-    const product = harvestingSoonProducts.find(p => p.id === productId);
+    const product = harvestingSoonProducts.find((p) => p.id === productId);
     if (product) {
       setSelectedProduct(product);
       setIsHarvestingModalOpen(true);
@@ -200,9 +200,10 @@ export function BuyerHome() {
                 >
                   <div className="relative">
                     <div className="w-full h-32 bg-gray-100 rounded-t-xl overflow-hidden">
-                      {typeof product.image === 'string' && product.image.startsWith('/') ? (
-                        <img 
-                          src={product.image} 
+                      {typeof product.image === "string" &&
+                      product.image.startsWith("/") ? (
+                        <img
+                          src={product.image}
                           alt={product.name}
                           className="w-full h-full object-cover"
                         />
@@ -252,9 +253,10 @@ export function BuyerHome() {
                   data-testid={`product-${product.id}`}
                 >
                   <div className="w-full h-32 bg-gray-100 rounded-t-xl overflow-hidden">
-                    {typeof product.image === 'string' && product.image.startsWith('/') ? (
-                      <img 
-                        src={product.image} 
+                    {typeof product.image === "string" &&
+                    product.image.startsWith("/") ? (
+                      <img
+                        src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />
@@ -354,9 +356,10 @@ export function BuyerHome() {
                 >
                   <div className="relative">
                     <div className="w-full h-48 bg-gray-100 rounded-t-xl overflow-hidden">
-                      {typeof product.image === 'string' && product.image.startsWith('/') ? (
-                        <img 
-                          src={product.image} 
+                      {typeof product.image === "string" &&
+                      product.image.startsWith("/") ? (
+                        <img
+                          src={product.image}
                           alt={product.name}
                           className="w-full h-full object-cover"
                         />
@@ -406,9 +409,10 @@ export function BuyerHome() {
                   data-testid={`product-desktop-${product.id}`}
                 >
                   <div className="w-full h-48 bg-gray-100 rounded-t-xl overflow-hidden">
-                    {typeof product.image === 'string' && product.image.startsWith('/') ? (
-                      <img 
-                        src={product.image} 
+                    {typeof product.image === "string" &&
+                    product.image.startsWith("/") ? (
+                      <img
+                        src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />
@@ -447,7 +451,7 @@ export function BuyerHome() {
         onClose={() => setIsProductModalOpen(false)}
         onAddToCart={handleAddToCart}
       />
-      
+
       <HarvestingSoonModal
         product={selectedProduct}
         isOpen={isHarvestingModalOpen}
