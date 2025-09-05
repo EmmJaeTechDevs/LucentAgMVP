@@ -53,7 +53,13 @@ class CORSHandler {
     const config: AxiosRequestConfig = {
       ...options,
       url,
-      headers: getRequestHeaders(options.headers),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Origin': window.location.origin,
+        'X-Requested-With': 'XMLHttpRequest',
+        ...options.headers,
+      },
       timeout: API_CONFIG.TIMEOUT,
       withCredentials: false, // Important for CORS
       // Additional axios config for CORS
