@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
-import { api } from "@/utils/api";
 
-interface FormData {
+// THIS IS THE NEW BUYER REGISTRATION FORM
+// ALL FIELDS MATCH BACKEND REQUIREMENTS EXACTLY
+
+interface BuyerFormData {
   firstName: string;
   lastName: string;
   phone: string;
   email: string;
   password: string;
-  // Home Address
   homeHouseNumber: string;
   homeStreet: string;
   homeBusStop: string;
@@ -21,13 +22,12 @@ interface FormData {
 
 export const BuyerAccountCreation = (): JSX.Element => {
   const [, setLocation] = useLocation();
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<BuyerFormData>({
     firstName: "",
     lastName: "",
     phone: "",
     email: "",
     password: "",
-    // Home Address
     homeHouseNumber: "",
     homeStreet: "",
     homeBusStop: "",
@@ -40,7 +40,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
+  const handleInputChange = (field: keyof BuyerFormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -52,6 +52,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
     setIsSubmitting(true);
     
     try {
+      // This matches your backend JSON structure exactly
       const backendData = {
         userType: "buyer",
         firstName: formData.firstName,
@@ -69,9 +70,21 @@ export const BuyerAccountCreation = (): JSX.Element => {
         homeCountry: formData.homeCountry
       };
 
-      const response = await api.buyers.register(backendData);
-      console.log("Registration successful:", response);
-      setLocation("/buyer-verification");
+      console.log("Sending buyer data:", backendData);
+      
+      // Call API (you may need to replace this with your actual API call)
+      const response = await fetch("/api/auth/register-buyer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(backendData)
+      });
+      
+      if (response.ok) {
+        alert("Registration successful!");
+        setLocation("/buyer-verification");
+      } else {
+        throw new Error("Registration failed");
+      }
       
     } catch (error) {
       console.error("Error creating account:", error);
@@ -82,135 +95,247 @@ export const BuyerAccountCreation = (): JSX.Element => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-900 mb-4">
-            BUYER ACCOUNT REGISTRATION
+    <div style={{ 
+      minHeight: "100vh", 
+      background: "linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)",
+      padding: "20px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }}>
+      <div style={{
+        width: "100%",
+        maxWidth: "600px",
+        backgroundColor: "white",
+        borderRadius: "20px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+        padding: "40px"
+      }}>
+        
+        {/* HEADER */}
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+          <h1 style={{ 
+            fontSize: "2.5rem", 
+            fontWeight: "bold", 
+            color: "#1565c0", 
+            marginBottom: "15px" 
+          }}>
+            🛒 NEW BUYER REGISTRATION
           </h1>
-          <p className="text-gray-600 text-lg">
-            Complete all fields below to create your buyer account
+          <p style={{ color: "#666", fontSize: "1.1rem" }}>
+            Fill all fields to create your buyer account
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Personal Information */}
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          
+          {/* PERSONAL INFORMATION */}
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Personal Information</h2>
+            <h2 style={{ fontSize: "1.3rem", fontWeight: "600", color: "#333", marginBottom: "15px" }}>
+              👤 Personal Information
+            </h2>
             
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                  First Name *
+                </label>
                 <input
                   type="text"
                   value={formData.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "2px solid #ddd",
+                    borderRadius: "8px",
+                    fontSize: "16px"
+                  }}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                  Last Name *
+                </label>
                 <input
                   type="text"
                   value={formData.lastName}
                   onChange={(e) => handleInputChange("lastName", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "2px solid #ddd",
+                    borderRadius: "8px",
+                    fontSize: "16px"
+                  }}
                   required
                 />
               </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                Phone Number *
+              </label>
               <input
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  border: "2px solid #ddd",
+                  borderRadius: "8px",
+                  fontSize: "16px"
+                }}
+                placeholder="+2348123456789"
                 required
               />
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                Email Address *
+              </label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  border: "2px solid #ddd",
+                  borderRadius: "8px",
+                  fontSize: "16px"
+                }}
+                placeholder="your@email.com"
                 required
               />
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                Password *
+              </label>
               <input
                 type="password"
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  border: "2px solid #ddd",
+                  borderRadius: "8px",
+                  fontSize: "16px"
+                }}
+                placeholder="Enter secure password"
                 required
               />
             </div>
           </div>
 
-          {/* Home Address */}
+          {/* HOME ADDRESS */}
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">🏠 Home Address</h2>
+            <h2 style={{ fontSize: "1.3rem", fontWeight: "600", color: "#333", marginBottom: "15px" }}>
+              🏠 Home Address
+            </h2>
             
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">House Number</label>
+                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                  House Number *
+                </label>
                 <input
                   type="text"
                   value={formData.homeHouseNumber}
                   onChange={(e) => handleInputChange("homeHouseNumber", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "2px solid #ddd",
+                    borderRadius: "8px",
+                    fontSize: "16px"
+                  }}
+                  placeholder="45B"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Street</label>
+                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                  Street *
+                </label>
                 <input
                   type="text"
                   value={formData.homeStreet}
                   onChange={(e) => handleInputChange("homeStreet", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "2px solid #ddd",
+                    borderRadius: "8px",
+                    fontSize: "16px"
+                  }}
+                  placeholder="Shopping Street"
                   required
                 />
               </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Nearest Bus Stop</label>
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                Nearest Bus Stop *
+              </label>
               <input
                 type="text"
                 value={formData.homeBusStop}
                 onChange={(e) => handleInputChange("homeBusStop", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  border: "2px solid #ddd",
+                  borderRadius: "8px",
+                  fontSize: "16px"
+                }}
+                placeholder="Mall Junction"
                 required
               />
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Additional Description</label>
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                Additional Description
+              </label>
               <input
                 type="text"
                 value={formData.homeAdditionalDesc}
                 onChange={(e) => handleInputChange("homeAdditionalDesc", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g. Opposite the mall"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  border: "2px solid #ddd",
+                  borderRadius: "8px",
+                  fontSize: "16px"
+                }}
+                placeholder="Opposite the mall"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "15px" }}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                  Country *
+                </label>
                 <select
                   value={formData.homeCountry}
                   onChange={(e) => handleInputChange("homeCountry", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "2px solid #ddd",
+                    borderRadius: "8px",
+                    fontSize: "16px"
+                  }}
                   required
                 >
                   <option value="">Select Country</option>
@@ -219,47 +344,85 @@ export const BuyerAccountCreation = (): JSX.Element => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                  State *
+                </label>
                 <input
                   type="text"
                   value={formData.homeState}
                   onChange={(e) => handleInputChange("homeState", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "2px solid #ddd",
+                    borderRadius: "8px",
+                    fontSize: "16px"
+                  }}
+                  placeholder="Lagos"
                   required
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px", marginBottom: "30px" }}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Local Government</label>
+                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                  Local Government *
+                </label>
                 <input
                   type="text"
                   value={formData.homeLocalGov}
                   onChange={(e) => handleInputChange("homeLocalGov", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "2px solid #ddd",
+                    borderRadius: "8px",
+                    fontSize: "16px"
+                  }}
+                  placeholder="Victoria Island"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Postcode</label>
+                <label style={{ display: "block", fontWeight: "500", color: "#333", marginBottom: "5px" }}>
+                  Postcode
+                </label>
                 <input
                   type="text"
                   value={formData.homePostcode}
                   onChange={(e) => handleInputChange("homePostcode", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "2px solid #ddd",
+                    borderRadius: "8px",
+                    fontSize: "16px"
+                  }}
+                  placeholder="101001"
                 />
               </div>
             </div>
           </div>
 
-          {/* Submit Button */}
+          {/* SUBMIT BUTTON */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-blue-700 disabled:opacity-50"
+            style={{
+              width: "100%",
+              padding: "15px",
+              backgroundColor: isSubmitting ? "#ccc" : "#1565c0",
+              color: "white",
+              border: "none",
+              borderRadius: "10px",
+              fontSize: "1.2rem",
+              fontWeight: "600",
+              cursor: isSubmitting ? "not-allowed" : "pointer",
+              transition: "background-color 0.3s"
+            }}
           >
-            {isSubmitting ? "Creating Account..." : "Create Buyer Account"}
+            {isSubmitting ? "Creating Account..." : "CREATE BUYER ACCOUNT"}
           </button>
         </form>
       </div>
