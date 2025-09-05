@@ -206,7 +206,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
         <div className="md:hidden max-w-md mx-auto w-full animate-fadeInUp">
           <div className="p-6 mb-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Create your account
+              BUYER REGISTRATION FORM
             </h1>
             <p className="text-gray-600 mb-6">
               Already have an account?{" "}
