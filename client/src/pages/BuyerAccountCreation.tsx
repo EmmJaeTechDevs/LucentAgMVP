@@ -87,14 +87,17 @@ export const BuyerAccountCreation = (): JSX.Element => {
         }
       );
       
-      console.log("Registration response:", response.data);
+      console.log("Full response:", response);
+      console.log("Response status:", response.status);
+      console.log("Response data:", response.data);
+      console.log("Response headers:", response.headers);
       
       // Store userId for verification page
-      const userId = response.data.userId || `temp_${Date.now()}`;
+      const userId = response.data?.userId || `temp_${Date.now()}`;
       localStorage.setItem("buyerUserId", userId);
       
-      // Show success message
-      alert("Registration successful! Please verify your account.");
+      // Show success message with more details
+      alert(`Registration successful! Status: ${response.status}. Please verify your account.`);
       
       // Redirect to verification page
       setLocation("/buyer-verification");
