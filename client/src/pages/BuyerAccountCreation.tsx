@@ -52,31 +52,40 @@ export const BuyerAccountCreation = (): JSX.Element => {
     setIsSubmitting(true);
 
     try {
+      // This matches your backend JSON structure exactly
+      const backendData = {
+        userType: "buyer",
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        email: formData.email,
+        password: formData.password,
+        homeStreet: formData.homeStreet,
+        homeHouseNumber: formData.homeHouseNumber,
+        homeAdditionalDesc: formData.homeAdditionalDesc,
+        homeBusStop: formData.homeBusStop,
+        homeLocalGov: formData.homeLocalGov,
+        homePostcode: formData.homePostcode,
+        homeState: formData.homeState,
+        homeCountry: formData.homeCountry,
+      };
+
+      console.log("Sending buyer data:", backendData);
+      console.log(
+        "JSON stringified data:",
+        JSON.stringify(backendData, null, 2),
+      );
+
       // Call your external backend API using Fetch POST request
       const response = await fetch(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer",
+        "https://lucent-ag-api-damidek.replit.app/api-docs/#/Farmers/post_api_auth_register_farmer",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-          body: JSON.stringify({
-            userType: "buyer",
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            phone: formData.phone,
-            email: formData.email,
-            password: formData.password,
-            homeStreet: formData.homeStreet,
-            homeHouseNumber: formData.homeHouseNumber,
-            homeAdditionalDesc: formData.homeAdditionalDesc,
-            homeBusStop: formData.homeBusStop,
-            homeLocalGov: formData.homeLocalGov,
-            homePostcode: formData.homePostcode,
-            homeState: formData.homeState,
-            homeCountry: formData.homeCountry,
-          }),
+          body: JSON.stringify(backendData),
         },
       );
 

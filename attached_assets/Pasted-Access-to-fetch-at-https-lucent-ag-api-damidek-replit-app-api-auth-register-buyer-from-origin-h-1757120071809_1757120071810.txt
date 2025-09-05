@@ -1,0 +1,47 @@
+Access to fetch at 'https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer' from origin 'https://fc08d0a5-acc8-48a8-91a5-42de6338a575-00-2emr95oywvq76.kirk.replit.dev' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+BuyerAccountCreation.tsx?t=1757085496882:49  POST https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer net::ERR_FAILED
+handleSubmit @ BuyerAccountCreation.tsx?t=1757085496882:49
+callCallback2 @ chunk-WERSD76P.js?v=9c3cef2c:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=9c3cef2c:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=9c3cef2c:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=9c3cef2c:3736
+executeDispatch @ chunk-WERSD76P.js?v=9c3cef2c:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=9c3cef2c:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=9c3cef2c:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=9c3cef2c:7051
+(anonymous) @ chunk-WERSD76P.js?v=9c3cef2c:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=9c3cef2c:18913
+batchedUpdates @ chunk-WERSD76P.js?v=9c3cef2c:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=9c3cef2c:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=9c3cef2c:5478
+dispatchEvent @ chunk-WERSD76P.js?v=9c3cef2c:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=9c3cef2c:5449Understand this error
+BuyerAccountCreation.tsx?t=1757085496882:93 Error creating account: TypeError: Failed to fetch
+    at handleSubmit (BuyerAccountCreation.tsx?t=1757085496882:49:30)
+    at HTMLUnknownElement.callCallback2 (chunk-WERSD76P.js?v=9c3cef2c:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-WERSD76P.js?v=9c3cef2c:3699:24)
+    at invokeGuardedCallback (chunk-WERSD76P.js?v=9c3cef2c:3733:39)
+    at invokeGuardedCallbackAndCatchFirstError (chunk-WERSD76P.js?v=9c3cef2c:3736:33)
+    at executeDispatch (chunk-WERSD76P.js?v=9c3cef2c:7014:11)
+    at processDispatchQueueItemsInOrder (chunk-WERSD76P.js?v=9c3cef2c:7034:15)
+    at processDispatchQueue (chunk-WERSD76P.js?v=9c3cef2c:7043:13)
+    at dispatchEventsForPlugins (chunk-WERSD76P.js?v=9c3cef2c:7051:11)
+    at chunk-WERSD76P.js?v=9c3cef2c:7174:20
+handleSubmit @ BuyerAccountCreation.tsx?t=1757085496882:93
+await in handleSubmit
+callCallback2 @ chunk-WERSD76P.js?v=9c3cef2c:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=9c3cef2c:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=9c3cef2c:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=9c3cef2c:3736
+executeDispatch @ chunk-WERSD76P.js?v=9c3cef2c:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=9c3cef2c:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=9c3cef2c:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=9c3cef2c:7051
+(anonymous) @ chunk-WERSD76P.js?v=9c3cef2c:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=9c3cef2c:18913
+batchedUpdates @ chunk-WERSD76P.js?v=9c3cef2c:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=9c3cef2c:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=9c3cef2c:5478
+dispatchEvent @ chunk-WERSD76P.js?v=9c3cef2c:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=9c3cef2c:5449Understand this error
+sw.js:16 Opened cache
