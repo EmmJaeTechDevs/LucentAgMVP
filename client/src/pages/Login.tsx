@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
 
 export function Login() {
   const [, setLocation] = useLocation();
@@ -64,53 +65,45 @@ export function Login() {
         rememberLogin: formData.rememberLogin
       };
 
-      console.log("=== LOGIN REQUEST ===");
+      console.log("=== LOGIN REQUEST (AXIOS) ===");
       console.log("Login Type:", loginType);
       console.log("Login Data:", loginData);
 
-      // Call login API - adjust URL based on your backend
-      const response = await fetch(
-        "https://cors-anywhere.herokuapp.com/https://lucent-ag-api-damidek.replit.app/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-          body: JSON.stringify(loginData),
-        }
-      );
+      // Backend API endpoint (replace with your actual backend URL)
+      const API_BASE_URL = "https://your-backend-api.com"; // Replace with actual backend URL
+      
+      // Call login API using axios
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, loginData, {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        timeout: 10000, // 10 second timeout
+      });
 
-      console.log("=== LOGIN RESPONSE ===");
+      console.log("=== LOGIN RESPONSE (AXIOS) ===");
       console.log("Response Status:", response.status);
-      console.log("Response OK:", response.ok);
-
-      let responseData;
-      try {
-        responseData = await response.json();
-        console.log("Response Body:", responseData);
-      } catch (parseError) {
-        console.log("Failed to parse JSON response:", parseError);
-        const textResponse = await response.text();
-        console.log("Raw response text:", textResponse);
-      }
+      console.log("Response Data:", response.data);
 
       if (response.status === 200) {
         console.log("✅ LOGIN SUCCESSFUL");
         
+        const userData = response.data.user || response.data;
+        
         // Store user session if remember login is checked
-        if (formData.rememberLogin && responseData?.user) {
+        if (formData.rememberLogin && userData) {
           localStorage.setItem("userSession", JSON.stringify({
-            userId: responseData.user.id,
-            userType: responseData.user.userType,
+            userId: userData.id,
+            userType: userData.userType,
+            token: response.data.token, // Store auth token if provided
             expiry: new Date().getTime() + (30 * 24 * 60 * 60 * 1000) // 30 days
           }));
-        } else if (responseData?.user) {
+        } else if (userData) {
           // Store session for current session only
           sessionStorage.setItem("userSession", JSON.stringify({
-            userId: responseData.user.id,
-            userType: responseData.user.userType,
+            userId: userData.id,
+            userType: userData.userType,
+            token: response.data.token, // Store auth token if provided
             expiry: new Date().getTime() + (2 * 60 * 60 * 1000) // 2 hours
           }));
         }
@@ -121,55 +114,71 @@ export function Login() {
         });
 
         // Redirect based on user type
-        if (responseData?.user?.userType === "farmer") {
+        if (userData?.userType === "farmer") {
           setLocation("/farmer-dashboard");
-        } else if (responseData?.user?.userType === "buyer") {
+        } else if (userData?.userType === "buyer") {
           setLocation("/buyer-home");
         } else {
           // Fallback redirect
           setLocation("/dashboard");
         }
 
-      } else if (response.status === 401) {
-        // Unauthorized - wrong credentials
-        const errorMessage = responseData?.message || "";
+      }
+    } catch (error) {
+      console.error("=== LOGIN ERROR (AXIOS) ===");
+      console.error("Error during login:", error);
+
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const errorMessage = error.response?.data?.message || "";
         
-        if (errorMessage.toLowerCase().includes("password")) {
-          setErrors({
-            emailOrPhone: "",
-            password: "Wrong Password. Please check and try again"
-          });
-        } else {
+        console.log("Axios Error Status:", status);
+        console.log("Axios Error Message:", errorMessage);
+
+        if (status === 401) {
+          // Unauthorized - wrong credentials
+          if (errorMessage.toLowerCase().includes("password")) {
+            setErrors({
+              emailOrPhone: "",
+              password: "Wrong Password. Please check and try again"
+            });
+          } else {
+            setErrors({
+              emailOrPhone: `${loginType === "email" ? "Email address" : "Phone number"} unrecognised. Please check and try again`,
+              password: ""
+            });
+          }
+        } else if (status === 404) {
+          // User not found
           setErrors({
             emailOrPhone: `${loginType === "email" ? "Email address" : "Phone number"} unrecognised. Please check and try again`,
             password: ""
           });
+        } else if (status === 400) {
+          // Bad request - validation error
+          toast({
+            variant: "destructive",
+            title: "Invalid Input",
+            description: errorMessage || "Please check your input and try again.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: errorMessage || `Login failed with status: ${status}`,
+          });
         }
-      } else if (response.status === 404) {
-        // User not found
-        setErrors({
-          emailOrPhone: `${loginType === "email" ? "Email address" : "Phone number"} unrecognised. Please check and try again`,
-          password: ""
-        });
       } else {
-        console.log(`❌ LOGIN FAILED - Status ${response.status}`);
+        // Network error or other error
         toast({
           variant: "destructive",
-          title: "Login Failed",
-          description: `Login failed with status: ${response.status}`,
+          title: "Network Error",
+          description: "Please check your connection and try again.",
         });
       }
-    } catch (error) {
-      console.error("=== LOGIN ERROR ===");
-      console.error("Error during login:", error);
-      toast({
-        variant: "destructive",
-        title: "Network Error",
-        description: "Please check your connection and try again.",
-      });
     } finally {
       setIsLoading(false);
-      console.log("=== LOGIN REQUEST COMPLETED ===");
+      console.log("=== LOGIN REQUEST COMPLETED (AXIOS) ===");
     }
   };
 
