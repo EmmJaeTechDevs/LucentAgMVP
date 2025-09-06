@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
+import { BaseUrl } from "../../../config";
 
 export function Login() {
   const [, setLocation] = useLocation();
@@ -16,12 +17,12 @@ export function Login() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({
-    emailOrPhone: "",
+    identifier: "",
     password: ""
   });
 
   const clearErrors = () => {
-    setErrors({ emailOrPhone: "", password: "" });
+    setErrors({ identifier: "", password: "" });
   };
 
   const validateInput = (value: string, type: "email" | "phone") => {

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { BaseUrl } from "../../../config";
 
 export function BuyerVerification() {
   const [location, setLocation] = useLocation();

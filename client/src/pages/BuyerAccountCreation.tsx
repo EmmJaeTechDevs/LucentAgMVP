@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { BaseUrl } from "../../../config";
 
 // THIS IS THE NEW BUYER REGISTRATION FORM
 // ALL FIELDS MATCH BACKEND REQUIREMENTS EXACTLY
