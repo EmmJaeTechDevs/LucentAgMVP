@@ -207,14 +207,15 @@ export function Login() {
             <div className="flex items-center space-x-3 mb-4">
               <label className="flex items-center space-x-2 cursor-pointer">
                 <input
-                  type="radio"
-                  name="loginType"
+                  type="checkbox"
                   checked={loginType === "phone"}
-                  onChange={() => setLoginType("phone")}
+                  onChange={() => setLoginType(loginType === "email" ? "phone" : "email")}
                   className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
-                  data-testid="radio-phone-login"
+                  data-testid="toggle-login-type"
                 />
-                <span className="text-sm text-gray-700">Login with Phone number instead</span>
+                <span className="text-sm text-gray-700">
+                  {loginType === "email" ? "Login with Phone number instead" : "Login with Email instead"}
+                </span>
               </label>
             </div>
 
@@ -343,14 +344,15 @@ export function Login() {
             <div className="flex items-center space-x-3 mb-6">
               <label className="flex items-center space-x-2 cursor-pointer">
                 <input
-                  type="radio"
-                  name="loginType"
+                  type="checkbox"
                   checked={loginType === "phone"}
-                  onChange={() => setLoginType("phone")}
+                  onChange={() => setLoginType(loginType === "email" ? "phone" : "email")}
                   className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
-                  data-testid="radio-phone-login-desktop"
+                  data-testid="toggle-login-type-desktop"
                 />
-                <span className="text-gray-700">Login with Phone number instead</span>
+                <span className="text-gray-700">
+                  {loginType === "email" ? "Login with Phone number instead" : "Login with Email instead"}
+                </span>
               </label>
             </div>
 
