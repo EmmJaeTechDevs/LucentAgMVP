@@ -32,6 +32,9 @@ import { Checkout } from "@/pages/Checkout";
 import { Login } from "@/pages/Login";
 import { BuyerProfile } from "@/pages/BuyerProfile";
 import { FarmerProfile } from "@/pages/FarmerProfile";
+import { ForgotPassword } from "@/pages/ForgotPassword";
+import { ResetOTP } from "@/pages/ResetOTP";
+import { ResetPassword } from "@/pages/ResetPassword";
 
 function Router() {
   return (
@@ -62,6 +65,9 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/buyer-profile" component={BuyerProfile} />
       <Route path="/farmer-profile" component={FarmerProfile} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-otp" component={ResetOTP} />
+      <Route path="/reset-password" component={ResetPassword} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

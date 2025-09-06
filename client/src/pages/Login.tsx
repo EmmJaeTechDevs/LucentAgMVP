@@ -285,6 +285,10 @@ export function Login() {
     setLocation("/role-selection");
   };
 
+  const handleForgotPassword = () => {
+    setLocation("/forgot-password");
+  };
+
   const requestOTPForLogin = async (userId: string, userType: string) => {
     try {
       console.log("=== REQUEST OTP FOR LOGIN ===");
@@ -368,12 +372,6 @@ export function Login() {
     }
   };
 
-  const handleForgotPassword = () => {
-    toast({
-      title: "Feature Coming Soon",
-      description: "Password reset functionality will be available soon.",
-    });
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
