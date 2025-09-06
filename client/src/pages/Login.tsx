@@ -60,11 +60,10 @@ export function Login() {
         return;
       }
 
-      // Prepare login data
+      // Prepare login data in the format expected by the server
       const loginData = {
-        [loginType]: formData.emailOrPhone,
-        password: formData.password,
-        rememberLogin: formData.rememberLogin,
+        identifier: formData.emailOrPhone, // Server expects "identifier" field
+        password: formData.password
       };
 
       console.log("=== LOGIN REQUEST (AXIOS) ===");
@@ -93,10 +92,10 @@ export function Login() {
 
       if (response.status === 200) {
         console.log("✅ LOGIN SUCCESSFUL");
-
-        const userData = response.data.user || response.data;
-        const userId = userData.id || userData.userId;
-
+        
+        const { user, token, message } = response.data;
+        const userId = user.userId || user.id;
+        
         if (!userId) {
           toast({
             variant: "destructive",
@@ -106,16 +105,22 @@ export function Login() {
           return;
         }
 
-        // Store userId in session storage for OTP verification
+        // Store userId and user data in session storage
         const sessionData = {
           userId: userId,
-          userType: userData.userType,
-          expiry: new Date().getTime() + 2 * 60 * 60 * 1000, // 2 hours
+          userType: user.userType,
+          token: token,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phone: user.phone,
+          isVerified: user.isVerified,
+          expiry: new Date().getTime() + (2 * 60 * 60 * 1000) // 2 hours
         };
 
-        if (userData.userType === "farmer") {
+        if (user.userType === "farmer") {
           sessionStorage.setItem("farmerSession", JSON.stringify(sessionData));
-        } else if (userData.userType === "buyer") {
+        } else if (user.userType === "buyer") {
           sessionStorage.setItem("buyerSession", JSON.stringify(sessionData));
         }
 
@@ -123,23 +128,48 @@ export function Login() {
         if (formData.rememberLogin) {
           const longTermSession = {
             ...sessionData,
-            expiry: new Date().getTime() + 30 * 24 * 60 * 60 * 1000, // 30 days
+            expiry: new Date().getTime() + (30 * 24 * 60 * 60 * 1000) // 30 days
           };
-
-          if (userData.userType === "farmer") {
+          
+          if (user.userType === "farmer") {
             localStorage.setItem("farmerUserId", userId);
-          } else if (userData.userType === "buyer") {
+            localStorage.setItem("farmerSession", JSON.stringify(longTermSession));
+          } else if (user.userType === "buyer") {
             localStorage.setItem("buyerUserId", userId);
+            localStorage.setItem("buyerSession", JSON.stringify(longTermSession));
           }
         }
 
-        toast({
-          title: "✅ Login Successful!",
-          description: "Requesting verification code...",
-        });
+        // Check if user is verified
+        if (user.isVerified) {
+          toast({
+            title: "✅ Login Successful!",
+            description: `Welcome back, ${user.firstName}!`,
+          });
 
-        // Now request OTP for verification
-        await requestOTPForLogin(userId, userData.userType);
+          // Route verified users appropriately
+          if (user.userType === "buyer") {
+            // Take verified buyer straight to buyer home page
+            setLocation("/buyer-home");
+          } else if (user.userType === "farmer") {
+            // Take verified farmer through normal process (notification -> harvesting method)
+            setLocation("/notification-preferences");
+          }
+        } else {
+          // User is not verified - this should not happen with current flow, but handle it
+          toast({
+            variant: "destructive",
+            title: "Account Not Verified",
+            description: "Please verify your phone number.",
+          });
+          
+          // Redirect to verification page
+          if (user.userType === "farmer") {
+            setLocation("/farmer-verification");
+          } else if (user.userType === "buyer") {
+            setLocation("/buyer-verification");
+          }
+        }
       }
     } catch (error) {
       console.error("=== LOGIN ERROR (AXIOS) ===");
@@ -153,16 +183,68 @@ export function Login() {
         console.log("Axios Error Message:", errorMessage);
 
         if (status === 401) {
-          // Unauthorized - wrong credentials
-          if (errorMessage.toLowerCase().includes("password")) {
-            setErrors({
-              emailOrPhone: "",
-              password: "Wrong Password. Please check and try again",
+          // Handle 401 - Invalid credentials
+          const errorData = error.response?.data;
+          if (errorData?.type === "invalid_credentials") {
+            toast({
+              variant: "destructive",
+              title: "Login Failed",
+              description: errorData.message || "Invalid credentials",
             });
+          } else if (errorData?.type === "account_not_verified") {
+            // Account not verified - redirect to verification page
+            const userId = errorData.user?.id;
+            
+            if (userId) {
+              // Store user ID for verification
+              const verificationData = {
+                userId: userId,
+                expiry: new Date().getTime() + (2 * 60 * 60 * 1000) // 2 hours
+              };
+              
+              // Determine user type from identifier format (email vs phone)
+              const isEmail = validateInput(formData.emailOrPhone, "email");
+              const userType = isEmail ? "buyer" : "farmer"; // Adjust this logic based on your app requirements
+              
+              if (userType === "farmer") {
+                sessionStorage.setItem("farmerSession", JSON.stringify({
+                  ...verificationData,
+                  userType: "farmer"
+                }));
+                localStorage.setItem("farmerUserId", userId);
+              } else {
+                sessionStorage.setItem("buyerSession", JSON.stringify({
+                  ...verificationData,
+                  userType: "buyer"
+                }));
+                localStorage.setItem("buyerUserId", userId);
+              }
+              
+              toast({
+                variant: "destructive",
+                title: "Account Not Verified",
+                description: errorData.message || "Please verify your phone number.",
+              });
+              
+              // Redirect to appropriate verification page
+              if (userType === "farmer") {
+                setLocation("/farmer-verification");
+              } else {
+                setLocation("/buyer-verification");
+              }
+            } else {
+              toast({
+                variant: "destructive",
+                title: "Verification Required",
+                description: errorData.message || "Account not verified. Please verify your phone number.",
+              });
+            }
           } else {
-            setErrors({
-              emailOrPhone: `${loginType === "email" ? "Email address" : "Phone number"} unrecognised. Please check and try again`,
-              password: "",
+            // Generic 401 handling
+            toast({
+              variant: "destructive",
+              title: "Authentication Failed",
+              description: errorMessage || "Invalid credentials. Please try again.",
             });
           }
         } else if (status === 404) {
@@ -176,8 +258,7 @@ export function Login() {
           toast({
             variant: "destructive",
             title: "Invalid Input",
-            description:
-              errorMessage || "Please check your input and try again.",
+            description: errorMessage || "Please check your input and try again.",
           });
         } else {
           toast({
