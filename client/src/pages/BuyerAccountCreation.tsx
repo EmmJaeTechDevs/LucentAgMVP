@@ -649,6 +649,39 @@ export const BuyerAccountCreation = (): JSX.Element => {
           >
             {isSubmitting ? "Creating Account..." : "CREATE BUYER ACCOUNT"}
           </button>
+
+          {/* LOGIN LINK */}
+          <div style={{ textAlign: "center", marginTop: "20px" }}>
+            <p style={{ color: "#666", fontSize: "1rem", marginBottom: "10px" }}>
+              Already have an account?
+            </p>
+            <button
+              type="button"
+              onClick={() => setLocation("/login")}
+              style={{
+                width: "100%",
+                padding: "15px",
+                backgroundColor: "transparent",
+                color: "#2e7d32",
+                border: "2px solid #2e7d32",
+                borderRadius: "10px",
+                fontSize: "1.2rem",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.3s",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = "#2e7d32";
+                e.currentTarget.style.color = "white";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = "#2e7d32";
+              }}
+            >
+              LOGIN TO YOUR ACCOUNT
+            </button>
+          </div>
         </form>
       </div>
     </div>

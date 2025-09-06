@@ -403,6 +403,20 @@ export const FarmerAccountCreation = (): JSX.Element => {
           >
             {isSubmitting ? "Creating Account..." : "Create Farmer Account"}
           </button>
+
+          {/* Login Link */}
+          <div className="text-center mt-6">
+            <p className="text-gray-600 mb-3">
+              Already have an account?
+            </p>
+            <button
+              type="button"
+              onClick={() => setLocation("/login")}
+              className="w-full border-2 border-green-600 text-green-600 py-3 rounded-lg font-semibold text-lg hover:bg-green-600 hover:text-white transition-colors"
+            >
+              Login to Your Account
+            </button>
+          </div>
         </form>
       </div>
     </div>
