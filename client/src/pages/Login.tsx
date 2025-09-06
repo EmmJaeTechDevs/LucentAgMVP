@@ -69,8 +69,8 @@ export function Login() {
       console.log("Login Type:", loginType);
       console.log("Login Data:", loginData);
 
-      // Backend API endpoint (replace with your actual backend URL)
-      const API_BASE_URL = "https://your-backend-api.com"; // Replace with actual backend URL
+      // Backend API endpoint (using the same as signup pages)
+      const API_BASE_URL = "https://lucent-ag-api-damidek.replit.app";
       
       // Call login API using axios
       const response = await axios.post(`${API_BASE_URL}/api/auth/login`, loginData, {
@@ -89,39 +89,51 @@ export function Login() {
         console.log("✅ LOGIN SUCCESSFUL");
         
         const userData = response.data.user || response.data;
+        const userId = userData.id || userData.userId;
         
-        // Store user session if remember login is checked
-        if (formData.rememberLogin && userData) {
-          localStorage.setItem("userSession", JSON.stringify({
-            userId: userData.id,
-            userType: userData.userType,
-            token: response.data.token, // Store auth token if provided
+        if (!userId) {
+          toast({
+            variant: "destructive",
+            title: "Login Error",
+            description: "User ID not found in response. Please try again.",
+          });
+          return;
+        }
+
+        // Store userId in session storage for OTP verification
+        const sessionData = {
+          userId: userId,
+          userType: userData.userType,
+          expiry: new Date().getTime() + (2 * 60 * 60 * 1000) // 2 hours
+        };
+
+        if (userData.userType === "farmer") {
+          sessionStorage.setItem("farmerSession", JSON.stringify(sessionData));
+        } else if (userData.userType === "buyer") {
+          sessionStorage.setItem("buyerSession", JSON.stringify(sessionData));
+        }
+
+        // Also store in localStorage if remember login is checked
+        if (formData.rememberLogin) {
+          const longTermSession = {
+            ...sessionData,
             expiry: new Date().getTime() + (30 * 24 * 60 * 60 * 1000) // 30 days
-          }));
-        } else if (userData) {
-          // Store session for current session only
-          sessionStorage.setItem("userSession", JSON.stringify({
-            userId: userData.id,
-            userType: userData.userType,
-            token: response.data.token, // Store auth token if provided
-            expiry: new Date().getTime() + (2 * 60 * 60 * 1000) // 2 hours
-          }));
+          };
+          
+          if (userData.userType === "farmer") {
+            localStorage.setItem("farmerUserId", userId);
+          } else if (userData.userType === "buyer") {
+            localStorage.setItem("buyerUserId", userId);
+          }
         }
 
         toast({
           title: "✅ Login Successful!",
-          description: "Welcome back! Redirecting to your dashboard...",
+          description: "Requesting verification code...",
         });
 
-        // Redirect based on user type
-        if (userData?.userType === "farmer") {
-          setLocation("/farmer-dashboard");
-        } else if (userData?.userType === "buyer") {
-          setLocation("/buyer-home");
-        } else {
-          // Fallback redirect
-          setLocation("/dashboard");
-        }
+        // Now request OTP for verification
+        await requestOTPForLogin(userId, userData.userType);
 
       }
     } catch (error) {
@@ -184,6 +196,87 @@ export function Login() {
 
   const handleSignupRedirect = () => {
     setLocation("/role-selection");
+  };
+
+  const requestOTPForLogin = async (userId: string, userType: string) => {
+    try {
+      console.log("=== REQUEST OTP FOR LOGIN ===");
+      console.log("User ID:", userId);
+      console.log("User Type:", userType);
+
+      // Prepare OTP request data (same format as signup pages)
+      const otpRequestData = {
+        userId: userId,
+        type: "sms",
+        purpose: "verification"
+      };
+
+      console.log("OTP Request Data:", otpRequestData);
+
+      // Send OTP request using axios
+      const otpResponse = await axios.post(
+        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
+        otpRequestData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          timeout: 10000
+        }
+      );
+
+      console.log("=== OTP REQUEST RESPONSE ===");
+      console.log("OTP Response Status:", otpResponse.status);
+      console.log("OTP Response Data:", otpResponse.data);
+
+      if (otpResponse.status === 200) {
+        console.log("✅ OTP REQUEST SUCCESSFUL");
+        
+        toast({
+          title: "✅ Verification Code Sent!",
+          description: "Please check your phone for the verification code.",
+        });
+
+        // Redirect to appropriate verification page
+        if (userType === "farmer") {
+          setLocation("/farmer-verification");
+        } else if (userType === "buyer") {
+          setLocation("/buyer-verification");
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Unknown User Type",
+            description: "Unable to determine verification page.",
+          });
+        }
+      } else {
+        console.log("❌ OTP REQUEST FAILED");
+        toast({
+          variant: "destructive",
+          title: "OTP Request Failed",
+          description: "Failed to send verification code. Please try again.",
+        });
+      }
+    } catch (error) {
+      console.error("=== OTP REQUEST ERROR ===");
+      console.error("Error requesting OTP:", error);
+      
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || "Failed to send verification code";
+        toast({
+          variant: "destructive",
+          title: "OTP Request Failed",
+          description: errorMessage,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Network Error",
+          description: "Failed to send verification code. Please check your connection.",
+        });
+      }
+    }
   };
 
   const handleForgotPassword = () => {
