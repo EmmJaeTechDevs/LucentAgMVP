@@ -98,7 +98,8 @@ export function BuyerVerification() {
       // Prepare request data
       const requestData = {
         userId: buyerId,
-        otp: verificationCode,
+        code: verificationCode,
+        type: "sms",
       };
 
       console.log("=== VERIFY OTP REQUEST (BUYER) ===");
