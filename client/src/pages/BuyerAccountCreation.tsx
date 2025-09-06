@@ -195,47 +195,6 @@ export const BuyerAccountCreation = (): JSX.Element => {
             Fill all fields to create your buyer account
           </p>
           
-          {/* Test Toast Buttons - Remove after testing */}
-          <div style={{ marginTop: "20px", display: "flex", gap: "10px", justifyContent: "center" }}>
-            <button
-              type="button"
-              onClick={() => toast({
-                title: "Test Toast Success",
-                description: "This is a test toast notification!",
-              })}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#2e7d32",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontSize: "14px"
-              }}
-            >
-              Test Success Toast
-            </button>
-            
-            <button
-              type="button"
-              onClick={() => toast({
-                variant: "destructive",
-                title: "Test Error Toast",
-                description: "This is a test error toast notification!",
-              })}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#d32f2f",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontSize: "14px"
-              }}
-            >
-              Test Error Toast
-            </button>
-          </div>
         </div>
 
         <form
