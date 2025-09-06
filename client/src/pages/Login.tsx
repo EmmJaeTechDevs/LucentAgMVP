@@ -3,22 +3,23 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
-import { BaseUrl } from "../../../config";
+import { config } from "process";
+import { BaseUrl } from "../../../Baseconfig";
 
 export function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  
+
   const [loginType, setLoginType] = useState<"email" | "phone">("email");
   const [formData, setFormData] = useState({
     emailOrPhone: "",
     password: "",
-    rememberLogin: false
+    rememberLogin: false,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({
     identifier: "",
-    password: ""
+    password: "",
   });
 
   const clearErrors = () => {
@@ -37,7 +38,7 @@ export function Login() {
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear errors when user starts typing
     if (field === "emailOrPhone" || field === "password") {
       clearErrors();
@@ -53,8 +54,8 @@ export function Login() {
       // Validate input format first
       if (!validateInput(formData.emailOrPhone, loginType)) {
         setErrors({
-          emailOrPhone: `${loginType === "email" ? "Email address" : "Phone number"} unrecognised. Please check and try again`,
-          password: ""
+          identifier: `${loginType === "email" ? "Email address" : "Phone number"} unrecognised. Please check and try again`,
+          password: "",
         });
         return;
       }
@@ -63,7 +64,7 @@ export function Login() {
       const loginData = {
         [loginType]: formData.emailOrPhone,
         password: formData.password,
-        rememberLogin: formData.rememberLogin
+        rememberLogin: formData.rememberLogin,
       };
 
       console.log("=== LOGIN REQUEST (AXIOS) ===");
@@ -72,15 +73,19 @@ export function Login() {
 
       // Backend API endpoint (using the same as signup pages)
       const API_BASE_URL = "https://lucent-ag-api-damidek.replit.app";
-      
+
       // Call login API using axios
-      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, loginData, {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/login`,
+        loginData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          timeout: 10000, // 10 second timeout
         },
-        timeout: 10000, // 10 second timeout
-      });
+      );
 
       console.log("=== LOGIN RESPONSE (AXIOS) ===");
       console.log("Response Status:", response.status);
@@ -88,10 +93,10 @@ export function Login() {
 
       if (response.status === 200) {
         console.log("✅ LOGIN SUCCESSFUL");
-        
+
         const userData = response.data.user || response.data;
         const userId = userData.id || userData.userId;
-        
+
         if (!userId) {
           toast({
             variant: "destructive",
@@ -105,7 +110,7 @@ export function Login() {
         const sessionData = {
           userId: userId,
           userType: userData.userType,
-          expiry: new Date().getTime() + (2 * 60 * 60 * 1000) // 2 hours
+          expiry: new Date().getTime() + 2 * 60 * 60 * 1000, // 2 hours
         };
 
         if (userData.userType === "farmer") {
@@ -118,9 +123,9 @@ export function Login() {
         if (formData.rememberLogin) {
           const longTermSession = {
             ...sessionData,
-            expiry: new Date().getTime() + (30 * 24 * 60 * 60 * 1000) // 30 days
+            expiry: new Date().getTime() + 30 * 24 * 60 * 60 * 1000, // 30 days
           };
-          
+
           if (userData.userType === "farmer") {
             localStorage.setItem("farmerUserId", userId);
           } else if (userData.userType === "buyer") {
@@ -135,7 +140,6 @@ export function Login() {
 
         // Now request OTP for verification
         await requestOTPForLogin(userId, userData.userType);
-
       }
     } catch (error) {
       console.error("=== LOGIN ERROR (AXIOS) ===");
@@ -144,7 +148,7 @@ export function Login() {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
         const errorMessage = error.response?.data?.message || "";
-        
+
         console.log("Axios Error Status:", status);
         console.log("Axios Error Message:", errorMessage);
 
@@ -153,26 +157,27 @@ export function Login() {
           if (errorMessage.toLowerCase().includes("password")) {
             setErrors({
               emailOrPhone: "",
-              password: "Wrong Password. Please check and try again"
+              password: "Wrong Password. Please check and try again",
             });
           } else {
             setErrors({
               emailOrPhone: `${loginType === "email" ? "Email address" : "Phone number"} unrecognised. Please check and try again`,
-              password: ""
+              password: "",
             });
           }
         } else if (status === 404) {
           // User not found
           setErrors({
             emailOrPhone: `${loginType === "email" ? "Email address" : "Phone number"} unrecognised. Please check and try again`,
-            password: ""
+            password: "",
           });
         } else if (status === 400) {
           // Bad request - validation error
           toast({
             variant: "destructive",
             title: "Invalid Input",
-            description: errorMessage || "Please check your input and try again.",
+            description:
+              errorMessage || "Please check your input and try again.",
           });
         } else {
           toast({
@@ -209,22 +214,22 @@ export function Login() {
       const otpRequestData = {
         userId: userId,
         type: "sms",
-        purpose: "verification"
+        purpose: "verification",
       };
 
       console.log("OTP Request Data:", otpRequestData);
 
       // Send OTP request using axios
       const otpResponse = await axios.post(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
+        `${BaseUrl}/api/auth/request-otp`,
         otpRequestData,
         {
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-          timeout: 10000
-        }
+          timeout: 10000,
+        },
       );
 
       console.log("=== OTP REQUEST RESPONSE ===");
@@ -233,7 +238,7 @@ export function Login() {
 
       if (otpResponse.status === 200) {
         console.log("✅ OTP REQUEST SUCCESSFUL");
-        
+
         toast({
           title: "✅ Verification Code Sent!",
           description: "Please check your phone for the verification code.",
@@ -262,9 +267,10 @@ export function Login() {
     } catch (error) {
       console.error("=== OTP REQUEST ERROR ===");
       console.error("Error requesting OTP:", error);
-      
+
       if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || "Failed to send verification code";
+        const errorMessage =
+          error.response?.data?.message || "Failed to send verification code";
         toast({
           variant: "destructive",
           title: "OTP Request Failed",
@@ -274,7 +280,8 @@ export function Login() {
         toast({
           variant: "destructive",
           title: "Network Error",
-          description: "Failed to send verification code. Please check your connection.",
+          description:
+            "Failed to send verification code. Please check your connection.",
         });
       }
     }
@@ -312,12 +319,16 @@ export function Login() {
                 <input
                   type="checkbox"
                   checked={loginType === "phone"}
-                  onChange={() => setLoginType(loginType === "email" ? "phone" : "email")}
+                  onChange={() =>
+                    setLoginType(loginType === "email" ? "phone" : "email")
+                  }
                   className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
                   data-testid="toggle-login-type"
                 />
                 <span className="text-sm text-gray-700">
-                  {loginType === "email" ? "Login with Phone number instead" : "Login with Email instead"}
+                  {loginType === "email"
+                    ? "Login with Phone number instead"
+                    : "Login with Email instead"}
                 </span>
               </label>
             </div>
@@ -330,18 +341,27 @@ export function Login() {
               <input
                 type={loginType === "email" ? "email" : "tel"}
                 value={formData.emailOrPhone}
-                onChange={(e) => handleInputChange("emailOrPhone", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("emailOrPhone", e.target.value)
+                }
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
-                  errors.emailOrPhone 
-                    ? "border-red-500 focus:border-red-600 focus:ring-red-200" 
+                  errors.emailOrPhone
+                    ? "border-red-500 focus:border-red-600 focus:ring-red-200"
                     : "border-gray-300 focus:border-green-600 focus:ring-green-200"
                 }`}
-                placeholder={loginType === "email" ? "Enter your email address" : "Enter your phone number"}
+                placeholder={
+                  loginType === "email"
+                    ? "Enter your email address"
+                    : "Enter your phone number"
+                }
                 required
                 data-testid={`input-${loginType}`}
               />
               {errors.emailOrPhone && (
-                <p className="mt-2 text-sm text-red-600" data-testid="error-email-phone">
+                <p
+                  className="mt-2 text-sm text-red-600"
+                  data-testid="error-email-phone"
+                >
                   {errors.emailOrPhone}
                 </p>
               )}
@@ -357,8 +377,8 @@ export function Login() {
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
-                  errors.password 
-                    ? "border-red-500 focus:border-red-600 focus:ring-red-200" 
+                  errors.password
+                    ? "border-red-500 focus:border-red-600 focus:ring-red-200"
                     : "border-gray-300 focus:border-green-600 focus:ring-green-200"
                 }`}
                 placeholder="Enter your password"
@@ -366,7 +386,10 @@ export function Login() {
                 data-testid="input-password"
               />
               {errors.password && (
-                <p className="mt-2 text-sm text-red-600" data-testid="error-password">
+                <p
+                  className="mt-2 text-sm text-red-600"
+                  data-testid="error-password"
+                >
                   {errors.password}
                 </p>
               )}
@@ -378,7 +401,9 @@ export function Login() {
                 <input
                   type="checkbox"
                   checked={formData.rememberLogin}
-                  onChange={(e) => handleInputChange("rememberLogin", e.target.checked)}
+                  onChange={(e) =>
+                    handleInputChange("rememberLogin", e.target.checked)
+                  }
                   className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
                   data-testid="checkbox-remember"
                 />
@@ -389,7 +414,9 @@ export function Login() {
             {/* Login Button */}
             <Button
               type="submit"
-              disabled={isLoading || !formData.emailOrPhone || !formData.password}
+              disabled={
+                isLoading || !formData.emailOrPhone || !formData.password
+              }
               className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-base font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               data-testid="button-login"
             >
@@ -449,12 +476,16 @@ export function Login() {
                 <input
                   type="checkbox"
                   checked={loginType === "phone"}
-                  onChange={() => setLoginType(loginType === "email" ? "phone" : "email")}
+                  onChange={() =>
+                    setLoginType(loginType === "email" ? "phone" : "email")
+                  }
                   className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
                   data-testid="toggle-login-type-desktop"
                 />
                 <span className="text-gray-700">
-                  {loginType === "email" ? "Login with Phone number instead" : "Login with Email instead"}
+                  {loginType === "email"
+                    ? "Login with Phone number instead"
+                    : "Login with Email instead"}
                 </span>
               </label>
             </div>
@@ -467,19 +498,28 @@ export function Login() {
               <input
                 type={loginType === "email" ? "email" : "tel"}
                 value={formData.emailOrPhone}
-                onChange={(e) => handleInputChange("emailOrPhone", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("emailOrPhone", e.target.value)
+                }
                 className={`w-full px-4 py-4 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-lg ${
-                  errors.emailOrPhone 
-                    ? "border-red-500 focus:border-red-600 focus:ring-red-200" 
+                  errors.emailOrPhone
+                    ? "border-red-500 focus:border-red-600 focus:ring-red-200"
                     : "border-gray-300 focus:border-green-600 focus:ring-green-200"
                 }`}
-                placeholder={loginType === "email" ? "Enter your email address" : "Enter your phone number"}
+                placeholder={
+                  loginType === "email"
+                    ? "Enter your email address"
+                    : "Enter your phone number"
+                }
                 required
                 data-testid={`input-${loginType}-desktop`}
               />
-              {errors.emailOrPhone && (
-                <p className="mt-2 text-red-600" data-testid="error-email-phone-desktop">
-                  {errors.emailOrPhone}
+              {errors.identifier && (
+                <p
+                  className="mt-2 text-red-600"
+                  data-testid="error-email-phone-desktop"
+                >
+                  {errors.identifier}
                 </p>
               )}
             </div>
@@ -494,8 +534,8 @@ export function Login() {
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e.target.value)}
                 className={`w-full px-4 py-4 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-lg ${
-                  errors.password 
-                    ? "border-red-500 focus:border-red-600 focus:ring-red-200" 
+                  errors.password
+                    ? "border-red-500 focus:border-red-600 focus:ring-red-200"
                     : "border-gray-300 focus:border-green-600 focus:ring-green-200"
                 }`}
                 placeholder="Enter your password"
@@ -503,7 +543,10 @@ export function Login() {
                 data-testid="input-password-desktop"
               />
               {errors.password && (
-                <p className="mt-2 text-red-600" data-testid="error-password-desktop">
+                <p
+                  className="mt-2 text-red-600"
+                  data-testid="error-password-desktop"
+                >
                   {errors.password}
                 </p>
               )}
@@ -515,7 +558,9 @@ export function Login() {
                 <input
                   type="checkbox"
                   checked={formData.rememberLogin}
-                  onChange={(e) => handleInputChange("rememberLogin", e.target.checked)}
+                  onChange={(e) =>
+                    handleInputChange("rememberLogin", e.target.checked)
+                  }
                   className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
                   data-testid="checkbox-remember-desktop"
                 />
@@ -526,7 +571,9 @@ export function Login() {
             {/* Login Button */}
             <Button
               type="submit"
-              disabled={isLoading || !formData.emailOrPhone || !formData.password}
+              disabled={
+                isLoading || !formData.emailOrPhone || !formData.password
+              }
               className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-xl font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105"
               data-testid="button-login-desktop"
             >

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { BaseUrl } from "../../../config";
+import { BaseUrl } from "../../../Baseconfig";
 
 // THIS IS THE NEW BUYER REGISTRATION FORM
 // ALL FIELDS MATCH BACKEND REQUIREMENTS EXACTLY
@@ -56,33 +56,30 @@ export const BuyerAccountCreation = (): JSX.Element => {
 
     try {
       // Call your external backend API using CORS proxy to avoid CORS errors
-      const response = await fetch(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/register-buyer",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-          body: JSON.stringify({
-            userType: "buyer",
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            phone: formData.phone,
-            email: formData.email,
-            password: formData.password,
-            homeStreet: formData.homeStreet,
-            homeHouseNumber: formData.homeHouseNumber,
-            homeAdditionalDesc: formData.homeAdditionalDesc,
-            homeBusStop: formData.homeBusStop,
-            homeLocalGov: formData.homeLocalGov,
-            homePostcode: formData.homePostcode,
-            homeState: formData.homeState,
-            homeCountry: formData.homeCountry,
-          }),
+      const response = await fetch(`${BaseUrl}/api/auth/register-buyer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-Requested-With": "XMLHttpRequest",
         },
-      );
+        body: JSON.stringify({
+          userType: "buyer",
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          email: formData.email,
+          password: formData.password,
+          homeStreet: formData.homeStreet,
+          homeHouseNumber: formData.homeHouseNumber,
+          homeAdditionalDesc: formData.homeAdditionalDesc,
+          homeBusStop: formData.homeBusStop,
+          homeLocalGov: formData.homeLocalGov,
+          homePostcode: formData.homePostcode,
+          homeState: formData.homeState,
+          homeCountry: formData.homeCountry,
+        }),
+      });
 
       console.log("Full response:", response);
       console.log("Response status:", response.status);
@@ -195,7 +192,6 @@ export const BuyerAccountCreation = (): JSX.Element => {
           <p style={{ color: "#666", fontSize: "1.1rem" }}>
             Fill all fields to create your buyer account
           </p>
-          
         </div>
 
         <form
@@ -653,7 +649,9 @@ export const BuyerAccountCreation = (): JSX.Element => {
 
           {/* LOGIN LINK */}
           <div style={{ textAlign: "center", marginTop: "20px" }}>
-            <p style={{ color: "#666", fontSize: "1rem", marginBottom: "10px" }}>
+            <p
+              style={{ color: "#666", fontSize: "1rem", marginBottom: "10px" }}
+            >
               Already have an account?
             </p>
             <button

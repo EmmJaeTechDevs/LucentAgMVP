@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { BaseUrl } from "../../../config";
+import { BaseUrl } from "../../../Baseconfig";
 
 export function BuyerVerification() {
   const [location, setLocation] = useLocation();
@@ -52,12 +52,12 @@ export function BuyerVerification() {
 
   const handleInputChange = (index: number, value: string) => {
     if (value.length > 1) return; // Only allow single digit
-    
+
     // Clear error state when user starts typing
     if (hasError) {
       setHasError(false);
     }
-    
+
     const newCode = [...code];
     newCode[index] = value;
     setCode(newCode);
@@ -80,11 +80,11 @@ export function BuyerVerification() {
 
     setIsVerifying(true);
     setHasError(false);
-    
+
     try {
       // Get buyer ID from sessionStorage or localStorage
       const buyerId = getBuyerId();
-      
+
       if (!buyerId) {
         console.log("❌ VERIFY OTP FAILED - No buyer ID found");
         toast({
@@ -94,15 +94,15 @@ export function BuyerVerification() {
         });
         return;
       }
-      
+
       // Prepare request data
       const requestData = {
         userId: buyerId,
-        otp: verificationCode
+        otp: verificationCode,
       };
-      
+
       console.log("=== VERIFY OTP REQUEST (BUYER) ===");
-      console.log("URL:", "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp");
+      console.log("URL:", `${BaseUrl}/api/auth/verify-otp`);
       console.log("Method:", "POST");
       console.log("Headers:", {
         "Content-Type": "application/json",
@@ -112,26 +112,26 @@ export function BuyerVerification() {
       console.log("Request Body:", JSON.stringify(requestData, null, 2));
       console.log("Buyer ID:", buyerId);
       console.log("OTP Code:", verificationCode);
-      
+
       // Send POST request to verify OTP using CORS proxy
-      const response = await fetch(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-          body: JSON.stringify(requestData),
-        }
-      );
-      
+      const response = await fetch(`${BaseUrl}/api/auth/verify-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify(requestData),
+      });
+
       console.log("=== VERIFY OTP RESPONSE (BUYER) ===");
       console.log("Response Status:", response.status);
       console.log("Response OK:", response.ok);
-      console.log("Response Headers:", Object.fromEntries(response.headers.entries()));
-      
+      console.log(
+        "Response Headers:",
+        Object.fromEntries(response.headers.entries()),
+      );
+
       // Parse response data
       let responseData;
       try {
@@ -142,18 +142,18 @@ export function BuyerVerification() {
         const textResponse = await response.text();
         console.log("Raw response text:", textResponse);
       }
-      
+
       if (response.status === 200) {
         console.log("✅ VERIFICATION SUCCESSFUL - Status 200");
         toast({
           title: "✅ Verification Successful!",
           description: "Your account has been verified successfully.",
         });
-        
+
         // Clear stored userId from both storage types
         localStorage.removeItem("buyerUserId");
         sessionStorage.removeItem("buyerSession");
-        
+
         // Redirect to buyer home page
         setLocation("/buyer-home");
       } else if (response.status === 400) {
@@ -161,7 +161,8 @@ export function BuyerVerification() {
         toast({
           variant: "destructive",
           title: "Invalid OTP",
-          description: "Invalid or wrong OTP. Please check your code and try again.",
+          description:
+            "Invalid or wrong OTP. Please check your code and try again.",
         });
         setHasError(true);
       } else {
@@ -204,7 +205,7 @@ export function BuyerVerification() {
     try {
       // Get buyer ID from sessionStorage or localStorage
       const buyerId = getBuyerId();
-      
+
       if (!buyerId) {
         console.log("❌ RESEND OTP FAILED (BUYER) - No buyer ID found");
         toast({
@@ -219,11 +220,11 @@ export function BuyerVerification() {
       const requestData = {
         userId: buyerId,
         type: "sms",
-        purpose: "verification"
+        purpose: "verification",
       };
 
       console.log("=== RESEND OTP REQUEST (BUYER) ===");
-      console.log("URL:", "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp");
+      console.log("URL:", `${BaseUrl}/api/auth/request-otp`);
       console.log("Method:", "POST");
       console.log("Headers:", {
         "Content-Type": "application/json",
@@ -234,23 +235,23 @@ export function BuyerVerification() {
       console.log("Buyer ID:", buyerId);
 
       // Send POST request to resend OTP
-      const response = await fetch(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-          body: JSON.stringify(requestData),
-        }
-      );
+      const response = await fetch(`${BaseUrl}/api/auth/request-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify(requestData),
+      });
 
       console.log("=== RESEND OTP RESPONSE (BUYER) ===");
       console.log("Response Status:", response.status);
       console.log("Response OK:", response.ok);
-      console.log("Response Headers:", Object.fromEntries(response.headers.entries()));
+      console.log(
+        "Response Headers:",
+        Object.fromEntries(response.headers.entries()),
+      );
 
       // Parse response data
       let responseData;
@@ -288,7 +289,7 @@ export function BuyerVerification() {
       console.error("Error message:", error.message);
       toast({
         variant: "destructive",
-        title: "Network Error", 
+        title: "Network Error",
         description: "Please check your connection and try again.",
       });
     } finally {
@@ -296,7 +297,7 @@ export function BuyerVerification() {
     }
   };
 
-  const isCodeComplete = code.every(digit => digit !== "");
+  const isCodeComplete = code.every((digit) => digit !== "");
 
   // Show success message if verification successful
   if (showSuccess) {
@@ -310,17 +311,22 @@ export function BuyerVerification() {
               <div className="w-32 h-32 mx-auto relative">
                 {/* Party/celebration emoji style icon */}
                 <div className="text-6xl">🎉</div>
-                <div className="absolute -top-2 -right-2 text-2xl animate-bounce">✨</div>
-                <div className="absolute -bottom-2 -left-2 text-2xl animate-bounce delay-300">🎊</div>
+                <div className="absolute -top-2 -right-2 text-2xl animate-bounce">
+                  ✨
+                </div>
+                <div className="absolute -bottom-2 -left-2 text-2xl animate-bounce delay-300">
+                  🎊
+                </div>
               </div>
             </div>
 
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
               Welcome to Lucent Ag
             </h1>
-            
+
             <p className="text-gray-600 text-base leading-relaxed mb-12">
-              We're glad to have you here. We'll show you how to use the app, step by step. It's quick and easy.
+              We're glad to have you here. We'll show you how to use the app,
+              step by step. It's quick and easy.
             </p>
 
             {/* Action buttons */}
@@ -332,7 +338,7 @@ export function BuyerVerification() {
               >
                 Show Me How
               </Button>
-              
+
               <div className="relative group">
                 <Button
                   onClick={handleSkip}
@@ -360,17 +366,22 @@ export function BuyerVerification() {
               <div className="w-40 h-40 mx-auto relative">
                 {/* Party/celebration emoji style icon */}
                 <div className="text-8xl">🎉</div>
-                <div className="absolute -top-4 -right-4 text-3xl animate-bounce">✨</div>
-                <div className="absolute -bottom-4 -left-4 text-3xl animate-bounce delay-300">🎊</div>
+                <div className="absolute -top-4 -right-4 text-3xl animate-bounce">
+                  ✨
+                </div>
+                <div className="absolute -bottom-4 -left-4 text-3xl animate-bounce delay-300">
+                  🎊
+                </div>
               </div>
             </div>
 
             <h1 className="text-4xl font-bold text-gray-900 mb-6">
               Welcome to Lucent Ag
             </h1>
-            
+
             <p className="text-gray-600 text-lg leading-relaxed mb-12">
-              We're glad to have you here. We'll show you how to use the app, step by step. It's quick and easy.
+              We're glad to have you here. We'll show you how to use the app,
+              step by step. It's quick and easy.
             </p>
 
             {/* Action buttons */}
@@ -382,7 +393,7 @@ export function BuyerVerification() {
               >
                 Show Me How
               </Button>
-              
+
               <div className="relative group">
                 <Button
                   onClick={handleSkip}
@@ -413,13 +424,14 @@ export function BuyerVerification() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Verify your account
           </h1>
-          
+
           <p className="text-base font-medium text-gray-900 mb-6">
             Almost There!
           </p>
 
           <p className="text-gray-600 text-sm leading-relaxed mb-8">
-            We've sent a 6-digit code to your email or phone number. Enter the code below to verify your account and continue.
+            We've sent a 6-digit code to your email or phone number. Enter the
+            code below to verify your account and continue.
           </p>
 
           {/* 6-digit code input */}
@@ -435,8 +447,8 @@ export function BuyerVerification() {
                 onChange={(e) => handleInputChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className={`w-12 h-12 text-center text-lg font-semibold border-2 rounded-lg focus:outline-none transition-colors ${
-                  hasError 
-                    ? "border-red-500 focus:border-red-600" 
+                  hasError
+                    ? "border-red-500 focus:border-red-600"
                     : "border-gray-200 focus:border-green-600"
                 }`}
                 maxLength={1}
@@ -497,13 +509,14 @@ export function BuyerVerification() {
           <h1 className="text-3xl font-bold text-gray-900 mb-3">
             Verify your account
           </h1>
-          
+
           <p className="text-lg font-medium text-gray-900 mb-6">
             Almost There!
           </p>
 
           <p className="text-gray-600 leading-relaxed mb-8">
-            We've sent a 6-digit code to your email or phone number. Enter the code below to verify your account and continue.
+            We've sent a 6-digit code to your email or phone number. Enter the
+            code below to verify your account and continue.
           </p>
 
           {/* 6-digit code input */}
@@ -519,8 +532,8 @@ export function BuyerVerification() {
                 onChange={(e) => handleInputChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className={`w-14 h-14 text-center text-xl font-semibold border-2 rounded-xl focus:outline-none transition-colors ${
-                  hasError 
-                    ? "border-red-500 focus:border-red-600" 
+                  hasError
+                    ? "border-red-500 focus:border-red-600"
                     : "border-gray-200 focus:border-green-600"
                 }`}
                 maxLength={1}

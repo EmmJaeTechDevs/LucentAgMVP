@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { BaseUrl } from "../../../config";
+import { BaseUrl } from "../../../Baseconfig";
 
 export function FarmerVerification() {
   const [location, setLocation] = useLocation();
@@ -84,10 +84,7 @@ export function FarmerVerification() {
       };
 
       console.log("=== VERIFY OTP REQUEST ===");
-      console.log(
-        "URL:",
-        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
-      );
+      console.log("URL:", `${BaseUrl}/api/auth/verify-otp`);
       console.log("Method:", "POST");
       console.log("Headers:", {
         "Content-Type": "application/json",
@@ -99,18 +96,15 @@ export function FarmerVerification() {
       console.log("OTP Code:", verificationCode);
 
       // Send POST request to verify OTP using CORS proxy
-      const response = await fetch(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/verify-otp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-          body: JSON.stringify(requestData),
+      const response = await fetch(`${BaseUrl}/api/auth/verify-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-Requested-With": "XMLHttpRequest",
         },
-      );
+        body: JSON.stringify(requestData),
+      });
 
       console.log("=== VERIFY OTP RESPONSE ===");
       console.log("Response Status:", response.status);
@@ -142,7 +136,8 @@ export function FarmerVerification() {
         toast({
           variant: "destructive",
           title: "Invalid OTP",
-          description: "Invalid or wrong OTP. Please check your code and try again.",
+          description:
+            "Invalid or wrong OTP. Please check your code and try again.",
         });
         setHasError(true);
       } else {
@@ -204,10 +199,7 @@ export function FarmerVerification() {
       };
 
       console.log("=== RESEND OTP REQUEST ===");
-      console.log(
-        "URL:",
-        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
-      );
+      console.log("URL:", `${BaseUrl}/api/auth/request-otp`);
       console.log("Method:", "POST");
       console.log("Headers:", {
         "Content-Type": "application/json",
@@ -218,18 +210,15 @@ export function FarmerVerification() {
       console.log("Farmer ID:", farmerId);
 
       // Send POST request to resend OTP
-      const response = await fetch(
-        "https://lucent-ag-api-damidek.replit.app/api/auth/request-otp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "X-Requested-With": "XMLHttpRequest",
-          },
-          body: JSON.stringify(requestData),
+      const response = await fetch(`${BaseUrl}/api/auth/request-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-Requested-With": "XMLHttpRequest",
         },
-      );
+        body: JSON.stringify(requestData),
+      });
 
       console.log("=== RESEND OTP RESPONSE ===");
       console.log("Response Status:", response.status);
