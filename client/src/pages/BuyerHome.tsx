@@ -164,13 +164,14 @@ export function BuyerHome() {
                 Ready for something fresh today?
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <button
                 onClick={handleProfileClick}
-                className="p-3 hover:bg-gray-100 rounded-xl transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-green-50 hover:bg-green-100 text-green-700 font-medium rounded-lg transition-all duration-200 hover:scale-105"
                 data-testid="button-profile"
               >
-                <User className="w-6 h-6 text-gray-700" />
+                <User className="w-5 h-5" />
+                <span className="text-sm font-semibold">Profile</span>
               </button>
               <button
                 onClick={handleCartClick}
@@ -329,13 +330,23 @@ export function BuyerHome() {
                 Ready for something fresh today?
               </p>
             </div>
-            <button
-              onClick={handleCartClick}
-              className="p-4 hover:bg-gray-100 rounded-xl transition-colors"
-              data-testid="button-cart-desktop"
-            >
-              <ShoppingCart className="w-8 h-8 text-gray-700" />
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleProfileClick}
+                className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+                data-testid="button-profile-desktop"
+              >
+                <User className="w-6 h-6" />
+                <span className="text-lg">My Profile</span>
+              </button>
+              <button
+                onClick={handleCartClick}
+                className="p-4 hover:bg-gray-100 rounded-xl transition-colors"
+                data-testid="button-cart-desktop"
+              >
+                <ShoppingCart className="w-8 h-8 text-gray-700" />
+              </button>
+            </div>
           </div>
 
           {/* Search Bar */}
