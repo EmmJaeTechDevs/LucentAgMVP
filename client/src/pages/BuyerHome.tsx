@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Search, ShoppingCart } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, ShoppingCart, User } from "lucide-react";
 import { useLocation } from "wouter";
 import TomatoesImage from "@assets/image 15.png";
 import SweetPotatoImage from "@assets/Frame 8.png";
@@ -17,6 +17,7 @@ export function BuyerHome() {
   const [selectedProduct, setSelectedProduct] = useState<any>(undefined);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isHarvestingModalOpen, setIsHarvestingModalOpen] = useState(false);
+  const [userLastName, setUserLastName] = useState("John");
 
   const categories = ["All", "Leafy Greens", "Fruits", "Grains", "Vegetables"];
 
@@ -130,6 +131,26 @@ export function BuyerHome() {
     setLocation("/cart");
   };
 
+  const handleProfileClick = () => {
+    setLocation("/buyer-profile");
+  };
+
+  // Load user data from session storage
+  useEffect(() => {
+    const buyerSession = sessionStorage.getItem("buyerSession");
+    if (buyerSession) {
+      try {
+        const sessionData = JSON.parse(buyerSession);
+        const now = new Date().getTime();
+        if (now < sessionData.expiry && sessionData.lastName) {
+          setUserLastName(sessionData.lastName);
+        }
+      } catch (error) {
+        console.error("Error parsing buyer session:", error);
+      }
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Layout */}
@@ -138,18 +159,27 @@ export function BuyerHome() {
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Hello John!</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Hello {userLastName}!</h1>
               <p className="text-gray-600 text-sm">
                 Ready for something fresh today?
               </p>
             </div>
-            <button
-              onClick={handleCartClick}
-              className="p-3 hover:bg-gray-100 rounded-xl transition-colors"
-              data-testid="button-cart"
-            >
-              <ShoppingCart className="w-6 h-6 text-gray-700" />
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleProfileClick}
+                className="p-3 hover:bg-gray-100 rounded-xl transition-colors"
+                data-testid="button-profile"
+              >
+                <User className="w-6 h-6 text-gray-700" />
+              </button>
+              <button
+                onClick={handleCartClick}
+                className="p-3 hover:bg-gray-100 rounded-xl transition-colors"
+                data-testid="button-cart"
+              >
+                <ShoppingCart className="w-6 h-6 text-gray-700" />
+              </button>
+            </div>
           </div>
 
           {/* Search Bar */}
@@ -294,7 +324,7 @@ export function BuyerHome() {
           {/* Header */}
           <div className="flex items-center justify-between mb-10">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900">Hello John!</h1>
+              <h1 className="text-4xl font-bold text-gray-900">Hello {userLastName}!</h1>
               <p className="text-gray-600 text-xl">
                 Ready for something fresh today?
               </p>

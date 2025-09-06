@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { 
@@ -14,7 +14,7 @@ import {
 
 export function FarmerDashboard() {
   const [, setLocation] = useLocation();
-  const [userName] = useState("John"); // This would come from user data
+  const [userName, setUserName] = useState("John");
 
   const handleAddNewCrop = () => {
     // Navigate to add crop page or open modal
@@ -38,7 +38,7 @@ export function FarmerDashboard() {
   };
 
   const handleEditProfile = () => {
-    console.log("Edit profile clicked");
+    setLocation("/farmer-profile");
   };
 
   const handleContactSupport = () => {
@@ -51,6 +51,22 @@ export function FarmerDashboard() {
     if (hour < 17) return "Good Afternoon";
     return "Good Evening";
   };
+
+  // Load user data from session storage
+  useEffect(() => {
+    const farmerSession = sessionStorage.getItem("farmerSession");
+    if (farmerSession) {
+      try {
+        const sessionData = JSON.parse(farmerSession);
+        const now = new Date().getTime();
+        if (now < sessionData.expiry && sessionData.lastName) {
+          setUserName(sessionData.lastName);
+        }
+      } catch (error) {
+        console.error("Error parsing farmer session:", error);
+      }
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">

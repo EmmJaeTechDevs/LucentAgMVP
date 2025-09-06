@@ -30,6 +30,8 @@ import { BuyerHome } from "@/pages/BuyerHome";
 import { Cart } from "@/pages/Cart";
 import { Checkout } from "@/pages/Checkout";
 import { Login } from "@/pages/Login";
+import { BuyerProfile } from "@/pages/BuyerProfile";
+import { FarmerProfile } from "@/pages/FarmerProfile";
 
 function Router() {
   return (
@@ -58,6 +60,8 @@ function Router() {
       <Route path="/cart" component={Cart} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/login" component={Login} />
+      <Route path="/buyer-profile" component={BuyerProfile} />
+      <Route path="/farmer-profile" component={FarmerProfile} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
