@@ -1,6 +1,18 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { 
   Leaf, 
   Plus, 
@@ -9,12 +21,14 @@ import {
   Bell, 
   Settings, 
   User, 
-  Headphones 
+  Headphones,
+  LogOut 
 } from "lucide-react";
 
 export function FarmerDashboard() {
   const [, setLocation] = useLocation();
   const [userName, setUserName] = useState("John");
+  const { toast } = useToast();
 
   const handleAddNewCrop = () => {
     // Navigate to add crop page or open modal
@@ -43,6 +57,20 @@ export function FarmerDashboard() {
 
   const handleContactSupport = () => {
     console.log("Contact support clicked");
+  };
+
+  const handleLogout = () => {
+    // Clear all session and local storage data
+    sessionStorage.clear();
+    localStorage.clear();
+    
+    toast({
+      title: "✅ Logged Out Successfully",
+      description: "You have been securely logged out.",
+    });
+    
+    // Redirect to logged out page
+    setLocation("/logged-out");
   };
 
   const getGreeting = () => {
@@ -186,6 +214,34 @@ export function FarmerDashboard() {
                 Contact Support
               </span>
             </button>
+            
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button
+                  className="bg-red-50 rounded-2xl p-6 shadow-sm border border-red-100 hover:shadow-md transition-all text-center"
+                  data-testid="button-logout"
+                >
+                  <LogOut className="w-8 h-8 text-red-600 mx-auto mb-3" />
+                  <span className="text-red-600 font-medium text-sm">
+                    Log Out
+                  </span>
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You're about to log out of your account. Your session will end and you'll need to sign in again to access your account.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
+                    Log Out
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>
@@ -307,6 +363,34 @@ export function FarmerDashboard() {
                 Contact Support
               </span>
             </button>
+            
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button
+                  className="bg-red-50 rounded-2xl p-6 shadow-sm border border-red-100 hover:shadow-lg transition-all text-center hover:scale-105"
+                  data-testid="button-logout-desktop"
+                >
+                  <LogOut className="w-10 h-10 text-red-600 mx-auto mb-4" />
+                  <span className="text-red-600 font-medium text-lg block">
+                    Log Out
+                  </span>
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You're about to log out of your account. Your session will end and you'll need to sign in again to access your account.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
+                    Log Out
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>

@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Search, ShoppingCart, User } from "lucide-react";
+import { Search, ShoppingCart, User, LogOut } from "lucide-react";
 import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import TomatoesImage from "@assets/image 15.png";
 import SweetPotatoImage from "@assets/Frame 8.png";
 import CabbageImage from "@assets/Frame 9.png";
@@ -18,6 +30,7 @@ export function BuyerHome() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isHarvestingModalOpen, setIsHarvestingModalOpen] = useState(false);
   const [userLastName, setUserLastName] = useState("John");
+  const { toast } = useToast();
 
   const categories = ["All", "Leafy Greens", "Fruits", "Grains", "Vegetables"];
 
@@ -135,6 +148,20 @@ export function BuyerHome() {
     setLocation("/buyer-profile");
   };
 
+  const handleLogout = () => {
+    // Clear all session and local storage data
+    sessionStorage.clear();
+    localStorage.clear();
+    
+    toast({
+      title: "✅ Logged Out Successfully",
+      description: "You have been securely logged out.",
+    });
+    
+    // Redirect to logged out page
+    setLocation("/logged-out");
+  };
+
   // Load user data from session storage
   useEffect(() => {
     const buyerSession = sessionStorage.getItem("buyerSession");
@@ -164,13 +191,13 @@ export function BuyerHome() {
                 Ready for something fresh today?
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={handleProfileClick}
-                className="flex items-center gap-2 px-4 py-2 bg-green-50 hover:bg-green-100 text-green-700 font-medium rounded-lg transition-all duration-200 hover:scale-105"
+                className="flex items-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 font-medium rounded-lg transition-all duration-200 hover:scale-105"
                 data-testid="button-profile"
               >
-                <User className="w-5 h-5" />
+                <User className="w-4 h-4" />
                 <span className="text-sm font-semibold">Profile</span>
               </button>
               <button
@@ -180,6 +207,30 @@ export function BuyerHome() {
               >
                 <ShoppingCart className="w-6 h-6 text-gray-700" />
               </button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    className="p-3 hover:bg-red-50 rounded-xl transition-colors"
+                    data-testid="button-logout"
+                  >
+                    <LogOut className="w-6 h-6 text-red-600" />
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      You're about to log out of your account. Your session will end and you'll need to sign in again to access your account.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
+                      Log Out
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
 
@@ -346,6 +397,31 @@ export function BuyerHome() {
               >
                 <ShoppingCart className="w-8 h-8 text-gray-700" />
               </button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    className="flex items-center gap-2 px-4 py-3 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-xl transition-all duration-300 hover:scale-105"
+                    data-testid="button-logout-desktop"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span>Log Out</span>
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      You're about to log out of your account. Your session will end and you'll need to sign in again to access your account.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
+                      Log Out
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
 
