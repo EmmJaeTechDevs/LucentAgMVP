@@ -105,17 +105,17 @@ export function Login() {
           return;
         }
 
-        // Store userId and user data in session storage
+        // Store complete user data in session storage with 24-hour expiry
         const sessionData = {
           userId: userId,
-          userType: user.userType,
-          token: token,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
           phone: user.phone,
+          token: token,
+          userType: user.userType,
           isVerified: user.isVerified,
-          expiry: new Date().getTime() + (2 * 60 * 60 * 1000) // 2 hours
+          expiry: new Date().getTime() + (24 * 60 * 60 * 1000) // 24 hours
         };
 
         if (user.userType === "farmer") {
@@ -124,7 +124,7 @@ export function Login() {
           sessionStorage.setItem("buyerSession", JSON.stringify(sessionData));
         }
 
-        // Also store in localStorage if remember login is checked
+        // Also store in localStorage if remember login is checked (30 days)
         if (formData.rememberLogin) {
           const longTermSession = {
             ...sessionData,
@@ -196,10 +196,10 @@ export function Login() {
             const userId = errorData.user?.id;
             
             if (userId) {
-              // Store user ID for verification
+              // Store user ID for verification with 24-hour expiry
               const verificationData = {
                 userId: userId,
-                expiry: new Date().getTime() + (2 * 60 * 60 * 1000) // 2 hours
+                expiry: new Date().getTime() + (24 * 60 * 60 * 1000) // 24 hours
               };
               
               // Determine user type from identifier format (email vs phone)
