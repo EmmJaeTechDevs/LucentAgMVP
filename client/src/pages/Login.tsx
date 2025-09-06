@@ -247,6 +247,68 @@ export function Login() {
               description: errorMessage || "Invalid credentials. Please try again.",
             });
           }
+        } else if (status === 403) {
+          // Handle 403 - Account not verified (new response format)
+          const errorData = error.response?.data;
+          if (errorData?.type === "account_not_verified") {
+            const userId = errorData.user?.id;
+            
+            if (userId) {
+              console.log("=== 403 ACCOUNT NOT VERIFIED ===");
+              console.log("User ID:", userId);
+              
+              // Store user ID for verification with 24-hour expiry
+              const verificationData = {
+                userId: userId,
+                expiry: new Date().getTime() + (24 * 60 * 60 * 1000) // 24 hours
+              };
+              
+              // Determine user type from identifier format (email vs phone)
+              const isEmail = validateInput(formData.emailOrPhone, "email");
+              const userType = isEmail ? "buyer" : "farmer";
+              
+              if (userType === "farmer") {
+                sessionStorage.setItem("farmerSession", JSON.stringify({
+                  ...verificationData,
+                  userType: "farmer"
+                }));
+                localStorage.setItem("farmerUserId", userId);
+              } else {
+                sessionStorage.setItem("buyerSession", JSON.stringify({
+                  ...verificationData,
+                  userType: "buyer"
+                }));
+                localStorage.setItem("buyerUserId", userId);
+              }
+              
+              // Send OTP request automatically
+              await requestOTPForLogin(userId, userType);
+              
+              // Show notification and redirect to verification page
+              toast({
+                title: "✅ Verification Code Sent",
+                description: "Please check your phone for the verification code.",
+              });
+              
+              if (userType === "farmer") {
+                setLocation("/farmer-verification");
+              } else {
+                setLocation("/buyer-verification");
+              }
+            } else {
+              toast({
+                variant: "destructive",
+                title: "Verification Required",
+                description: errorData.message || "Account not verified. Please verify your phone number.",
+              });
+            }
+          } else {
+            toast({
+              variant: "destructive",
+              title: "Access Forbidden",
+              description: errorMessage || "Access denied. Please try again.",
+            });
+          }
         } else if (status === 404) {
           // User not found
           setErrors({
