@@ -117,12 +117,12 @@ export function ResetPassword() {
       console.log("Token present:", !!token);
 
       const requestData = {
-        userId: userId,
         token: token,
-        newPassword: newPassword.trim()
+        password: newPassword.trim(),
+        confirmPassword: confirmPassword.trim()
       };
 
-      console.log("Request Data:", { ...requestData, newPassword: "[HIDDEN]" });
+      console.log("Request Data:", { ...requestData, password: "[HIDDEN]", confirmPassword: "[HIDDEN]" });
 
       const response = await axios.post(
         `${BaseUrl}/api/auth/reset-password`,
@@ -152,7 +152,7 @@ export function ResetPassword() {
 
           toast({
             title: "✅ Password Reset Successful",
-            description: responseData.message || "Your password has been successfully reset. You can now log in with your new password.",
+            description: responseData.message,
           });
 
           // Redirect to login page
