@@ -10,7 +10,6 @@ export function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const [loginType, setLoginType] = useState<"email" | "phone">("email");
   const [formData, setFormData] = useState({
     emailOrPhone: "",
     password: "",
@@ -18,12 +17,12 @@ export function Login() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({
-    identifier: "",
+    emailOrPhone: "",
     password: "",
   });
 
   const clearErrors = () => {
-    setErrors({ identifier: "", password: "" });
+    setErrors({ emailOrPhone: "", password: "" });
   };
 
   const validateInput = (value: string, type: "email" | "phone") => {
@@ -51,10 +50,11 @@ export function Login() {
     clearErrors();
 
     try {
-      // Validate input format first
-      if (!validateInput(formData.emailOrPhone, loginType)) {
+      // Determine input type and validate format
+      const inputType = formData.emailOrPhone.includes("@") ? "email" : "phone";
+      if (!validateInput(formData.emailOrPhone, inputType)) {
         setErrors({
-          identifier: `${loginType === "email" ? "Email address" : "Phone number"} unrecognised. Please check and try again`,
+          emailOrPhone: `${inputType === "email" ? "Email address" : "Phone number"} unrecognised. Please check and try again`,
           password: "",
         });
         return;
@@ -67,7 +67,7 @@ export function Login() {
       };
 
       console.log("=== LOGIN REQUEST (AXIOS) ===");
-      console.log("Login Type:", loginType);
+      console.log("Input Type:", inputType);
       console.log("Login Data:", loginData);
 
       // Backend API endpoint (using the same as signup pages)
@@ -204,7 +204,7 @@ export function Login() {
               
               // Determine user type from identifier format (email vs phone)
               const isEmail = validateInput(formData.emailOrPhone, "email");
-              const userType = isEmail ? "buyer" : "farmer"; // Adjust this logic based on your app requirements
+              const userType = isEmail ? "buyer" : "farmer";
               
               if (userType === "farmer") {
                 sessionStorage.setItem("farmerSession", JSON.stringify({
@@ -312,7 +312,7 @@ export function Login() {
         } else if (status === 404) {
           // User not found
           setErrors({
-            emailOrPhone: `${loginType === "email" ? "Email address" : "Phone number"} unrecognised. Please check and try again`,
+            emailOrPhone: "Email address or phone number unrecognised. Please check and try again",
             password: "",
           });
         } else if (status === 400) {
@@ -454,53 +454,30 @@ export function Login() {
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
-            {/* Login Type Toggle */}
-            <div className="flex items-center space-x-3 mb-4">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={loginType === "phone"}
-                  onChange={() =>
-                    setLoginType(loginType === "email" ? "phone" : "email")
-                  }
-                  className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
-                  data-testid="toggle-login-type"
-                />
-                <span className="text-sm text-gray-700">
-                  {loginType === "email"
-                    ? "Login with Phone number instead"
-                    : "Login with Email instead"}
-                </span>
-              </label>
-            </div>
 
             {/* Email/Phone Input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {loginType === "email" ? "Email Address" : "Phone Number"}
+                Email or Phone Number
               </label>
               <input
-                type={loginType === "email" ? "email" : "tel"}
+                type="text"
                 value={formData.emailOrPhone}
                 onChange={(e) =>
                   handleInputChange("emailOrPhone", e.target.value)
                 }
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
                   errors.emailOrPhone
-                    ? "border-red-500 focus:border-red-600 focus:ring-red-200"
+                    ? "border-orange-500 focus:border-orange-600 focus:ring-orange-200"
                     : "border-gray-300 focus:border-green-600 focus:ring-green-200"
                 }`}
-                placeholder={
-                  loginType === "email"
-                    ? "Enter your email address"
-                    : "Enter your phone number"
-                }
+                placeholder="Please input your email or phone number here"
                 required
-                data-testid={`input-${loginType}`}
+                data-testid="input-email-phone"
               />
               {errors.emailOrPhone && (
                 <p
-                  className="mt-2 text-sm text-red-600"
+                  className="mt-2 text-sm text-orange-600"
                   data-testid="error-email-phone"
                 >
                   {errors.emailOrPhone}
@@ -519,7 +496,7 @@ export function Login() {
                 onChange={(e) => handleInputChange("password", e.target.value)}
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
                   errors.password
-                    ? "border-red-500 focus:border-red-600 focus:ring-red-200"
+                    ? "border-orange-500 focus:border-orange-600 focus:ring-orange-200"
                     : "border-gray-300 focus:border-green-600 focus:ring-green-200"
                 }`}
                 placeholder="Enter your password"
@@ -528,7 +505,7 @@ export function Login() {
               />
               {errors.password && (
                 <p
-                  className="mt-2 text-sm text-red-600"
+                  className="mt-2 text-sm text-orange-600"
                   data-testid="error-password"
                 >
                   {errors.password}
@@ -611,56 +588,33 @@ export function Login() {
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
-            {/* Login Type Toggle */}
-            <div className="flex items-center space-x-3 mb-6">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={loginType === "phone"}
-                  onChange={() =>
-                    setLoginType(loginType === "email" ? "phone" : "email")
-                  }
-                  className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
-                  data-testid="toggle-login-type-desktop"
-                />
-                <span className="text-gray-700">
-                  {loginType === "email"
-                    ? "Login with Phone number instead"
-                    : "Login with Email instead"}
-                </span>
-              </label>
-            </div>
 
             {/* Email/Phone Input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {loginType === "email" ? "Email Address" : "Phone Number"}
+                Email or Phone Number
               </label>
               <input
-                type={loginType === "email" ? "email" : "tel"}
+                type="text"
                 value={formData.emailOrPhone}
                 onChange={(e) =>
                   handleInputChange("emailOrPhone", e.target.value)
                 }
                 className={`w-full px-4 py-4 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-lg ${
                   errors.emailOrPhone
-                    ? "border-red-500 focus:border-red-600 focus:ring-red-200"
+                    ? "border-orange-500 focus:border-orange-600 focus:ring-orange-200"
                     : "border-gray-300 focus:border-green-600 focus:ring-green-200"
                 }`}
-                placeholder={
-                  loginType === "email"
-                    ? "Enter your email address"
-                    : "Enter your phone number"
-                }
+                placeholder="Please input your email or phone number here"
                 required
-                data-testid={`input-${loginType}-desktop`}
+                data-testid="input-email-phone-desktop"
               />
-              {errors.identifier && (
+              {errors.emailOrPhone && (
                 <p
-                  className="mt-2 text-red-600"
+                  className="mt-2 text-orange-600"
                   data-testid="error-email-phone-desktop"
                 >
-                  {errors.identifier}
+                  {errors.emailOrPhone}
                 </p>
               )}
             </div>
@@ -676,7 +630,7 @@ export function Login() {
                 onChange={(e) => handleInputChange("password", e.target.value)}
                 className={`w-full px-4 py-4 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-lg ${
                   errors.password
-                    ? "border-red-500 focus:border-red-600 focus:ring-red-200"
+                    ? "border-orange-500 focus:border-orange-600 focus:ring-orange-200"
                     : "border-gray-300 focus:border-green-600 focus:ring-green-200"
                 }`}
                 placeholder="Enter your password"
@@ -685,7 +639,7 @@ export function Login() {
               />
               {errors.password && (
                 <p
-                  className="mt-2 text-red-600"
+                  className="mt-2 text-orange-600"
                   data-testid="error-password-desktop"
                 >
                   {errors.password}
