@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { SessionCrypto } from "@/utils/sessionCrypto";
 import { BaseUrl } from "../../../Baseconfig";
 
 // THIS IS THE NEW BUYER REGISTRATION FORM
@@ -122,9 +123,11 @@ export const BuyerAccountCreation = (): JSX.Element => {
           expiry: expiryTime,
         };
         
-        sessionStorage.setItem("buyerSession", JSON.stringify(sessionData));
-        // Also store in localStorage for backward compatibility
-        localStorage.setItem("buyerUserId", userId);
+        // Encrypt sensitive session data before storing
+        const encryptedSessionData = SessionCrypto.encryptSessionData(sessionData);
+        sessionStorage.setItem("buyerSession", JSON.stringify(encryptedSessionData));
+        // Also store in localStorage for backward compatibility (encrypted)
+        localStorage.setItem("buyerUserId", SessionCrypto.encrypt(userId));
 
         // Show success message
         toast({

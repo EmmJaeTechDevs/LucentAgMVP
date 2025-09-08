@@ -213,18 +213,18 @@ export function Login() {
               const isEmail = validateInput(formData.emailOrPhone, "email");
               const userType = isEmail ? "buyer" : "farmer";
               
+              // Encrypt verification session data
+              const encryptedVerificationData = SessionCrypto.encryptSessionData({
+                ...verificationData,
+                userType: userType
+              });
+              
               if (userType === "farmer") {
-                sessionStorage.setItem("farmerSession", JSON.stringify({
-                  ...verificationData,
-                  userType: "farmer"
-                }));
-                localStorage.setItem("farmerUserId", userId);
+                sessionStorage.setItem("farmerSession", JSON.stringify(encryptedVerificationData));
+                localStorage.setItem("farmerUserId", SessionCrypto.encrypt(userId));
               } else {
-                sessionStorage.setItem("buyerSession", JSON.stringify({
-                  ...verificationData,
-                  userType: "buyer"
-                }));
-                localStorage.setItem("buyerUserId", userId);
+                sessionStorage.setItem("buyerSession", JSON.stringify(encryptedVerificationData));
+                localStorage.setItem("buyerUserId", SessionCrypto.encrypt(userId));
               }
               
               toast({

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { api } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
+import { SessionCrypto } from "@/utils/sessionCrypto";
 
 interface FormData {
   firstName: string;
@@ -119,9 +120,11 @@ export const FarmerAccountCreation = (): JSX.Element => {
           expiry: expiryTime
         };
         
-        sessionStorage.setItem("farmerSession", JSON.stringify(sessionData));
-        // Also store in localStorage for backward compatibility
-        localStorage.setItem("farmerUserId", userId);
+        // Encrypt sensitive session data before storing
+        const encryptedSessionData = SessionCrypto.encryptSessionData(sessionData);
+        sessionStorage.setItem("farmerSession", JSON.stringify(encryptedSessionData));
+        // Also store in localStorage for backward compatibility (encrypted)
+        localStorage.setItem("farmerUserId", SessionCrypto.encrypt(userId));
       }
       
       setLocation("/farmer-verification");
