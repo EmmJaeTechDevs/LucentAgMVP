@@ -149,7 +149,7 @@ export function FarmerVerification() {
         });
         setHasError(true);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("=== VERIFY OTP ERROR ===");
       console.error("Error verifying OTP:", error);
       console.error("Error type:", error.constructor.name);
@@ -257,7 +257,7 @@ export function FarmerVerification() {
           description: "Failed to resend verification code. Please try again.",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("=== RESEND OTP ERROR ===");
       console.error("Error resending OTP:", error);
       console.error("Error type:", error.constructor.name);
