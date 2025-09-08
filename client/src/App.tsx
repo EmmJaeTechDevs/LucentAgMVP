@@ -36,6 +36,7 @@ import { ForgotPassword } from "@/pages/ForgotPassword";
 import { ResetOTP } from "@/pages/ResetOTP";
 import { ResetPassword } from "@/pages/ResetPassword";
 import { LoggedOut } from "@/pages/LoggedOut";
+import { SessionExpired } from "@/pages/SessionExpired";
 
 function Router() {
   return (
@@ -70,6 +71,7 @@ function Router() {
       <Route path="/reset-otp" component={ResetOTP} />
       <Route path="/reset-password" component={ResetPassword} />
       <Route path="/logged-out" component={LoggedOut} />
+      <Route path="/session-expired" component={SessionExpired} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
