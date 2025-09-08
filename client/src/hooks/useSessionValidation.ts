@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "wouter";
+import { SessionCrypto } from "@/utils/sessionCrypto";
 
 interface SessionData {
   userId: string;
@@ -21,7 +22,8 @@ export function useSessionValidation(userType?: "buyer" | "farmer") {
         const buyerSession = sessionStorage.getItem("buyerSession");
         if (buyerSession) {
           try {
-            const sessionData: SessionData = JSON.parse(buyerSession);
+            const encryptedSessionData = JSON.parse(buyerSession);
+            const sessionData: SessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
             isValid = !!(sessionData.userId && sessionData.token && now < sessionData.expiry);
           } catch (error) {
             console.error("Error parsing buyer session:", error);
@@ -31,7 +33,8 @@ export function useSessionValidation(userType?: "buyer" | "farmer") {
         const farmerSession = sessionStorage.getItem("farmerSession");
         if (farmerSession) {
           try {
-            const sessionData: SessionData = JSON.parse(farmerSession);
+            const encryptedSessionData = JSON.parse(farmerSession);
+            const sessionData: SessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
             isValid = !!(sessionData.userId && sessionData.token && now < sessionData.expiry);
           } catch (error) {
             console.error("Error parsing farmer session:", error);
@@ -44,7 +47,8 @@ export function useSessionValidation(userType?: "buyer" | "farmer") {
         
         if (buyerSession) {
           try {
-            const sessionData: SessionData = JSON.parse(buyerSession);
+            const encryptedBuyerData = JSON.parse(buyerSession);
+            const sessionData: SessionData = SessionCrypto.decryptSessionData(encryptedBuyerData);
             if (sessionData.userId && sessionData.token && now < sessionData.expiry) {
               isValid = true;
             }
@@ -55,7 +59,8 @@ export function useSessionValidation(userType?: "buyer" | "farmer") {
         
         if (!isValid && farmerSession) {
           try {
-            const sessionData: SessionData = JSON.parse(farmerSession);
+            const encryptedFarmerData = JSON.parse(farmerSession);
+            const sessionData: SessionData = SessionCrypto.decryptSessionData(encryptedFarmerData);
             if (sessionData.userId && sessionData.token && now < sessionData.expiry) {
               isValid = true;
             }
