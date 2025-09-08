@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
+import { Eye, EyeOff } from "lucide-react";
 import { BaseUrl } from "../../../Baseconfig";
 
 // THIS IS THE NEW BUYER REGISTRATION FORM
@@ -25,6 +26,7 @@ interface BuyerFormData {
 
 export const BuyerAccountCreation = (): JSX.Element => {
   const [, setLocation] = useLocation();
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<BuyerFormData>({
     firstName: "",
     lastName: "",
@@ -351,20 +353,45 @@ export const BuyerAccountCreation = (): JSX.Element => {
               >
                 Password *
               </label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => handleInputChange("password", e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  border: "2px solid #ddd",
-                  borderRadius: "8px",
-                  fontSize: "16px",
-                }}
-                placeholder="Enter secure password"
-                required
-              />
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    paddingRight: "48px",
+                    border: "2px solid #ddd",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                  }}
+                  placeholder="Enter secure password"
+                  required
+                  data-testid="input-password-buyer"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#666",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "4px",
+                  }}
+                  data-testid="toggle-password-visibility-buyer"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
           </div>
 

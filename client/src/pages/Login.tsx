@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
+import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import { config } from "process";
 import { BaseUrl } from "../../../Baseconfig";
@@ -21,6 +22,7 @@ export function Login() {
     emailOrPhone: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const clearErrors = () => {
     setErrors({ emailOrPhone: "", password: "" });
@@ -497,19 +499,29 @@ export function Login() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => handleInputChange("password", e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
-                  errors.password
-                    ? "border-orange-500 focus:border-orange-600 focus:ring-orange-200"
-                    : "border-gray-300 focus:border-green-600 focus:ring-green-200"
-                }`}
-                placeholder="Enter your password"
-                required
-                data-testid="input-password"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
+                    errors.password
+                      ? "border-orange-500 focus:border-orange-600 focus:ring-orange-200"
+                      : "border-gray-300 focus:border-green-600 focus:ring-green-200"
+                  }`}
+                  placeholder="Enter your password"
+                  required
+                  data-testid="input-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center justify-center w-12 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  data-testid="toggle-password-visibility"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
               {errors.password && (
                 <p
                   className="mt-2 text-sm text-orange-600"
@@ -631,19 +643,29 @@ export function Login() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => handleInputChange("password", e.target.value)}
-                className={`w-full px-4 py-4 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-lg ${
-                  errors.password
-                    ? "border-orange-500 focus:border-orange-600 focus:ring-orange-200"
-                    : "border-gray-300 focus:border-green-600 focus:ring-green-200"
-                }`}
-                placeholder="Enter your password"
-                required
-                data-testid="input-password-desktop"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  className={`w-full px-4 py-4 pr-14 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-lg ${
+                    errors.password
+                      ? "border-orange-500 focus:border-orange-600 focus:ring-orange-200"
+                      : "border-gray-300 focus:border-green-600 focus:ring-green-200"
+                  }`}
+                  placeholder="Enter your password"
+                  required
+                  data-testid="input-password-desktop"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center justify-center w-14 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  data-testid="toggle-password-visibility-desktop"
+                >
+                  {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                </button>
+              </div>
               {errors.password && (
                 <p
                   className="mt-2 text-orange-600"

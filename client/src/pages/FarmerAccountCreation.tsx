@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { api } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
+import { Eye, EyeOff } from "lucide-react";
 
 interface FormData {
   firstName: string;
@@ -33,6 +34,7 @@ interface FormData {
 export const FarmerAccountCreation = (): JSX.Element => {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -205,13 +207,24 @@ export const FarmerAccountCreation = (): JSX.Element => {
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => handleInputChange("password", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  className="w-full px-3 py-2 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  required
+                  data-testid="input-password-farmer"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center justify-center w-12 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  data-testid="toggle-password-visibility-farmer"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
           </div>
 
