@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
+import { SessionCrypto } from "@/utils/sessionCrypto";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -89,7 +90,8 @@ export function FarmerDashboard() {
     const farmerSession = sessionStorage.getItem("farmerSession");
     if (farmerSession) {
       try {
-        const sessionData = JSON.parse(farmerSession);
+        const encryptedSessionData = JSON.parse(farmerSession);
+        const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
         const now = new Date().getTime();
         if (now < sessionData.expiry && sessionData.lastName) {
           setUserName(sessionData.lastName);

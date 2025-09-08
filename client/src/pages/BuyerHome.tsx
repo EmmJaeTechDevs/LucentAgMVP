@@ -3,6 +3,7 @@ import { Search, ShoppingCart, User, LogOut } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
+import { SessionCrypto } from "@/utils/sessionCrypto";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -171,7 +172,8 @@ export function BuyerHome() {
     const buyerSession = sessionStorage.getItem("buyerSession");
     if (buyerSession) {
       try {
-        const sessionData = JSON.parse(buyerSession);
+        const encryptedSessionData = JSON.parse(buyerSession);
+        const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
         const now = new Date().getTime();
         if (now < sessionData.expiry && sessionData.lastName) {
           setUserLastName(sessionData.lastName);

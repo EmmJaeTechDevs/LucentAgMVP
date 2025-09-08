@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Phone, Mail, MapPin, Edit3 } from "lucide-react";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
+import { SessionCrypto } from "@/utils/sessionCrypto";
 
 interface UserData {
   firstName: string;
@@ -26,7 +27,8 @@ export function BuyerProfile() {
     const buyerSession = sessionStorage.getItem("buyerSession");
     if (buyerSession) {
       try {
-        const sessionData = JSON.parse(buyerSession);
+        const encryptedSessionData = JSON.parse(buyerSession);
+        const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
         const now = new Date().getTime();
         
         if (now < sessionData.expiry) {

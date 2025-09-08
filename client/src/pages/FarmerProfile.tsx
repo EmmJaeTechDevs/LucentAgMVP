@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Phone, Mail, Leaf, Edit3 } from "lucide-react";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
+import { SessionCrypto } from "@/utils/sessionCrypto";
 
 interface UserData {
   firstName: string;
@@ -26,7 +27,8 @@ export function FarmerProfile() {
     const farmerSession = sessionStorage.getItem("farmerSession");
     if (farmerSession) {
       try {
-        const sessionData = JSON.parse(farmerSession);
+        const encryptedSessionData = JSON.parse(farmerSession);
+        const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
         const now = new Date().getTime();
         
         if (now < sessionData.expiry) {
