@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Phone, Mail, MapPin, Edit3 } from "lucide-react";
+import { useSessionValidation } from "@/hooks/useSessionValidation";
 
 interface UserData {
   firstName: string;
@@ -16,6 +17,9 @@ export function BuyerProfile() {
   const [, setLocation] = useLocation();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Validate buyer session
+  useSessionValidation("buyer");
 
   // Load user data from session storage
   useEffect(() => {

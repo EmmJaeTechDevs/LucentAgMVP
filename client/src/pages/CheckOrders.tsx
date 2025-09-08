@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, Leaf, ChevronRight } from "lucide-react";
+import { useSessionValidation } from "@/hooks/useSessionValidation";
 
 interface Order {
   id: string;
@@ -13,6 +14,9 @@ interface Order {
 export function CheckOrders() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<"pending" | "completed">("pending");
+
+  // Validate farmer session
+  useSessionValidation("farmer");
   
   // Sample orders data
   const orders: Order[] = [

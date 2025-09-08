@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Phone, Mail, Leaf, Edit3 } from "lucide-react";
+import { useSessionValidation } from "@/hooks/useSessionValidation";
 
 interface UserData {
   firstName: string;
@@ -16,6 +17,9 @@ export function FarmerProfile() {
   const [, setLocation] = useLocation();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Validate farmer session
+  useSessionValidation("farmer");
 
   // Load user data from session storage
   useEffect(() => {

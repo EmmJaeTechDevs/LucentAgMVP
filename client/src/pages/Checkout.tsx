@@ -5,6 +5,7 @@ import TomatoesImage from "@assets/image 15.png";
 import { DeliveryAddressModal } from "../components/DeliveryAddressModal";
 import { DeliveryNoteModal } from "../components/DeliveryNoteModal";
 import { OrderSuccessModal } from "../components/OrderSuccessModal";
+import { useSessionValidation } from "@/hooks/useSessionValidation";
 
 interface CartItem {
   id: number;
@@ -16,6 +17,9 @@ interface CartItem {
 }
 
 export function Checkout() {
+  // Validate buyer session (only buyers can checkout)
+  useSessionValidation("buyer");
+
   const [cartItems] = useState<CartItem[]>([
     {
       id: 1,

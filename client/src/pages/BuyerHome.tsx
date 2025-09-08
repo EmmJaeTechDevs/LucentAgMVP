@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search, ShoppingCart, User, LogOut } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useSessionValidation } from "@/hooks/useSessionValidation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +32,9 @@ export function BuyerHome() {
   const [isHarvestingModalOpen, setIsHarvestingModalOpen] = useState(false);
   const [userLastName, setUserLastName] = useState("John");
   const { toast } = useToast();
+
+  // Validate buyer session
+  useSessionValidation("buyer");
 
   const categories = ["All", "Leafy Greens", "Fruits", "Grains", "Vegetables"];
 

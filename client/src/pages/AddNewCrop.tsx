@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, Calendar } from "lucide-react";
+import { useSessionValidation } from "@/hooks/useSessionValidation";
 
 interface CropFormData {
   cropType: string;
@@ -15,6 +16,9 @@ interface CropFormData {
 
 export function AddNewCrop() {
   const [, setLocation] = useLocation();
+
+  // Validate farmer session
+  useSessionValidation("farmer");
   
   const [formData, setFormData] = useState<CropFormData>({
     cropType: "",

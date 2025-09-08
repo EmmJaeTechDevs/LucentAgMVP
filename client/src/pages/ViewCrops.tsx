@@ -1,9 +1,13 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Leaf } from "lucide-react";
+import { useSessionValidation } from "@/hooks/useSessionValidation";
 
 export function ViewCrops() {
   const [, setLocation] = useLocation();
+
+  // Validate farmer session
+  useSessionValidation("farmer");
 
   const handleGoBack = () => {
     setLocation("/farmer-dashboard");

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ArrowLeft, Trash2, Minus, Plus } from "lucide-react";
 import { Link } from "wouter";
 import TomatoesImage from "@assets/image 15.png";
+import { useSessionValidation } from "@/hooks/useSessionValidation";
 
 interface CartItem {
   id: number;
@@ -13,6 +14,9 @@ interface CartItem {
 }
 
 export function Cart() {
+  // Validate buyer session (only buyers can have shopping carts)
+  useSessionValidation("buyer");
+
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
       id: 1,

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useSessionValidation } from "@/hooks/useSessionValidation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +30,9 @@ export function FarmerDashboard() {
   const [, setLocation] = useLocation();
   const [userName, setUserName] = useState("John");
   const { toast } = useToast();
+
+  // Validate farmer session
+  useSessionValidation("farmer");
 
   const handleAddNewCrop = () => {
     // Navigate to add crop page or open modal

@@ -1,8 +1,12 @@
 import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
+import { useSessionValidation } from "@/hooks/useSessionValidation";
 
 export function Notifications() {
   const [, setLocation] = useLocation();
+
+  // Validate session (can be used by both farmers and buyers)
+  useSessionValidation();
 
   const handleGoBack = () => {
     setLocation("/farmer-dashboard");
