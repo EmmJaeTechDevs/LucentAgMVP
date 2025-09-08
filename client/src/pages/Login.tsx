@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { SessionCrypto } from "@/utils/sessionCrypto";
 import axios from "axios";
 import { config } from "process";
 import { BaseUrl } from "../../../Baseconfig";
@@ -118,10 +119,13 @@ export function Login() {
           expiry: new Date().getTime() + (8 * 60 * 60 * 1000) // 8 hours
         };
 
+        // Encrypt sensitive session data before storing
+        const encryptedSessionData = SessionCrypto.encryptSessionData(sessionData);
+        
         if (user.userType === "farmer") {
-          sessionStorage.setItem("farmerSession", JSON.stringify(sessionData));
+          sessionStorage.setItem("farmerSession", JSON.stringify(encryptedSessionData));
         } else if (user.userType === "buyer") {
-          sessionStorage.setItem("buyerSession", JSON.stringify(sessionData));
+          sessionStorage.setItem("buyerSession", JSON.stringify(encryptedSessionData));
         }
 
         // Also store in localStorage if remember login is checked (30 days)
@@ -131,12 +135,15 @@ export function Login() {
             expiry: new Date().getTime() + (30 * 24 * 60 * 60 * 1000) // 30 days
           };
           
+          // Encrypt long-term session data as well
+          const encryptedLongTermSession = SessionCrypto.encryptSessionData(longTermSession);
+          
           if (user.userType === "farmer") {
-            localStorage.setItem("farmerUserId", userId);
-            localStorage.setItem("farmerSession", JSON.stringify(longTermSession));
+            localStorage.setItem("farmerUserId", SessionCrypto.encrypt(userId));
+            localStorage.setItem("farmerSession", JSON.stringify(encryptedLongTermSession));
           } else if (user.userType === "buyer") {
-            localStorage.setItem("buyerUserId", userId);
-            localStorage.setItem("buyerSession", JSON.stringify(longTermSession));
+            localStorage.setItem("buyerUserId", SessionCrypto.encrypt(userId));
+            localStorage.setItem("buyerSession", JSON.stringify(encryptedLongTermSession));
           }
         }
 
