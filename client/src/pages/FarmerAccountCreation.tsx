@@ -106,7 +106,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
       
       if (userId) {
         const now = new Date().getTime();
-        const expiryTime = now + (24 * 60 * 60 * 1000); // 24 hours from now
+        const expiryTime = now + (8 * 60 * 60 * 1000); // 8 hours from now
         
         const sessionData = {
           userId: userId,

@@ -115,7 +115,7 @@ export function Login() {
           token: token,
           userType: user.userType,
           isVerified: user.isVerified,
-          expiry: new Date().getTime() + (24 * 60 * 60 * 1000) // 24 hours
+          expiry: new Date().getTime() + (8 * 60 * 60 * 1000) // 8 hours
         };
 
         if (user.userType === "farmer") {
@@ -199,7 +199,7 @@ export function Login() {
               // Store user ID for verification with 24-hour expiry
               const verificationData = {
                 userId: userId,
-                expiry: new Date().getTime() + (24 * 60 * 60 * 1000) // 24 hours
+                expiry: new Date().getTime() + (8 * 60 * 60 * 1000) // 8 hours
               };
               
               // Determine user type from identifier format (email vs phone)
@@ -260,7 +260,7 @@ export function Login() {
               // Store user ID for verification with 24-hour expiry
               const verificationData = {
                 userId: userId,
-                expiry: new Date().getTime() + (24 * 60 * 60 * 1000) // 24 hours
+                expiry: new Date().getTime() + (8 * 60 * 60 * 1000) // 8 hours
               };
               
               // Determine user type from identifier format (email vs phone)
