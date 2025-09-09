@@ -13,6 +13,8 @@ type ToasterToast = ToastProps & {
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  countdown?: number
+  createdAt?: number
 }
 
 const actionTypes = {
@@ -55,6 +57,8 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
+const countdownIntervals = new Map<string, ReturnType<typeof setInterval>>()
+
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
     return
@@ -62,6 +66,7 @@ const addToRemoveQueue = (toastId: string) => {
 
   const timeout = setTimeout(() => {
     toastTimeouts.delete(toastId)
+    countdownIntervals.delete(toastId)
     dispatch({
       type: "REMOVE_TOAST",
       toastId: toastId,
@@ -141,13 +146,17 @@ type Toast = Omit<ToasterToast, "id">
 
 function toast({ ...props }: Toast) {
   const id = genId()
+  const createdAt = Date.now()
 
   const update = (props: ToasterToast) =>
     dispatch({
       type: "UPDATE_TOAST",
       toast: { ...props, id },
     })
-  const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
+  const dismiss = () => {
+    countdownIntervals.delete(id)
+    dispatch({ type: "DISMISS_TOAST", toastId: id })
+  }
 
   dispatch({
     type: "ADD_TOAST",
@@ -155,11 +164,31 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
+      countdown: 100,
+      createdAt,
       onOpenChange: (open) => {
         if (!open) dismiss()
       },
     },
   })
+
+  // Start countdown interval
+  const interval = setInterval(() => {
+    const elapsed = Date.now() - createdAt
+    const remaining = Math.max(0, ((TOAST_REMOVE_DELAY - elapsed) / TOAST_REMOVE_DELAY) * 100)
+    
+    if (remaining <= 0) {
+      clearInterval(interval)
+      countdownIntervals.delete(id)
+    } else {
+      dispatch({
+        type: "UPDATE_TOAST",
+        toast: { id, countdown: remaining },
+      })
+    }
+  }, 50) // Update every 50ms for smooth animation
+
+  countdownIntervals.set(id, interval)
 
   return {
     id: id,
