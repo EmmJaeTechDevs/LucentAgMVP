@@ -26,28 +26,76 @@ interface FarmerPlant {
 }
 
 // Mapping function to convert server response to crop format
-const mapFarmerPlantsTocrops = (farmerPlantsData: FarmerPlant[]): Crop[] => {
+const mapFarmerPlantsTocrops = (farmerPlantsData: any[]): Crop[] => {
   if (!farmerPlantsData || farmerPlantsData.length === 0) {
     console.log("No farmer plants data to map");
     return [];
   }
   
-  console.log("Mapping farmer plants to crops:", farmerPlantsData);
+  console.log("📋 Raw server response structure:", JSON.stringify(farmerPlantsData, null, 2));
   
-  // Transform each farmer plant into crop format, displaying only plant name
-  const mappedCrops = farmerPlantsData.map((plant) => {
-    console.log("Mapping plant:", plant.plant.name);
-    return {
-      id: plant.plantId,
-      name: plant.plant.name, // Extract and display only the plant name
-      selected: true, // Farmer's existing plants are pre-selected
-      category: plant.plant.category,
-      landSize: plant.landSize,
-      notes: plant.notes,
-    };
+  // Transform each farmer plant into crop format with safe property access
+  const mappedCrops: Crop[] = [];
+  
+  farmerPlantsData.forEach((plant, index) => {
+    console.log(`🔍 Processing plant ${index + 1}:`, plant);
+    
+    // Check different possible data structures
+    let plantName = null;
+    let plantId = null;
+    let category = null;
+    let landSize = null;
+    let notes = null;
+    
+    // Try different ways the server might structure the data
+    if (plant && typeof plant === 'object') {
+      // Case 1: Expected structure { plant: { name: string, category: string }, plantId: string, ... }
+      if (plant.plant && plant.plant.name) {
+        plantName = plant.plant.name;
+        plantId = plant.plantId || plant.id;
+        category = plant.plant.category;
+        landSize = plant.landSize;
+        notes = plant.notes;
+      }
+      // Case 2: Flattened structure { name: string, category: string, id: string, ... }
+      else if (plant.name) {
+        plantName = plant.name;
+        plantId = plant.id || plant.plantId;
+        category = plant.category;
+        landSize = plant.landSize;
+        notes = plant.notes;
+      }
+      // Case 3: Different nesting { plantDetails: { name: string }, ... }
+      else if (plant.plantDetails && plant.plantDetails.name) {
+        plantName = plant.plantDetails.name;
+        plantId = plant.id || plant.plantId;
+        category = plant.plantDetails.category;
+        landSize = plant.landSize;
+        notes = plant.notes;
+      }
+      
+      // If we found a valid plant name, add it to crops
+      if (plantName) {
+        console.log(`✅ Successfully extracted plant: ${plantName}`);
+        mappedCrops.push({
+          id: plantId || `plant_${index}`,
+          name: plantName,
+          selected: true,
+          category: category || 'Unknown',
+          landSize: landSize || 'Unknown',
+          notes: notes || '',
+        });
+      } else {
+        console.error(`❌ Could not extract plant name from:`, plant);
+        console.error(`Available properties:`, Object.keys(plant));
+      }
+    } else {
+      console.error(`❌ Invalid plant data at index ${index}:`, plant);
+    }
   });
   
-  console.log("Successfully mapped", mappedCrops.length, "farmer plants to crops");
+  console.log(`✅ Successfully mapped ${mappedCrops.length} out of ${farmerPlantsData.length} plants`);
+  console.log("Final mapped crops:", mappedCrops.map(c => c.name));
   return mappedCrops;
 };
 
