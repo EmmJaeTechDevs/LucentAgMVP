@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { SessionCrypto } from "@/utils/sessionCrypto";
+import { BaseUrl } from "../../../Baseconfig";
 
 interface PreferenceOption {
   id: string;
@@ -10,8 +13,22 @@ interface PreferenceOption {
   checked: boolean;
 }
 
+interface FarmerPlant {
+  id: string;
+  farmerId: string;
+  plantId: string;
+  landSize: string;
+  notes: string;
+  plant: {
+    name: string;
+    category: string;
+  };
+}
+
 export function NotificationPreferences() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [preferences, setPreferences] = useState<PreferenceOption[]>([
     {
       id: "sms",
@@ -47,14 +64,99 @@ export function NotificationPreferences() {
     );
   };
 
-  const handleSaveChoices = () => {
+  const getAuthToken = () => {
+    try {
+      const sessionData = sessionStorage.getItem("farmerSession");
+      if (sessionData) {
+        const encryptedData = JSON.parse(sessionData);
+        const parsed = SessionCrypto.decryptSessionData(encryptedData);
+        return parsed.token;
+      }
+    } catch (error) {
+      console.error("Error getting auth token:", error);
+    }
+    return null;
+  };
+
+  const fetchFarmerPlants = async () => {
+    const token = getAuthToken();
+    
+    if (!token) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "Please log in again.",
+      });
+      setLocation("/login");
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${BaseUrl}/api/farmer/plants`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+      });
+
+      console.log("Farmer plants API response:", response.status);
+
+      if (response.status === 200) {
+        const plantsData: FarmerPlant[] = await response.json();
+        console.log("Farmer plants data:", plantsData);
+        
+        // Store the plants data in sessionStorage for CropSelection page
+        sessionStorage.setItem("farmerPlantsData", JSON.stringify(plantsData));
+        
+        return plantsData;
+      } else if (response.status === 401) {
+        toast({
+          variant: "destructive",
+          title: "Unauthorized",
+          description: "token required",
+        });
+        return null;
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch farmer plants data.",
+        });
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching farmer plants:", error);
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Please check your connection and try again.",
+      });
+      return null;
+    }
+  };
+
+  const handleSaveChoices = async () => {
     console.log("Notification preferences saved:", preferences);
+    setIsLoading(true);
+    
+    // Fetch farmer plants data before navigating
+    await fetchFarmerPlants();
+    
+    setIsLoading(false);
     // Navigate to crop selection
     setLocation("/crop-selection");
   };
 
-  const handleSkipForNow = () => {
+  const handleSkipForNow = async () => {
     console.log("Skipped notification preferences");
+    setIsLoading(true);
+    
+    // Fetch farmer plants data before navigating
+    await fetchFarmerPlants();
+    
+    setIsLoading(false);
     // Navigate to crop selection
     setLocation("/crop-selection");
   };
@@ -109,19 +211,21 @@ export function NotificationPreferences() {
           <div className="space-y-3">
             <Button
               onClick={handleSaveChoices}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-medium rounded-xl transition-colors"
+              disabled={isLoading}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="button-save-choices"
             >
-              Save My Choices
+              {isLoading ? "Loading..." : "Save My Choices"}
             </Button>
             
             <Button
               onClick={handleSkipForNow}
+              disabled={isLoading}
               variant="outline"
-              className="w-full border-2 border-gray-300 text-gray-600 hover:bg-gray-50 py-4 text-lg font-medium rounded-xl transition-colors"
+              className="w-full border-2 border-gray-300 text-gray-600 hover:bg-gray-50 py-4 text-lg font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="button-skip-for-now"
             >
-              Skip for Now
+              {isLoading ? "Loading..." : "Skip for Now"}
             </Button>
           </div>
         </div>
@@ -175,19 +279,21 @@ export function NotificationPreferences() {
           <div className="space-y-4">
             <Button
               onClick={handleSaveChoices}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-xl font-medium rounded-xl transition-all hover:scale-105"
+              disabled={isLoading}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-xl font-medium rounded-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               data-testid="button-save-choices-desktop"
             >
-              Save My Choices
+              {isLoading ? "Loading..." : "Save My Choices"}
             </Button>
             
             <Button
               onClick={handleSkipForNow}
+              disabled={isLoading}
               variant="outline"
-              className="w-full border-2 border-gray-300 text-gray-600 hover:bg-gray-50 py-4 text-xl font-medium rounded-xl transition-all hover:scale-105"
+              className="w-full border-2 border-gray-300 text-gray-600 hover:bg-gray-50 py-4 text-xl font-medium rounded-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               data-testid="button-skip-for-now-desktop"
             >
-              Skip for Now
+              {isLoading ? "Loading..." : "Skip for Now"}
             </Button>
           </div>
         </div>

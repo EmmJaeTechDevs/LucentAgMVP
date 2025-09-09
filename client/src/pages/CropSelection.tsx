@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Leaf, Plus } from "lucide-react";
@@ -8,21 +8,102 @@ interface Crop {
   id: string;
   name: string;
   selected: boolean;
+  category?: string;
+  landSize?: string;
+  notes?: string;
+}
+
+interface FarmerPlant {
+  id: string;
+  farmerId: string;
+  plantId: string;
+  landSize: string;
+  notes: string;
+  plant: {
+    name: string;
+    category: string;
+  };
 }
 
 export function CropSelection() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [crops, setCrops] = useState<Crop[]>([
-    { id: "maize", name: "Maize", selected: true },
-    { id: "tomatoes", name: "Tomatoes", selected: false },
-    { id: "yam", name: "Yam", selected: false },
-    { id: "beans", name: "Beans", selected: false },
-    { id: "groundnuts", name: "Groundnuts", selected: false },
-    { id: "rice", name: "Rice", selected: false },
-    { id: "cassava", name: "Cassava", selected: false },
-    { id: "pepper", name: "Pepper", selected: false }
-  ]);
+  const [crops, setCrops] = useState<Crop[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load farmer plants data from sessionStorage on component mount
+  useEffect(() => {
+    const loadFarmerPlants = () => {
+      try {
+        const farmerPlantsData = sessionStorage.getItem("farmerPlantsData");
+        
+        if (farmerPlantsData) {
+          const plantsData: FarmerPlant[] = JSON.parse(farmerPlantsData);
+          console.log("Loading farmer plants data:", plantsData);
+          
+          // Convert farmer plants to crop format
+          const farmerCrops: Crop[] = plantsData.map((plant) => ({
+            id: plant.plantId,
+            name: plant.plant.name,
+            selected: true, // Plants farmer already grows are selected by default
+            category: plant.plant.category,
+            landSize: plant.landSize,
+            notes: plant.notes,
+          }));
+          
+          // Add some default crops that farmers can also select if not already growing
+          const defaultCrops: Crop[] = [
+            { id: "maize", name: "Maize", selected: false },
+            { id: "tomatoes", name: "Tomatoes", selected: false },
+            { id: "yam", name: "Yam", selected: false },
+            { id: "beans", name: "Beans", selected: false },
+            { id: "groundnuts", name: "Groundnuts", selected: false },
+            { id: "rice", name: "Rice", selected: false },
+            { id: "cassava", name: "Cassava", selected: false },
+            { id: "pepper", name: "Pepper", selected: false }
+          ];
+          
+          // Merge farmer crops with default crops, avoiding duplicates
+          const existingCropNames = farmerCrops.map(crop => crop.name.toLowerCase());
+          const additionalCrops = defaultCrops.filter(
+            defaultCrop => !existingCropNames.includes(defaultCrop.name.toLowerCase())
+          );
+          
+          setCrops([...farmerCrops, ...additionalCrops]);
+        } else {
+          // Fallback to default crops if no data found
+          console.log("No farmer plants data found, using default crops");
+          setCrops([
+            { id: "maize", name: "Maize", selected: true },
+            { id: "tomatoes", name: "Tomatoes", selected: false },
+            { id: "yam", name: "Yam", selected: false },
+            { id: "beans", name: "Beans", selected: false },
+            { id: "groundnuts", name: "Groundnuts", selected: false },
+            { id: "rice", name: "Rice", selected: false },
+            { id: "cassava", name: "Cassava", selected: false },
+            { id: "pepper", name: "Pepper", selected: false }
+          ]);
+        }
+      } catch (error) {
+        console.error("Error loading farmer plants data:", error);
+        // Fallback to default crops on error
+        setCrops([
+          { id: "maize", name: "Maize", selected: true },
+          { id: "tomatoes", name: "Tomatoes", selected: false },
+          { id: "yam", name: "Yam", selected: false },
+          { id: "beans", name: "Beans", selected: false },
+          { id: "groundnuts", name: "Groundnuts", selected: false },
+          { id: "rice", name: "Rice", selected: false },
+          { id: "cassava", name: "Cassava", selected: false },
+          { id: "pepper", name: "Pepper", selected: false }
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadFarmerPlants();
+  }, []);
 
   const handleToggleCrop = (id: string) => {
     setCrops(prev => 
@@ -48,6 +129,17 @@ export function CropSelection() {
   };
 
   const hasSelectedCrops = crops.some(crop => crop.selected);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your crops...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
