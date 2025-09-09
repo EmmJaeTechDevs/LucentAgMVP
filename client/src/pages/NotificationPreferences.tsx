@@ -34,33 +34,33 @@ export function NotificationPreferences() {
       id: "sms",
       title: "SMS",
       description: "Get text messages on your phone",
-      checked: true
+      checked: true,
     },
     {
       id: "email",
       title: "Email",
       description: "Receive updates in your inbox",
-      checked: true
+      checked: true,
     },
     {
       id: "whatsapp",
       title: "WhatsApp",
       description: "We'll message you directly on WhatsApp",
-      checked: false
+      checked: false,
     },
     {
       id: "inapp",
       title: "In App",
       description: "See messages here in the app",
-      checked: false
-    }
+      checked: false,
+    },
   ]);
 
   const handleTogglePreference = (id: string) => {
-    setPreferences(prev => 
-      prev.map(pref => 
-        pref.id === id ? { ...pref, checked: !pref.checked } : pref
-      )
+    setPreferences((prev) =>
+      prev.map((pref) =>
+        pref.id === id ? { ...pref, checked: !pref.checked } : pref,
+      ),
     );
   };
 
@@ -80,7 +80,7 @@ export function NotificationPreferences() {
 
   const fetchFarmerPlants = async () => {
     const token = getAuthToken();
-    
+
     if (!token) {
       toast({
         variant: "destructive",
@@ -92,12 +92,12 @@ export function NotificationPreferences() {
     }
 
     try {
-      const response = await fetch(`${BaseUrl}/api/farmer/plants`, {
+      const response = await fetch(`${BaseUrl}/api/plants`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          Accept: "application/json",
         },
       });
 
@@ -106,10 +106,10 @@ export function NotificationPreferences() {
       if (response.status === 200) {
         const plantsData: FarmerPlant[] = await response.json();
         console.log("Farmer plants data:", plantsData);
-        
+
         // Store the plants data in sessionStorage for CropSelection page
         sessionStorage.setItem("farmerPlantsData", JSON.stringify(plantsData));
-        
+
         return plantsData;
       } else if (response.status === 401) {
         toast({
@@ -140,10 +140,10 @@ export function NotificationPreferences() {
   const handleSaveChoices = async () => {
     console.log("Notification preferences saved:", preferences);
     setIsLoading(true);
-    
+
     // Fetch farmer plants data before navigating
     await fetchFarmerPlants();
-    
+
     setIsLoading(false);
     // Navigate to crop selection
     setLocation("/crop-selection");
@@ -152,10 +152,10 @@ export function NotificationPreferences() {
   const handleSkipForNow = async () => {
     console.log("Skipped notification preferences");
     setIsLoading(true);
-    
+
     // Fetch farmer plants data before navigating
     await fetchFarmerPlants();
-    
+
     setIsLoading(false);
     // Navigate to crop selection
     setLocation("/crop-selection");
@@ -174,7 +174,7 @@ export function NotificationPreferences() {
           <h1 className="text-3xl font-bold text-gray-900 mb-4 text-center">
             Stay Updated!
           </h1>
-          
+
           <p className="text-gray-600 text-base leading-relaxed mb-8 text-center">
             Choose how you want to get important messages from us.
           </p>
@@ -188,20 +188,20 @@ export function NotificationPreferences() {
                 className="flex items-start gap-3 cursor-pointer"
                 data-testid={`preference-${pref.id}`}
               >
-                <div className={`w-6 h-6 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${
-                  pref.checked 
-                    ? "bg-green-600 border-green-600" 
-                    : "border-gray-300 bg-white"
-                }`}>
+                <div
+                  className={`w-6 h-6 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${
+                    pref.checked
+                      ? "bg-green-600 border-green-600"
+                      : "border-gray-300 bg-white"
+                  }`}
+                >
                   {pref.checked && <Check className="w-4 h-4 text-white" />}
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900 text-lg">
                     {pref.title}
                   </h3>
-                  <p className="text-gray-600 text-sm">
-                    {pref.description}
-                  </p>
+                  <p className="text-gray-600 text-sm">{pref.description}</p>
                 </div>
               </div>
             ))}
@@ -217,7 +217,7 @@ export function NotificationPreferences() {
             >
               {isLoading ? "Loading..." : "Save My Choices"}
             </Button>
-            
+
             <Button
               onClick={handleSkipForNow}
               disabled={isLoading}
@@ -242,7 +242,7 @@ export function NotificationPreferences() {
           <h1 className="text-4xl font-bold text-gray-900 mb-6 text-center">
             Stay Updated!
           </h1>
-          
+
           <p className="text-gray-600 text-lg leading-relaxed mb-10 text-center">
             Choose how you want to get important messages from us.
           </p>
@@ -256,20 +256,20 @@ export function NotificationPreferences() {
                 className="flex items-start gap-4 cursor-pointer"
                 data-testid={`preference-${pref.id}-desktop`}
               >
-                <div className={`w-7 h-7 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${
-                  pref.checked 
-                    ? "bg-green-600 border-green-600" 
-                    : "border-gray-300 bg-white"
-                }`}>
+                <div
+                  className={`w-7 h-7 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${
+                    pref.checked
+                      ? "bg-green-600 border-green-600"
+                      : "border-gray-300 bg-white"
+                  }`}
+                >
                   {pref.checked && <Check className="w-5 h-5 text-white" />}
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900 text-xl">
                     {pref.title}
                   </h3>
-                  <p className="text-gray-600">
-                    {pref.description}
-                  </p>
+                  <p className="text-gray-600">{pref.description}</p>
                 </div>
               </div>
             ))}
@@ -285,7 +285,7 @@ export function NotificationPreferences() {
             >
               {isLoading ? "Loading..." : "Save My Choices"}
             </Button>
-            
+
             <Button
               onClick={handleSkipForNow}
               disabled={isLoading}
