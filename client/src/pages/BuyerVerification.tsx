@@ -228,16 +228,47 @@ export function BuyerVerification() {
         console.log("Raw response text:", textResponse);
       }
 
-      if (response.status === 200) {
+      if (response.status === 200 && responseData?.success) {
         console.log("✅ VERIFICATION SUCCESSFUL - Status 200");
+        
+        const { user, token, message } = responseData;
+        const userId = user.userId || user.id;
+        
+        if (!userId) {
+          toast({
+            variant: "destructive",
+            title: "Verification Error",
+            description: "User ID not found in response. Please try again.",
+          });
+          return;
+        }
+
+        // Store complete user data in session storage with 8-hour expiry
+        const sessionData = {
+          userId: userId,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phone: user.phone,
+          token: token,
+          userType: user.userType,
+          isVerified: user.isVerified,
+          expiry: new Date().getTime() + (8 * 60 * 60 * 1000) // 8 hours
+        };
+
+        // Encrypt sensitive session data before storing
+        const encryptedSessionData = SessionCrypto.encryptSessionData(sessionData);
+        
+        sessionStorage.setItem("buyerSession", JSON.stringify(encryptedSessionData));
+
         toast({
           title: "✅ Verification Successful!",
-          description: "Your account has been verified successfully.",
+          description: `Welcome to Lucent Ag, ${user.firstName}!`,
         });
 
-        // Clear stored userId from both storage types
+        // Clear temporary registration data
         localStorage.removeItem("buyerUserId");
-        sessionStorage.removeItem("buyerSession");
+        sessionStorage.removeItem("tempBuyerSession");
 
         // Redirect to buyer home page
         setLocation("/buyer-home");
