@@ -1,66 +1,141 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Leaf, Check } from "lucide-react";
 
-interface ProcessingMethod {
+interface Question {
   id: string;
-  name: string;
-  checked: boolean;
+  question: string;
+  questionType: string;
+  isRequired: boolean;
+  category: string;
+  answer?: string; // For storing user's answer
 }
 
-interface CropProcessing {
-  cropName: string;
-  methods: ProcessingMethod[];
+interface PlantQuestions {
+  plantId: string;
+  plantName: string;
+  questions: Question[];
+}
+
+interface QuestionsResponse {
+  questions: PlantQuestions[];
 }
 
 export function CropProcessing() {
   const [, setLocation] = useLocation();
-  
-  // This would normally come from the previous page's selections
-  // For demo, showing Maize and Cassava as selected crops
-  const [cropProcessing, setCropProcessing] = useState<CropProcessing[]>([
-    {
-      cropName: "Maize",
-      methods: [
-        { id: "maize-drying", name: "Drying", checked: false },
-        { id: "maize-milling", name: "Milling", checked: false },
-        { id: "maize-none", name: "I don't process", checked: false }
-      ]
-    },
-    {
-      cropName: "Cassava", 
-      methods: [
-        { id: "cassava-drying", name: "Drying", checked: false },
-        { id: "cassava-garri", name: "Garri Production", checked: false },
-        { id: "cassava-flour", name: "Flour Production", checked: false },
-        { id: "cassava-none", name: "I don't process", checked: false }
-      ]
-    }
-  ]);
+  const [plantQuestions, setPlantQuestions] = useState<PlantQuestions[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userAnswers, setUserAnswers] = useState<{ [questionId: string]: string }>({});
 
-  const handleToggleMethod = (cropIndex: number, methodId: string) => {
-    setCropProcessing(prev => 
-      prev.map((crop, index) => 
-        index === cropIndex 
-          ? {
-              ...crop,
-              methods: crop.methods.map(method =>
-                method.id === methodId 
-                  ? { ...method, checked: !method.checked }
-                  : method
-              )
-            }
-          : crop
-      )
-    );
+  // Load questions data from sessionStorage on component mount
+  useEffect(() => {
+    const loadQuestionsData = () => {
+      console.log("🔄 Loading questions data from sessionStorage...");
+      
+      try {
+        const questionsData = sessionStorage.getItem("cropQuestionsData");
+        
+        if (questionsData) {
+          const parsedData: QuestionsResponse = JSON.parse(questionsData);
+          console.log("✅ Found questions data from API:", parsedData);
+          
+          if (parsedData.questions && Array.isArray(parsedData.questions)) {
+            console.log("📊 Mapping questions for", parsedData.questions.length, "plants:");
+            
+            // Map the questions data
+            parsedData.questions.forEach((plant) => {
+              console.log(`🌱 Plant: ${plant.plantName} (${plant.plantId}) has ${plant.questions.length} questions`);
+            });
+            
+            setPlantQuestions(parsedData.questions);
+          } else {
+            console.error("❌ Invalid questions data structure:", parsedData);
+            setPlantQuestions([]);
+          }
+        } else {
+          console.log("❌ No questions data found in sessionStorage");
+          // Navigate back to crop selection if no data
+          setLocation("/crop-selection");
+          return;
+        }
+      } catch (error) {
+        console.error("❌ Error loading questions data:", error);
+        setLocation("/crop-selection");
+        return;
+      } finally {
+        setIsLoading(false);
+        console.log("✅ Questions loading complete");
+      }
+    };
+
+    loadQuestionsData();
+  }, [setLocation]);
+
+  const handleAnswerChange = (questionId: string, answer: string) => {
+    console.log(`📝 Answer updated for question ${questionId}:`, answer);
+    setUserAnswers(prev => ({
+      ...prev,
+      [questionId]: answer
+    }));
   };
 
   const handleSave = () => {
-    console.log("Crop processing data:", cropProcessing);
+    console.log("💾 Saving answers for crop processing questions:");
+    console.log("User Answers:", userAnswers);
+    
+    // Validate required questions are answered
+    const requiredQuestions = plantQuestions.flatMap(plant => 
+      plant.questions.filter(q => q.isRequired)
+    );
+    
+    const missingAnswers = requiredQuestions.filter(q => 
+      !userAnswers[q.id] || userAnswers[q.id].trim() === ""
+    );
+    
+    if (missingAnswers.length > 0) {
+      console.log("⚠️ Missing required answers:", missingAnswers.map(q => q.question));
+      // You could show a toast here for missing required fields
+      return;
+    }
+    
+    // Here you would typically save to API or sessionStorage
+    console.log("✅ All required questions answered, proceeding to dashboard");
+    
     // Navigate to farmer dashboard
     setLocation("/farmer-dashboard");
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading questions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (plantQuestions.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <Leaf className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Questions Found</h2>
+          <p className="text-gray-600 mb-4">No questions were found for your selected crops.</p>
+          <Button 
+            onClick={() => setLocation("/crop-selection")}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            Back to Crop Selection
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -75,42 +150,99 @@ export function CropProcessing() {
           </div>
 
           <h1 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-            Do you process any of your harvest?
+            Tell us about your crops
           </h1>
           
           <p className="text-gray-600 text-base leading-relaxed mb-8 text-center">
-            Let us know which crops you process and how you do it.
+            Answer a few questions about your selected crops to help us serve you better.
           </p>
 
-          {/* Processing sections for each crop */}
+          {/* Questions sections for each plant */}
           <div className="space-y-8 mb-8">
-            {cropProcessing.map((crop, cropIndex) => (
-              <div key={crop.cropName} className="space-y-4">
+            {plantQuestions.map((plant) => (
+              <div key={plant.plantId} className="space-y-4">
                 <h2 className="text-lg font-semibold text-gray-900">
-                  How do you process {crop.cropName}?
+                  Questions for {plant.plantName}
                 </h2>
-                <p className="text-sm text-gray-600 mb-4">
-                  Select all that apply
-                </p>
                 
-                <div className="space-y-3">
-                  {crop.methods.map((method) => (
+                <div className="space-y-4">
+                  {plant.questions.map((question) => (
                     <div
-                      key={method.id}
-                      onClick={() => handleToggleMethod(cropIndex, method.id)}
-                      className="flex items-center gap-3 cursor-pointer"
-                      data-testid={`method-${method.id}`}
+                      key={question.id}
+                      className="space-y-2"
+                      data-testid={`question-${question.id}`}
                     >
-                      <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
-                        method.checked 
-                          ? "bg-green-600 border-green-600" 
-                          : "border-gray-300 bg-white"
-                      }`}>
-                        {method.checked && <Check className="w-4 h-4 text-white" />}
-                      </div>
-                      <span className="text-gray-900 font-medium">
-                        {method.name}
-                      </span>
+                      <label className="block">
+                        <span className="text-sm font-medium text-gray-900">
+                          {question.question}
+                          {question.isRequired && <span className="text-red-500 ml-1">*</span>}
+                        </span>
+                        <span className="text-xs text-gray-500 block mt-1">
+                          Category: {question.category} | Type: {question.questionType}
+                        </span>
+                        
+                        {question.questionType === "text" && (
+                          <input
+                            type="text"
+                            value={userAnswers[question.id] || ""}
+                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Enter your answer..."
+                            data-testid={`input-${question.id}`}
+                          />
+                        )}
+                        
+                        {question.questionType === "boolean" && (
+                          <div className="mt-2 flex gap-4">
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name={question.id}
+                                value="yes"
+                                checked={userAnswers[question.id] === "yes"}
+                                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                                className="text-green-600 focus:ring-green-500"
+                                data-testid={`radio-${question.id}-yes`}
+                              />
+                              <span className="text-sm text-gray-700">Yes</span>
+                            </label>
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name={question.id}
+                                value="no"
+                                checked={userAnswers[question.id] === "no"}
+                                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                                className="text-green-600 focus:ring-green-500"
+                                data-testid={`radio-${question.id}-no`}
+                              />
+                              <span className="text-sm text-gray-700">No</span>
+                            </label>
+                          </div>
+                        )}
+                        
+                        {question.questionType === "number" && (
+                          <input
+                            type="number"
+                            value={userAnswers[question.id] || ""}
+                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            placeholder="Enter a number..."
+                            data-testid={`number-${question.id}`}
+                          />
+                        )}
+                        
+                        {question.questionType === "textarea" && (
+                          <textarea
+                            value={userAnswers[question.id] || ""}
+                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            rows={3}
+                            placeholder="Enter your detailed answer..."
+                            data-testid={`textarea-${question.id}`}
+                          />
+                        )}
+                      </label>
                     </div>
                   ))}
                 </div>
@@ -124,14 +256,14 @@ export function CropProcessing() {
             className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-medium rounded-xl transition-colors"
             data-testid="button-save"
           >
-            Save
+            Save Answers
           </Button>
         </div>
       </div>
 
       {/* Desktop Layout */}
       <div className="hidden md:flex min-h-screen items-center justify-center p-8">
-        <div className="bg-white rounded-3xl shadow-xl p-12 w-full max-w-2xl">
+        <div className="bg-white rounded-3xl shadow-xl p-12 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
           {/* Plant icon */}
           <div className="mb-10 text-center">
             <div className="w-20 h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center">
@@ -140,42 +272,99 @@ export function CropProcessing() {
           </div>
 
           <h1 className="text-4xl font-bold text-gray-900 mb-6 text-center">
-            Do you process any of your harvest?
+            Tell us about your crops
           </h1>
           
           <p className="text-gray-600 text-lg leading-relaxed mb-12 text-center max-w-md mx-auto">
-            Let us know which crops you process and how you do it.
+            Answer a few questions about your selected crops to help us serve you better.
           </p>
 
-          {/* Processing sections for each crop */}
-          <div className="space-y-10 mb-12">
-            {cropProcessing.map((crop, cropIndex) => (
-              <div key={crop.cropName} className="space-y-6">
-                <h2 className="text-2xl font-semibold text-gray-900">
-                  How do you process {crop.cropName}?
+          {/* Questions sections for each plant */}
+          <div className="space-y-12 mb-12">
+            {plantQuestions.map((plant) => (
+              <div key={plant.plantId} className="space-y-6">
+                <h2 className="text-2xl font-semibold text-gray-900 border-b border-gray-200 pb-3">
+                  Questions for {plant.plantName}
                 </h2>
-                <p className="text-gray-600 mb-6">
-                  Select all that apply
-                </p>
                 
-                <div className="space-y-4">
-                  {crop.methods.map((method) => (
+                <div className="space-y-6">
+                  {plant.questions.map((question) => (
                     <div
-                      key={method.id}
-                      onClick={() => handleToggleMethod(cropIndex, method.id)}
-                      className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 p-3 rounded-lg transition-colors"
-                      data-testid={`method-${method.id}-desktop`}
+                      key={question.id}
+                      className="space-y-3 p-4 bg-gray-50 rounded-lg"
+                      data-testid={`question-${question.id}-desktop`}
                     >
-                      <div className={`w-7 h-7 rounded border-2 flex items-center justify-center transition-colors ${
-                        method.checked 
-                          ? "bg-green-600 border-green-600" 
-                          : "border-gray-300 bg-white"
-                      }`}>
-                        {method.checked && <Check className="w-5 h-5 text-white" />}
-                      </div>
-                      <span className="text-gray-900 font-medium text-lg">
-                        {method.name}
-                      </span>
+                      <label className="block">
+                        <span className="text-lg font-medium text-gray-900">
+                          {question.question}
+                          {question.isRequired && <span className="text-red-500 ml-1">*</span>}
+                        </span>
+                        <span className="text-sm text-gray-500 block mt-1">
+                          Category: {question.category} | Type: {question.questionType}
+                        </span>
+                        
+                        {question.questionType === "text" && (
+                          <input
+                            type="text"
+                            value={userAnswers[question.id] || ""}
+                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            className="mt-3 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
+                            placeholder="Enter your answer..."
+                            data-testid={`input-${question.id}-desktop`}
+                          />
+                        )}
+                        
+                        {question.questionType === "boolean" && (
+                          <div className="mt-3 flex gap-6">
+                            <label className="flex items-center gap-3">
+                              <input
+                                type="radio"
+                                name={question.id}
+                                value="yes"
+                                checked={userAnswers[question.id] === "yes"}
+                                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                                className="w-4 h-4 text-green-600 focus:ring-green-500"
+                                data-testid={`radio-${question.id}-yes-desktop`}
+                              />
+                              <span className="text-lg text-gray-700">Yes</span>
+                            </label>
+                            <label className="flex items-center gap-3">
+                              <input
+                                type="radio"
+                                name={question.id}
+                                value="no"
+                                checked={userAnswers[question.id] === "no"}
+                                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                                className="w-4 h-4 text-green-600 focus:ring-green-500"
+                                data-testid={`radio-${question.id}-no-desktop`}
+                              />
+                              <span className="text-lg text-gray-700">No</span>
+                            </label>
+                          </div>
+                        )}
+                        
+                        {question.questionType === "number" && (
+                          <input
+                            type="number"
+                            value={userAnswers[question.id] || ""}
+                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            className="mt-3 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
+                            placeholder="Enter a number..."
+                            data-testid={`number-${question.id}-desktop`}
+                          />
+                        )}
+                        
+                        {question.questionType === "textarea" && (
+                          <textarea
+                            value={userAnswers[question.id] || ""}
+                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            className="mt-3 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
+                            rows={4}
+                            placeholder="Enter your detailed answer..."
+                            data-testid={`textarea-${question.id}-desktop`}
+                          />
+                        )}
+                      </label>
                     </div>
                   ))}
                 </div>
@@ -190,7 +379,7 @@ export function CropProcessing() {
               className="bg-green-600 hover:bg-green-700 text-white px-16 py-4 text-xl font-medium rounded-xl transition-all hover:scale-105"
               data-testid="button-save-desktop"
             >
-              Save
+              Save Answers
             </Button>
           </div>
         </div>

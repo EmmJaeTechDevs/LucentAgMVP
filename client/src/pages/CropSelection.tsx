@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Leaf, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { SessionCrypto } from "@/utils/sessionCrypto";
+import { BaseUrl } from "../../../Baseconfig";
 
 interface Crop {
   id: string;
@@ -127,6 +129,7 @@ export function CropSelection() {
   const { toast } = useToast();
   const [crops, setCrops] = useState<Crop[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Load and process farmer plants data from sessionStorage on component mount
   useEffect(() => {
@@ -187,11 +190,111 @@ export function CropSelection() {
     });
   };
 
-  const handleNext = () => {
+  const getAuthToken = () => {
+    try {
+      const sessionData = sessionStorage.getItem("farmerSession");
+      if (sessionData) {
+        const encryptedData = JSON.parse(sessionData);
+        const parsed = SessionCrypto.decryptSessionData(encryptedData);
+        return parsed.token;
+      }
+    } catch (error) {
+      console.error("Error getting auth token:", error);
+    }
+    return null;
+  };
+
+  const fetchQuestionsForSelectedCrops = async (plantIds: string[]) => {
+    const token = getAuthToken();
+    
+    if (!token) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "Please log in again.",
+      });
+      setLocation("/login");
+      return null;
+    }
+
+    try {
+      const requestBody = { plantIds };
+      console.log("🌱 Sending plantIds to questions API:", requestBody);
+      
+      const response = await fetch(`${BaseUrl}/api/farmer/plants/questions`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log("📊 Questions API response status:", response.status);
+
+      if (response.status === 200) {
+        const questionsData = await response.json();
+        console.log("✅ Questions API Response:", questionsData);
+        
+        // Store the questions data in sessionStorage for CropProcessing page
+        sessionStorage.setItem("cropQuestionsData", JSON.stringify(questionsData));
+        
+        return questionsData;
+      } else if (response.status === 401) {
+        toast({
+          variant: "destructive",
+          title: "Unauthorized",
+          description: "token required",
+        });
+        return null;
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch questions for selected crops.",
+        });
+        return null;
+      }
+    } catch (error) {
+      console.error("❌ Error fetching crop questions:", error);
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Please check your connection and try again.",
+      });
+      return null;
+    }
+  };
+
+  const handleNext = async () => {
     const selectedCrops = crops.filter(crop => crop.selected);
-    console.log("Selected crops:", selectedCrops);
-    // Navigate to crop processing page
-    setLocation("/crop-processing");
+    console.log("🎯 Selected crops:", selectedCrops);
+    
+    if (selectedCrops.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No Crops Selected",
+        description: "Please select at least one crop to continue.",
+      });
+      return;
+    }
+    
+    // Extract plantIds from selected crops
+    const plantIds = selectedCrops.map(crop => crop.id);
+    console.log("🌿 Extracted plantIds:", plantIds);
+    
+    setIsSaving(true);
+    
+    // Fetch questions for selected crops
+    const questionsResult = await fetchQuestionsForSelectedCrops(plantIds);
+    
+    setIsSaving(false);
+    
+    if (questionsResult) {
+      // Navigate to crop processing page with questions data
+      setLocation("/crop-processing");
+    }
   };
 
   const hasSelectedCrops = crops.some(crop => crop.selected);
@@ -276,11 +379,11 @@ export function CropSelection() {
           {/* Next button */}
           <Button
             onClick={handleNext}
-            disabled={!hasSelectedCrops}
+            disabled={!hasSelectedCrops || isSaving}
             className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="button-next"
           >
-            Next
+            {isSaving ? "Loading Questions..." : "Next"}
           </Button>
         </div>
       </div>
@@ -353,11 +456,11 @@ export function CropSelection() {
           <div className="text-center">
             <Button
               onClick={handleNext}
-              disabled={!hasSelectedCrops}
+              disabled={!hasSelectedCrops || isSaving}
               className="bg-green-600 hover:bg-green-700 text-white px-16 py-4 text-xl font-medium rounded-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               data-testid="button-next-desktop"
             >
-              Next
+              {isSaving ? "Loading Questions..." : "Next"}
             </Button>
           </div>
         </div>
