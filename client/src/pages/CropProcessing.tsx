@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Leaf, Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { SessionCrypto } from "@/utils/sessionCrypto";
+import { BaseUrl } from "../../../Baseconfig";
 
 interface QuestionOption {
   label: string;
@@ -28,10 +31,36 @@ interface QuestionsResponse {
   questions: PlantQuestions[];
 }
 
+interface AnswerSubmission {
+  plantId: string;
+  questionId: string;
+  answer: string | string[];
+  customAnswer?: string;
+}
+
+interface BulkAnswersRequest {
+  answers: AnswerSubmission[];
+}
+
+interface SubmissionResult {
+  plantId: string;
+  questionId: string;
+  status: string;
+  message: string;
+}
+
+interface BulkAnswersResponse {
+  message: string;
+  processed: number;
+  results: SubmissionResult[];
+}
+
 export function CropProcessing() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [plantQuestions, setPlantQuestions] = useState<PlantQuestions[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [userAnswers, setUserAnswers] = useState<{ [questionId: string]: string | string[] }>({});
   const [cropAnswers, setCropAnswers] = useState<{ [plantId: string]: { [questionId: string]: string | string[] } }>({});
 
@@ -117,7 +146,118 @@ export function CropProcessing() {
     handleAnswerChange(plantId, questionId, optionValue);
   };
 
-  const handleSave = () => {
+  const getAuthToken = () => {
+    try {
+      const sessionData = sessionStorage.getItem("farmerSession");
+      if (sessionData) {
+        const encryptedData = JSON.parse(sessionData);
+        const parsed = SessionCrypto.decryptSessionData(encryptedData);
+        return parsed.token;
+      }
+    } catch (error) {
+      console.error("Error getting auth token:", error);
+    }
+    return null;
+  };
+
+  const transformAnswersForAPI = (): BulkAnswersRequest => {
+    const answers: AnswerSubmission[] = [];
+    
+    // Transform cropAnswers object into array format expected by API
+    Object.entries(cropAnswers).forEach(([plantId, plantAnswers]) => {
+      Object.entries(plantAnswers).forEach(([questionId, answer]) => {
+        answers.push({
+          plantId,
+          questionId,
+          answer,
+          // Add customAnswer field if needed (can be extended later)
+        });
+      });
+    });
+    
+    console.log("🔄 Transformed answers for API:", answers);
+    return { answers };
+  };
+
+  const submitAnswersToAPI = async (answersPayload: BulkAnswersRequest) => {
+    const token = getAuthToken();
+    
+    if (!token) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "Please log in again.",
+      });
+      setLocation("/login");
+      return null;
+    }
+
+    try {
+      console.log("📤 Submitting answers to bulk endpoint:", answersPayload);
+      
+      const response = await fetch(`${BaseUrl}/api/farmer/answers/bulk`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify(answersPayload),
+      });
+
+      console.log("📊 Bulk answers API response status:", response.status);
+
+      if (response.status === 200) {
+        const responseData: BulkAnswersResponse = await response.json();
+        console.log("✅ Bulk answers API success response:", responseData);
+        
+        toast({
+          title: "Success!",
+          description: responseData.message,
+        });
+        
+        return responseData;
+      } else if (response.status === 400) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Validation error",
+        });
+        return null;
+      } else if (response.status === 401) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Unauthorized - token required",
+        });
+        return null;
+      } else if (response.status === 403) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Only farmers can submit answers",
+        });
+        return null;
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to submit answers. Please try again.",
+        });
+        return null;
+      }
+    } catch (error) {
+      console.error("❌ Error submitting answers:", error);
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Please check your connection and try again.",
+      });
+      return null;
+    }
+  };
+
+  const handleSave = async () => {
     console.log("💾 Saving answers for crop processing questions:");
     console.log("User Answers (Global):", userAnswers);
     console.log("Crop Answers (By Plant):", cropAnswers);
@@ -137,16 +277,43 @@ export function CropProcessing() {
     
     if (missingAnswers.length > 0) {
       console.log("⚠️ Missing required answers:", missingAnswers.map(q => q.question));
-      // You could show a toast here for missing required fields
+      toast({
+        variant: "destructive",
+        title: "Required Fields Missing",
+        description: `Please answer all required questions before submitting.`,
+      });
       return;
     }
     
-    // Here you would typically save to API or sessionStorage
-    console.log("✅ All required questions answered, proceeding to dashboard");
-    console.log("📊 Final structured answers by crop:", cropAnswers);
+    // Check if there are any answers to submit
+    if (Object.keys(cropAnswers).length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No Answers",
+        description: "Please answer at least one question before submitting.",
+      });
+      return;
+    }
     
-    // Navigate to farmer dashboard
-    setLocation("/farmer-dashboard");
+    setIsSaving(true);
+    
+    try {
+      // Transform answers to API format
+      const answersPayload = transformAnswersForAPI();
+      
+      // Submit to API
+      const result = await submitAnswersToAPI(answersPayload);
+      
+      if (result) {
+        console.log("✅ All answers submitted successfully, proceeding to dashboard");
+        console.log("📊 Final submission result:", result);
+        
+        // Navigate to farmer dashboard on success
+        setLocation("/farmer-dashboard");
+      }
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (isLoading) {
@@ -348,10 +515,11 @@ export function CropProcessing() {
           {/* Save button */}
           <Button
             onClick={handleSave}
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-medium rounded-xl transition-colors"
+            disabled={isSaving}
+            className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="button-save"
           >
-            Save Answers
+            {isSaving ? "Submitting Answers..." : "Save Answers"}
           </Button>
         </div>
       </div>
@@ -523,10 +691,11 @@ export function CropProcessing() {
           <div className="text-center">
             <Button
               onClick={handleSave}
-              className="bg-green-600 hover:bg-green-700 text-white px-16 py-4 text-xl font-medium rounded-xl transition-all hover:scale-105"
+              disabled={isSaving}
+              className="bg-green-600 hover:bg-green-700 text-white px-16 py-4 text-xl font-medium rounded-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               data-testid="button-save-desktop"
             >
-              Save Answers
+              {isSaving ? "Submitting Answers..." : "Save Answers"}
             </Button>
           </div>
         </div>
