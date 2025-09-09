@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Leaf, Check } from "lucide-react";
 
 interface QuestionOption {
-  id: string;
-  text: string;
-  value?: string;
+  label: string;
+  value: string;
 }
 
 interface Question {
@@ -99,18 +98,23 @@ export function CropProcessing() {
     }));
   };
   
-  const handleCheckboxChange = (plantId: string, questionId: string, optionId: string, checked: boolean) => {
+  const handleCheckboxChange = (plantId: string, questionId: string, optionValue: string, checked: boolean) => {
     const currentAnswers = (userAnswers[questionId] as string[]) || [];
     let newAnswers: string[];
     
     if (checked) {
-      newAnswers = [...currentAnswers, optionId];
+      newAnswers = [...currentAnswers, optionValue];
     } else {
-      newAnswers = currentAnswers.filter(id => id !== optionId);
+      newAnswers = currentAnswers.filter(value => value !== optionValue);
     }
     
     console.log(`☑️ Checkbox updated for plant ${plantId}, question ${questionId}:`, newAnswers);
     handleAnswerChange(plantId, questionId, newAnswers);
+  };
+  
+  const handleRadioChange = (plantId: string, questionId: string, optionValue: string) => {
+    console.log(`📻 Radio button selected for plant ${plantId}, question ${questionId}:`, optionValue);
+    handleAnswerChange(plantId, questionId, optionValue);
   };
 
   const handleSave = () => {
@@ -282,24 +286,51 @@ export function CropProcessing() {
                           />
                         )}
                         
-                        {question.options && question.options.length > 0 && (
+                        {(question.questionType === "checkbox" && question.options) && (
                           <div className="mt-3 space-y-2">
                             <div className="text-sm font-medium text-gray-700 mb-2">Select all that apply:</div>
                             {question.options.map((option) => {
                               const selectedOptions = (userAnswers[question.id] as string[]) || [];
-                              const isChecked = selectedOptions.includes(option.id);
+                              const isChecked = selectedOptions.includes(option.value);
                               
                               return (
-                                <label key={option.id} className="flex items-center gap-3 cursor-pointer">
+                                <label key={option.value} className="flex items-center gap-3 cursor-pointer">
                                   <input
                                     type="checkbox"
                                     checked={isChecked}
-                                    onChange={(e) => handleCheckboxChange(plant.plantId, question.id, option.id, e.target.checked)}
+                                    onChange={(e) => handleCheckboxChange(plant.plantId, question.id, option.value, e.target.checked)}
                                     className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
-                                    data-testid={`checkbox-${question.id}-${option.id}`}
+                                    data-testid={`checkbox-${question.id}-${option.value}`}
                                   />
                                   <span className="text-sm text-gray-900">
-                                    {option.text}
+                                    {option.label}
+                                  </span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        )}
+                        
+                        {(question.questionType === "multiple_choice" && question.options) && (
+                          <div className="mt-3 space-y-2">
+                            <div className="text-sm font-medium text-gray-700 mb-2">Choose one option:</div>
+                            {question.options.map((option) => {
+                              const selectedValue = userAnswers[question.id] as string;
+                              const isSelected = selectedValue === option.value;
+                              
+                              return (
+                                <label key={option.value} className="flex items-center gap-3 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={question.id}
+                                    value={option.value}
+                                    checked={isSelected}
+                                    onChange={() => handleRadioChange(plant.plantId, question.id, option.value)}
+                                    className="w-4 h-4 text-green-600 focus:ring-green-500"
+                                    data-testid={`radio-${question.id}-${option.value}`}
+                                  />
+                                  <span className="text-sm text-gray-900">
+                                    {option.label}
                                   </span>
                                 </label>
                               );
@@ -429,24 +460,51 @@ export function CropProcessing() {
                           />
                         )}
                         
-                        {question.options && question.options.length > 0 && (
+                        {(question.questionType === "checkbox" && question.options) && (
                           <div className="mt-4 space-y-3">
                             <div className="text-lg font-medium text-gray-700 mb-3">Select all that apply:</div>
                             {question.options.map((option) => {
                               const selectedOptions = (userAnswers[question.id] as string[]) || [];
-                              const isChecked = selectedOptions.includes(option.id);
+                              const isChecked = selectedOptions.includes(option.value);
                               
                               return (
-                                <label key={option.id} className="flex items-center gap-4 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                                <label key={option.value} className="flex items-center gap-4 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
                                   <input
                                     type="checkbox"
                                     checked={isChecked}
-                                    onChange={(e) => handleCheckboxChange(plant.plantId, question.id, option.id, e.target.checked)}
+                                    onChange={(e) => handleCheckboxChange(plant.plantId, question.id, option.value, e.target.checked)}
                                     className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
-                                    data-testid={`checkbox-${question.id}-${option.id}-desktop`}
+                                    data-testid={`checkbox-${question.id}-${option.value}-desktop`}
                                   />
                                   <span className="text-lg text-gray-900">
-                                    {option.text}
+                                    {option.label}
+                                  </span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        )}
+                        
+                        {(question.questionType === "multiple_choice" && question.options) && (
+                          <div className="mt-4 space-y-3">
+                            <div className="text-lg font-medium text-gray-700 mb-3">Choose one option:</div>
+                            {question.options.map((option) => {
+                              const selectedValue = userAnswers[question.id] as string;
+                              const isSelected = selectedValue === option.value;
+                              
+                              return (
+                                <label key={option.value} className="flex items-center gap-4 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                                  <input
+                                    type="radio"
+                                    name={question.id}
+                                    value={option.value}
+                                    checked={isSelected}
+                                    onChange={() => handleRadioChange(plant.plantId, question.id, option.value)}
+                                    className="w-5 h-5 text-green-600 focus:ring-green-500"
+                                    data-testid={`radio-${question.id}-${option.value}-desktop`}
+                                  />
+                                  <span className="text-lg text-gray-900">
+                                    {option.label}
                                   </span>
                                 </label>
                               );
