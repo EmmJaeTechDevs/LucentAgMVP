@@ -25,80 +25,107 @@ interface FarmerPlant {
   };
 }
 
+// Mapping function to convert server response to crop format
+const mapFarmerPlantsTocrops = (farmerPlantsData: FarmerPlant[]): Crop[] => {
+  if (!farmerPlantsData || farmerPlantsData.length === 0) {
+    console.log("No farmer plants data to map");
+    return [];
+  }
+  
+  console.log("Mapping farmer plants to crops:", farmerPlantsData);
+  
+  // Transform each farmer plant into crop format, displaying only plant name
+  const mappedCrops = farmerPlantsData.map((plant) => {
+    console.log("Mapping plant:", plant.plant.name);
+    return {
+      id: plant.plantId,
+      name: plant.plant.name, // Extract and display only the plant name
+      selected: true, // Farmer's existing plants are pre-selected
+      category: plant.plant.category,
+      landSize: plant.landSize,
+      notes: plant.notes,
+    };
+  });
+  
+  console.log("Successfully mapped", mappedCrops.length, "farmer plants to crops");
+  return mappedCrops;
+};
+
+// Default crops to merge with farmer's existing plants
+const getDefaultCrops = (): Crop[] => [
+  { id: "maize", name: "Maize", selected: false },
+  { id: "tomatoes", name: "Tomatoes", selected: false },
+  { id: "yam", name: "Yam", selected: false },
+  { id: "beans", name: "Beans", selected: false },
+  { id: "groundnuts", name: "Groundnuts", selected: false },
+  { id: "rice", name: "Rice", selected: false },
+  { id: "cassava", name: "Cassava", selected: false },
+  { id: "pepper", name: "Pepper", selected: false }
+];
+
+// Function to merge farmer crops with default crops, avoiding duplicates
+const mergeCropsWithDefaults = (farmerCrops: Crop[], defaultCrops: Crop[]): Crop[] => {
+  const existingCropNames = farmerCrops.map(crop => crop.name.toLowerCase());
+  const additionalCrops = defaultCrops.filter(
+    defaultCrop => !existingCropNames.includes(defaultCrop.name.toLowerCase())
+  );
+  
+  console.log("Merging", farmerCrops.length, "farmer crops with", additionalCrops.length, "additional crops");
+  return [...farmerCrops, ...additionalCrops];
+};
+
 export function CropSelection() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [crops, setCrops] = useState<Crop[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load farmer plants data from sessionStorage on component mount
+  // Load and process farmer plants data from sessionStorage on component mount
   useEffect(() => {
     const loadFarmerPlants = () => {
+      console.log("Starting to load farmer plants data from sessionStorage...");
+      
       try {
         const farmerPlantsData = sessionStorage.getItem("farmerPlantsData");
         
         if (farmerPlantsData) {
-          const plantsData: FarmerPlant[] = JSON.parse(farmerPlantsData);
-          console.log("Loading farmer plants data:", plantsData);
+          // Parse the server response
+          const serverResponse: FarmerPlant[] = JSON.parse(farmerPlantsData);
+          console.log("✅ Found farmer plants data from server:", serverResponse);
           
-          // Convert farmer plants to crop format
-          const farmerCrops: Crop[] = plantsData.map((plant) => ({
-            id: plant.plantId,
-            name: plant.plant.name,
-            selected: true, // Plants farmer already grows are selected by default
-            category: plant.plant.category,
-            landSize: plant.landSize,
-            notes: plant.notes,
-          }));
+          // Use mapping function to convert server response to crop format
+          const farmerCrops = mapFarmerPlantsTocrops(serverResponse);
           
-          // Add some default crops that farmers can also select if not already growing
-          const defaultCrops: Crop[] = [
-            { id: "maize", name: "Maize", selected: false },
-            { id: "tomatoes", name: "Tomatoes", selected: false },
-            { id: "yam", name: "Yam", selected: false },
-            { id: "beans", name: "Beans", selected: false },
-            { id: "groundnuts", name: "Groundnuts", selected: false },
-            { id: "rice", name: "Rice", selected: false },
-            { id: "cassava", name: "Cassava", selected: false },
-            { id: "pepper", name: "Pepper", selected: false }
-          ];
-          
-          // Merge farmer crops with default crops, avoiding duplicates
-          const existingCropNames = farmerCrops.map(crop => crop.name.toLowerCase());
-          const additionalCrops = defaultCrops.filter(
-            defaultCrop => !existingCropNames.includes(defaultCrop.name.toLowerCase())
-          );
-          
-          setCrops([...farmerCrops, ...additionalCrops]);
+          if (farmerCrops.length > 0) {
+            // Get default crops and merge with farmer's crops
+            const defaultCrops = getDefaultCrops();
+            const finalCrops = mergeCropsWithDefaults(farmerCrops, defaultCrops);
+            
+            console.log("✅ Successfully populated crops dynamically:", finalCrops.map(c => c.name));
+            setCrops(finalCrops);
+          } else {
+            // No farmer plants found, use defaults with first one selected
+            console.log("No valid farmer plants to map, using default crops");
+            const defaultCrops = getDefaultCrops();
+            defaultCrops[0].selected = true; // Select first crop as default
+            setCrops(defaultCrops);
+          }
         } else {
-          // Fallback to default crops if no data found
-          console.log("No farmer plants data found, using default crops");
-          setCrops([
-            { id: "maize", name: "Maize", selected: true },
-            { id: "tomatoes", name: "Tomatoes", selected: false },
-            { id: "yam", name: "Yam", selected: false },
-            { id: "beans", name: "Beans", selected: false },
-            { id: "groundnuts", name: "Groundnuts", selected: false },
-            { id: "rice", name: "Rice", selected: false },
-            { id: "cassava", name: "Cassava", selected: false },
-            { id: "pepper", name: "Pepper", selected: false }
-          ]);
+          // No data in sessionStorage, fallback to default crops
+          console.log("❌ No farmer plants data found in sessionStorage, using default crops");
+          const defaultCrops = getDefaultCrops();
+          defaultCrops[0].selected = true; // Select first crop as default
+          setCrops(defaultCrops);
         }
       } catch (error) {
-        console.error("Error loading farmer plants data:", error);
-        // Fallback to default crops on error
-        setCrops([
-          { id: "maize", name: "Maize", selected: true },
-          { id: "tomatoes", name: "Tomatoes", selected: false },
-          { id: "yam", name: "Yam", selected: false },
-          { id: "beans", name: "Beans", selected: false },
-          { id: "groundnuts", name: "Groundnuts", selected: false },
-          { id: "rice", name: "Rice", selected: false },
-          { id: "cassava", name: "Cassava", selected: false },
-          { id: "pepper", name: "Pepper", selected: false }
-        ]);
+        console.error("❌ Error processing farmer plants data:", error);
+        // Error occurred, fallback to default crops
+        const defaultCrops = getDefaultCrops();
+        defaultCrops[0].selected = true;
+        setCrops(defaultCrops);
       } finally {
         setIsLoading(false);
+        console.log("✅ Crop selection page populated successfully");
       }
     };
 
