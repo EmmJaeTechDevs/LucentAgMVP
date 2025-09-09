@@ -3,13 +3,20 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Leaf, Check } from "lucide-react";
 
+interface QuestionOption {
+  id: string;
+  text: string;
+  value?: string;
+}
+
 interface Question {
   id: string;
   question: string;
   questionType: string;
   isRequired: boolean;
   category: string;
-  answer?: string; // For storing user's answer
+  options?: QuestionOption[]; // For checkbox/select questions
+  answer?: string | string[]; // For storing user's answer (string for single, array for multiple)
 }
 
 interface PlantQuestions {
@@ -26,7 +33,8 @@ export function CropProcessing() {
   const [, setLocation] = useLocation();
   const [plantQuestions, setPlantQuestions] = useState<PlantQuestions[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [userAnswers, setUserAnswers] = useState<{ [questionId: string]: string }>({});
+  const [userAnswers, setUserAnswers] = useState<{ [questionId: string]: string | string[] }>({});
+  const [cropAnswers, setCropAnswers] = useState<{ [plantId: string]: { [questionId: string]: string | string[] } }>({});
 
   // Load questions data from sessionStorage on component mount
   useEffect(() => {
@@ -72,26 +80,56 @@ export function CropProcessing() {
     loadQuestionsData();
   }, [setLocation]);
 
-  const handleAnswerChange = (questionId: string, answer: string) => {
-    console.log(`📝 Answer updated for question ${questionId}:`, answer);
+  const handleAnswerChange = (plantId: string, questionId: string, answer: string | string[]) => {
+    console.log(`📝 Answer updated for plant ${plantId}, question ${questionId}:`, answer);
+    
+    // Update global userAnswers
     setUserAnswers(prev => ({
       ...prev,
       [questionId]: answer
     }));
+    
+    // Update crop-specific answers
+    setCropAnswers(prev => ({
+      ...prev,
+      [plantId]: {
+        ...prev[plantId],
+        [questionId]: answer
+      }
+    }));
+  };
+  
+  const handleCheckboxChange = (plantId: string, questionId: string, optionId: string, checked: boolean) => {
+    const currentAnswers = (userAnswers[questionId] as string[]) || [];
+    let newAnswers: string[];
+    
+    if (checked) {
+      newAnswers = [...currentAnswers, optionId];
+    } else {
+      newAnswers = currentAnswers.filter(id => id !== optionId);
+    }
+    
+    console.log(`☑️ Checkbox updated for plant ${plantId}, question ${questionId}:`, newAnswers);
+    handleAnswerChange(plantId, questionId, newAnswers);
   };
 
   const handleSave = () => {
     console.log("💾 Saving answers for crop processing questions:");
-    console.log("User Answers:", userAnswers);
+    console.log("User Answers (Global):", userAnswers);
+    console.log("Crop Answers (By Plant):", cropAnswers);
     
     // Validate required questions are answered
     const requiredQuestions = plantQuestions.flatMap(plant => 
       plant.questions.filter(q => q.isRequired)
     );
     
-    const missingAnswers = requiredQuestions.filter(q => 
-      !userAnswers[q.id] || userAnswers[q.id].trim() === ""
-    );
+    const missingAnswers = requiredQuestions.filter(q => {
+      const answer = userAnswers[q.id];
+      if (Array.isArray(answer)) {
+        return answer.length === 0;
+      }
+      return !answer || answer.toString().trim() === "";
+    });
     
     if (missingAnswers.length > 0) {
       console.log("⚠️ Missing required answers:", missingAnswers.map(q => q.question));
@@ -101,6 +139,7 @@ export function CropProcessing() {
     
     // Here you would typically save to API or sessionStorage
     console.log("✅ All required questions answered, proceeding to dashboard");
+    console.log("📊 Final structured answers by crop:", cropAnswers);
     
     // Navigate to farmer dashboard
     setLocation("/farmer-dashboard");
@@ -184,8 +223,8 @@ export function CropProcessing() {
                         {question.questionType === "text" && (
                           <input
                             type="text"
-                            value={userAnswers[question.id] || ""}
-                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            value={(userAnswers[question.id] as string) || ""}
+                            onChange={(e) => handleAnswerChange(plant.plantId, question.id, e.target.value)}
                             className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                             placeholder="Enter your answer..."
                             data-testid={`input-${question.id}`}
@@ -200,7 +239,7 @@ export function CropProcessing() {
                                 name={question.id}
                                 value="yes"
                                 checked={userAnswers[question.id] === "yes"}
-                                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                                onChange={(e) => handleAnswerChange(plant.plantId, question.id, e.target.value)}
                                 className="text-green-600 focus:ring-green-500"
                                 data-testid={`radio-${question.id}-yes`}
                               />
@@ -212,7 +251,7 @@ export function CropProcessing() {
                                 name={question.id}
                                 value="no"
                                 checked={userAnswers[question.id] === "no"}
-                                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                                onChange={(e) => handleAnswerChange(plant.plantId, question.id, e.target.value)}
                                 className="text-green-600 focus:ring-green-500"
                                 data-testid={`radio-${question.id}-no`}
                               />
@@ -224,8 +263,8 @@ export function CropProcessing() {
                         {question.questionType === "number" && (
                           <input
                             type="number"
-                            value={userAnswers[question.id] || ""}
-                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            value={(userAnswers[question.id] as string) || ""}
+                            onChange={(e) => handleAnswerChange(plant.plantId, question.id, e.target.value)}
                             className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                             placeholder="Enter a number..."
                             data-testid={`number-${question.id}`}
@@ -234,13 +273,38 @@ export function CropProcessing() {
                         
                         {question.questionType === "textarea" && (
                           <textarea
-                            value={userAnswers[question.id] || ""}
-                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            value={(userAnswers[question.id] as string) || ""}
+                            onChange={(e) => handleAnswerChange(plant.plantId, question.id, e.target.value)}
                             className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                             rows={3}
                             placeholder="Enter your detailed answer..."
                             data-testid={`textarea-${question.id}`}
                           />
+                        )}
+                        
+                        {question.options && question.options.length > 0 && (
+                          <div className="mt-3 space-y-2">
+                            <div className="text-sm font-medium text-gray-700 mb-2">Select all that apply:</div>
+                            {question.options.map((option) => {
+                              const selectedOptions = (userAnswers[question.id] as string[]) || [];
+                              const isChecked = selectedOptions.includes(option.id);
+                              
+                              return (
+                                <label key={option.id} className="flex items-center gap-3 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => handleCheckboxChange(plant.plantId, question.id, option.id, e.target.checked)}
+                                    className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
+                                    data-testid={`checkbox-${question.id}-${option.id}`}
+                                  />
+                                  <span className="text-sm text-gray-900">
+                                    {option.text}
+                                  </span>
+                                </label>
+                              );
+                            })}
+                          </div>
                         )}
                       </label>
                     </div>
@@ -306,8 +370,8 @@ export function CropProcessing() {
                         {question.questionType === "text" && (
                           <input
                             type="text"
-                            value={userAnswers[question.id] || ""}
-                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            value={(userAnswers[question.id] as string) || ""}
+                            onChange={(e) => handleAnswerChange(plant.plantId, question.id, e.target.value)}
                             className="mt-3 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
                             placeholder="Enter your answer..."
                             data-testid={`input-${question.id}-desktop`}
@@ -322,7 +386,7 @@ export function CropProcessing() {
                                 name={question.id}
                                 value="yes"
                                 checked={userAnswers[question.id] === "yes"}
-                                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                                onChange={(e) => handleAnswerChange(plant.plantId, question.id, e.target.value)}
                                 className="w-4 h-4 text-green-600 focus:ring-green-500"
                                 data-testid={`radio-${question.id}-yes-desktop`}
                               />
@@ -334,7 +398,7 @@ export function CropProcessing() {
                                 name={question.id}
                                 value="no"
                                 checked={userAnswers[question.id] === "no"}
-                                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                                onChange={(e) => handleAnswerChange(plant.plantId, question.id, e.target.value)}
                                 className="w-4 h-4 text-green-600 focus:ring-green-500"
                                 data-testid={`radio-${question.id}-no-desktop`}
                               />
@@ -346,8 +410,8 @@ export function CropProcessing() {
                         {question.questionType === "number" && (
                           <input
                             type="number"
-                            value={userAnswers[question.id] || ""}
-                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            value={(userAnswers[question.id] as string) || ""}
+                            onChange={(e) => handleAnswerChange(plant.plantId, question.id, e.target.value)}
                             className="mt-3 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
                             placeholder="Enter a number..."
                             data-testid={`number-${question.id}-desktop`}
@@ -356,13 +420,38 @@ export function CropProcessing() {
                         
                         {question.questionType === "textarea" && (
                           <textarea
-                            value={userAnswers[question.id] || ""}
-                            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                            value={(userAnswers[question.id] as string) || ""}
+                            onChange={(e) => handleAnswerChange(plant.plantId, question.id, e.target.value)}
                             className="mt-3 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
                             rows={4}
                             placeholder="Enter your detailed answer..."
                             data-testid={`textarea-${question.id}-desktop`}
                           />
+                        )}
+                        
+                        {question.options && question.options.length > 0 && (
+                          <div className="mt-4 space-y-3">
+                            <div className="text-lg font-medium text-gray-700 mb-3">Select all that apply:</div>
+                            {question.options.map((option) => {
+                              const selectedOptions = (userAnswers[question.id] as string[]) || [];
+                              const isChecked = selectedOptions.includes(option.id);
+                              
+                              return (
+                                <label key={option.id} className="flex items-center gap-4 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => handleCheckboxChange(plant.plantId, question.id, option.id, e.target.checked)}
+                                    className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
+                                    data-testid={`checkbox-${question.id}-${option.id}-desktop`}
+                                  />
+                                  <span className="text-lg text-gray-900">
+                                    {option.text}
+                                  </span>
+                                </label>
+                              );
+                            })}
+                          </div>
                         )}
                       </label>
                     </div>
