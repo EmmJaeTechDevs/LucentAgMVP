@@ -97,32 +97,23 @@ export function CropSelection() {
           const farmerCrops = mapFarmerPlantsTocrops(serverResponse);
           
           if (farmerCrops.length > 0) {
-            // Get default crops and merge with farmer's crops
-            const defaultCrops = getDefaultCrops();
-            const finalCrops = mergeCropsWithDefaults(farmerCrops, defaultCrops);
-            
-            console.log("✅ Successfully populated crops dynamically:", finalCrops.map(c => c.name));
-            setCrops(finalCrops);
+            // Only show farmer's actual crops from API response
+            console.log("✅ Successfully populated crops dynamically:", farmerCrops.map(c => c.name));
+            setCrops(farmerCrops);
           } else {
-            // No farmer plants found, use defaults with first one selected
-            console.log("No valid farmer plants to map, using default crops");
-            const defaultCrops = getDefaultCrops();
-            defaultCrops[0].selected = true; // Select first crop as default
-            setCrops(defaultCrops);
+            // No farmer plants found, show empty state or minimal default
+            console.log("No valid farmer plants to map, showing empty crop list");
+            setCrops([]);
           }
         } else {
-          // No data in sessionStorage, fallback to default crops
-          console.log("❌ No farmer plants data found in sessionStorage, using default crops");
-          const defaultCrops = getDefaultCrops();
-          defaultCrops[0].selected = true; // Select first crop as default
-          setCrops(defaultCrops);
+          // No data in sessionStorage, show empty state
+          console.log("❌ No farmer plants data found in sessionStorage, showing empty crop list");
+          setCrops([]);
         }
       } catch (error) {
         console.error("❌ Error processing farmer plants data:", error);
-        // Error occurred, fallback to default crops
-        const defaultCrops = getDefaultCrops();
-        defaultCrops[0].selected = true;
-        setCrops(defaultCrops);
+        // Error occurred, show empty state
+        setCrops([]);
       } finally {
         setIsLoading(false);
         console.log("✅ Crop selection page populated successfully");
