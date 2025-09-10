@@ -108,17 +108,66 @@ const mapFarmerPlantsTocrops = (farmerPlantsData: any[]): Crop[] => {
   return mappedCrops;
 };
 
-// Default crops available for selection - these represent generic plant types
-const getDefaultCrops = (): Crop[] => [
-  { id: "plant-maize", name: "Maize", selected: false },
-  { id: "plant-tomato", name: "Tomatoes", selected: false },
-  { id: "plant-yam", name: "Yam", selected: false },
-  { id: "plant-beans", name: "Beans", selected: false },
-  { id: "plant-groundnuts", name: "Groundnuts", selected: false },
-  { id: "plant-rice", name: "Rice", selected: false },
-  { id: "plant-cassava", name: "Cassava", selected: false },
-  { id: "plant-pepper", name: "Pepper", selected: false }
-];
+// Function to convert backend plants data to crop selection format
+const mapBackendPlantsToSelectionCrops = (plantsData: any[]): Crop[] => {
+  if (!plantsData || plantsData.length === 0) {
+    console.log("No backend plants data to map");
+    return [];
+  }
+  
+  console.log("📋 Raw backend plants data:", JSON.stringify(plantsData, null, 2));
+  
+  const mappedCrops: Crop[] = [];
+  
+  plantsData.forEach((plant, index) => {
+    console.log(`🔍 Processing backend plant ${index + 1}:`, plant);
+    
+    let plantId = null;
+    let plantName = null;
+    let category = null;
+    
+    // Handle different possible data structures from backend
+    if (plant && typeof plant === 'object') {
+      // Case 1: Direct structure { id: string, name: string, category: string }
+      if (plant.id && plant.name) {
+        plantId = plant.id;
+        plantName = plant.name;
+        category = plant.category;
+      }
+      // Case 2: Nested structure { plant: { id: string, name: string } }
+      else if (plant.plant && plant.plant.id && plant.plant.name) {
+        plantId = plant.plant.id;
+        plantName = plant.plant.name;
+        category = plant.plant.category;
+      }
+      // Case 3: Other naming conventions
+      else if (plant.plantId && plant.plantName) {
+        plantId = plant.plantId;
+        plantName = plant.plantName;
+        category = plant.plantCategory;
+      }
+      
+      if (plantId && plantName) {
+        console.log(`✅ Successfully extracted plant: ${plantName} (${plantId})`);
+        mappedCrops.push({
+          id: plantId,
+          name: plantName,
+          selected: false, // Available for selection, not pre-selected
+          category: category || 'Unknown'
+        });
+      } else {
+        console.error(`❌ Could not extract plant data from:`, plant);
+        console.error(`Available properties:`, Object.keys(plant));
+      }
+    } else {
+      console.error(`❌ Invalid plant data at index ${index}:`, plant);
+    }
+  });
+  
+  console.log(`✅ Successfully mapped ${mappedCrops.length} out of ${plantsData.length} backend plants`);
+  console.log("Final mapped crops for selection:", mappedCrops.map(c => `${c.name} (${c.id})`));
+  return mappedCrops;
+};
 
 // Function to merge farmer crops with default crops, avoiding duplicates
 const mergeCropsWithDefaults = (farmerCrops: Crop[], defaultCrops: Crop[]): Crop[] => {
@@ -139,18 +188,37 @@ export function CropSelection() {
   const [isSaving, setIsSaving] = useState(false);
   const [cropDetails, setCropDetails] = useState<CropDetails>({});
 
-  // Load default crops on component mount
+  // Load backend plants data from sessionStorage on component mount
   useEffect(() => {
-    const loadDefaultCrops = () => {
-      console.log("Loading default crops for selection...");
+    const loadBackendCrops = () => {
+      console.log("Loading backend plants data for crop selection...");
       
       try {
-        // Load default crops for farmer to choose from
-        const defaultCrops = getDefaultCrops();
-        console.log("✅ Loaded default crops:", defaultCrops.map(c => c.name));
-        setCrops(defaultCrops);
+        // Load plants data fetched from /api/plants endpoint
+        const plantsData = sessionStorage.getItem("farmerPlantsData");
+        
+        if (plantsData) {
+          const parsedPlantsData = JSON.parse(plantsData);
+          console.log("✅ Found backend plants data:", parsedPlantsData);
+          
+          // Convert backend plants to crop selection format
+          const backendCrops = mapBackendPlantsToSelectionCrops(parsedPlantsData);
+          
+          if (backendCrops.length > 0) {
+            console.log("✅ Successfully loaded backend crops for selection:", backendCrops.map(c => c.name));
+            setCrops(backendCrops);
+          } else {
+            console.log("❌ No valid backend crops found, showing empty state");
+            setCrops([]);
+          }
+        } else {
+          console.log("❌ No backend plants data found in sessionStorage");
+          console.log("User may need to go back to notification preferences page");
+          // Show empty state or redirect back
+          setCrops([]);
+        }
       } catch (error) {
-        console.error("❌ Error loading default crops:", error);
+        console.error("❌ Error loading backend crops:", error);
         setCrops([]);
       } finally {
         setIsLoading(false);
@@ -158,7 +226,7 @@ export function CropSelection() {
       }
     };
 
-    loadDefaultCrops();
+    loadBackendCrops();
   }, []);
 
   const handleToggleCrop = (id: string) => {
@@ -456,11 +524,11 @@ export function CropSelection() {
           </div>
 
           <h1 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-            What do you grow on your farm?
+            What do you want to grow?
           </h1>
           
           <p className="text-gray-600 text-base leading-relaxed mb-8 text-center">
-            Tell us what you produce. This helps us connect you with the right buyers.
+            Select the crops you want to add to your farm. This helps us connect you with the right buyers.
           </p>
 
           {/* Crop selection grid */}
@@ -580,11 +648,11 @@ export function CropSelection() {
           </div>
 
           <h1 className="text-4xl font-bold text-gray-900 mb-6 text-center">
-            What do you grow on your farm?
+            What do you want to grow?
           </h1>
           
           <p className="text-gray-600 text-lg leading-relaxed mb-12 text-center max-w-md mx-auto">
-            Tell us what you produce. This helps us connect you with the right buyers.
+            Select the crops you want to add to your farm. This helps us connect you with the right buyers.
           </p>
 
           {/* Crop selection grid */}
