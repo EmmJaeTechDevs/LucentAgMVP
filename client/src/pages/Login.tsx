@@ -60,30 +60,31 @@ export function Login() {
         }
       });
 
-      console.log("Farmer plants response:", response.data);
+      console.log("Farmer plants response status:", response.status);
+      console.log("Farmer plants response data:", response.data);
       
-      // Check if farmer has plants
-      if (response.data && response.data.length > 0) {
-        // Farmer has plants, take them to dashboard
+      // Check status code to determine redirect
+      if (response.status === 200) {
+        // Status 200: Farmer has plants, take them to dashboard
         setLocation("/farmer-dashboard");
-      } else {
-        // No plants, take them through crop selection flow
-        setLocation("/crop-selection");
       }
     } catch (error) {
       console.error("Error checking farmer plants:", error);
-      
-      // If API call fails, default to crop selection to be safe
-      setLocation("/crop-selection");
       
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
         console.log("Plants API Error Status:", status);
         
-        if (status === 404 || status === 400) {
-          // No plants found or farmer doesn't exist in plants system
+        if (status === 400) {
+          // Status 400: Take farmer to crop selection page
+          setLocation("/crop-selection");
+        } else {
+          // For other errors, default to crop selection to be safe
           setLocation("/crop-selection");
         }
+      } else {
+        // Non-axios errors, default to crop selection
+        setLocation("/crop-selection");
       }
     }
   };
