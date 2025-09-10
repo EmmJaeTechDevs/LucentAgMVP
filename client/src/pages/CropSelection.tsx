@@ -340,22 +340,17 @@ export function CropSelection() {
     }
 
     try {
-      // Create FormData without stringifying
-      const formData = new FormData();
-      farmerPlantIds.forEach((plantId) => {
-        formData.append('plantIds', plantId);
-      });
-      
-      console.log("🌱 Sending farmer plant IDs to questions API as FormData:", Array.from(formData.entries()));
+      const requestBody = { plantIds: farmerPlantIds };
+      console.log("🌱 Sending farmer plant IDs to questions API:", requestBody);
 
       const response = await fetch(`${BaseUrl}/api/farmer/plants/questions`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          // Remove Content-Type header to let browser set it for FormData
+          "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: formData,
+        body: JSON.stringify(requestBody),
       });
 
       console.log("📊 Questions API response status:", response.status);
@@ -432,23 +427,23 @@ export function CropSelection() {
     }
 
     try {
-      // Create FormData without stringifying
-      const formData = new FormData();
-      formData.append('plantId', plantId);
-      formData.append('landSize', landSize);
-      formData.append('notes', notes);
-      formData.append('farmerId', farmerId);
+      const requestBody = {
+        plantId,
+        landSize,
+        notes,
+        farmerId
+      };
 
-      console.log(`🌱 Adding plant to farm with FormData:`, Array.from(formData.entries()));
+      console.log(`🌱 Adding plant to farm:`, requestBody);
 
       const response = await fetch(`${BaseUrl}/api/farmer/plants`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          // Remove Content-Type header to let browser set it for FormData
+          "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: formData,
+        body: JSON.stringify(requestBody),
       });
 
       console.log(`📊 Plant ${plantId} add response status:`, response.status);
