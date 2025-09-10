@@ -61,11 +61,11 @@ export function CropProcessing() {
   const [plantQuestions, setPlantQuestions] = useState<PlantQuestions[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [userAnswers, setUserAnswers] = useState<{
-    [questionId: string]: string | string[];
-  }>({});
   const [cropAnswers, setCropAnswers] = useState<{
     [plantId: string]: { [questionId: string]: string | string[] };
+  }>({});
+  const [customAnswers, setCustomAnswers] = useState<{
+    [plantId: string]: { [questionId: string]: string };
   }>({});
 
   // Load questions data from sessionStorage on component mount
@@ -128,13 +128,7 @@ export function CropProcessing() {
       answer,
     );
 
-    // Update global userAnswers
-    setUserAnswers((prev) => ({
-      ...prev,
-      [questionId]: answer,
-    }));
-
-    // Update crop-specific answers
+    // Update crop-specific answers only (removed global userAnswers)
     setCropAnswers((prev) => ({
       ...prev,
       [plantId]: {
@@ -150,7 +144,8 @@ export function CropProcessing() {
     optionValue: string,
     checked: boolean,
   ) => {
-    const currentAnswers = (userAnswers[questionId] as string[]) || [];
+    // Use plant-scoped state instead of global userAnswers
+    const currentAnswers = (cropAnswers[plantId]?.[questionId] as string[]) || [];
     let newAnswers: string[];
 
     if (checked) {
@@ -178,6 +173,17 @@ export function CropProcessing() {
     handleAnswerChange(plantId, questionId, optionValue);
   };
 
+  const handleCustomAnswerChange = (plantId: string, questionId: string, customAnswer: string) => {
+    console.log(`📝 Custom answer for plant ${plantId}, question ${questionId}:`, customAnswer);
+    setCustomAnswers((prev) => ({
+      ...prev,
+      [plantId]: {
+        ...prev[plantId],
+        [questionId]: customAnswer,
+      },
+    }));
+  };
+
   const getAuthToken = () => {
     try {
       const sessionData = sessionStorage.getItem("farmerSession");
@@ -198,11 +204,12 @@ export function CropProcessing() {
     // Transform cropAnswers object into array format expected by API
     Object.entries(cropAnswers).forEach(([plantId, plantAnswers]) => {
       Object.entries(plantAnswers).forEach(([questionId, answer]) => {
+        const customAnswer = customAnswers[plantId]?.[questionId];
         answers.push({
           plantId, // Use the generic plant ID directly from questions API
           questionId,
           answer,
-          // Add customAnswer field if needed (can be extended later)
+          ...(customAnswer && customAnswer.trim() !== '' && { customAnswer: customAnswer.trim() })
         });
       });
     });
@@ -291,21 +298,20 @@ export function CropProcessing() {
 
   const handleSave = async () => {
     console.log("💾 Saving answers for crop processing questions:");
-    console.log("User Answers (Global):", userAnswers);
     console.log("Crop Answers (By Plant):", cropAnswers);
 
-    // Validate required questions are answered
-    const requiredQuestions = plantQuestions.flatMap((plant) =>
-      plant.questions.filter((q) => q.isRequired),
+    // Validate required questions are answered for each plant
+    const missingAnswers = plantQuestions.flatMap((plant) =>
+      plant.questions.filter((q) => {
+        if (!q.isRequired) return false;
+        
+        const answer = cropAnswers[plant.plantId]?.[q.id];
+        if (Array.isArray(answer)) {
+          return answer.length === 0;
+        }
+        return !answer || answer.toString().trim() === "";
+      })
     );
-
-    const missingAnswers = requiredQuestions.filter((q) => {
-      const answer = userAnswers[q.id];
-      if (Array.isArray(answer)) {
-        return answer.length === 0;
-      }
-      return !answer || answer.toString().trim() === "";
-    });
 
     if (missingAnswers.length > 0) {
       console.log(
@@ -439,7 +445,7 @@ export function CropProcessing() {
                         {question.questionType === "text" && (
                           <input
                             type="text"
-                            value={(userAnswers[question.id] as string) || ""}
+                            value={(cropAnswers[plant.plantId]?.[question.id] as string) || ""}
                             onChange={(e) =>
                               handleAnswerChange(
                                 plant.plantId,
@@ -458,9 +464,9 @@ export function CropProcessing() {
                             <label className="flex items-center gap-2">
                               <input
                                 type="radio"
-                                name={question.id}
+                                name={`${plant.plantId}-${question.id}`}
                                 value="yes"
-                                checked={userAnswers[question.id] === "yes"}
+                                checked={cropAnswers[plant.plantId]?.[question.id] === "yes"}
                                 onChange={(e) =>
                                   handleAnswerChange(
                                     plant.plantId,
@@ -476,9 +482,9 @@ export function CropProcessing() {
                             <label className="flex items-center gap-2">
                               <input
                                 type="radio"
-                                name={question.id}
+                                name={`${plant.plantId}-${question.id}`}
                                 value="no"
-                                checked={userAnswers[question.id] === "no"}
+                                checked={cropAnswers[plant.plantId]?.[question.id] === "no"}
                                 onChange={(e) =>
                                   handleAnswerChange(
                                     plant.plantId,
@@ -497,7 +503,7 @@ export function CropProcessing() {
                         {question.questionType === "number" && (
                           <input
                             type="number"
-                            value={(userAnswers[question.id] as string) || ""}
+                            value={(cropAnswers[plant.plantId]?.[question.id] as string) || ""}
                             onChange={(e) =>
                               handleAnswerChange(
                                 plant.plantId,
@@ -513,7 +519,7 @@ export function CropProcessing() {
 
                         {question.questionType === "textarea" && (
                           <textarea
-                            value={(userAnswers[question.id] as string) || ""}
+                            value={(cropAnswers[plant.plantId]?.[question.id] as string) || ""}
                             onChange={(e) =>
                               handleAnswerChange(
                                 plant.plantId,
@@ -536,7 +542,7 @@ export function CropProcessing() {
                               </div>
                               {question.options.map((option) => {
                                 const selectedOptions =
-                                  (userAnswers[question.id] as string[]) || [];
+                                  (cropAnswers[plant.plantId]?.[question.id] as string[]) || [];
                                 const isChecked = selectedOptions.includes(
                                   option.value,
                                 );
@@ -577,7 +583,7 @@ export function CropProcessing() {
                               </div>
                               {question.options.map((option) => {
                                 const selectedOptions =
-                                  (userAnswers[question.id] as string[]) || [];
+                                  (cropAnswers[plant.plantId]?.[question.id] as string[]) || [];
                                 const isChecked = selectedOptions.includes(
                                   option.value,
                                 );
@@ -609,6 +615,21 @@ export function CropProcessing() {
                               })}
                             </div>
                           )}
+
+                        {/* Custom Answer Field */}
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Additional Comments (Optional)
+                          </label>
+                          <textarea
+                            value={customAnswers[plant.plantId]?.[question.id] || ""}
+                            onChange={(e) => handleCustomAnswerChange(plant.plantId, question.id, e.target.value)}
+                            placeholder="Add any additional details or comments..."
+                            rows={2}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none text-sm"
+                            data-testid={`custom-answer-${question.id}`}
+                          />
+                        </div>
                       </label>
                     </div>
                   ))}
@@ -678,7 +699,7 @@ export function CropProcessing() {
                         {question.questionType === "text" && (
                           <input
                             type="text"
-                            value={(userAnswers[question.id] as string) || ""}
+                            value={(cropAnswers[plant.plantId]?.[question.id] as string) || ""}
                             onChange={(e) =>
                               handleAnswerChange(
                                 plant.plantId,
@@ -697,9 +718,9 @@ export function CropProcessing() {
                             <label className="flex items-center gap-3">
                               <input
                                 type="radio"
-                                name={question.id}
+                                name={`${plant.plantId}-${question.id}`}
                                 value="yes"
-                                checked={userAnswers[question.id] === "yes"}
+                                checked={cropAnswers[plant.plantId]?.[question.id] === "yes"}
                                 onChange={(e) =>
                                   handleAnswerChange(
                                     plant.plantId,
@@ -715,9 +736,9 @@ export function CropProcessing() {
                             <label className="flex items-center gap-3">
                               <input
                                 type="radio"
-                                name={question.id}
+                                name={`${plant.plantId}-${question.id}`}
                                 value="no"
-                                checked={userAnswers[question.id] === "no"}
+                                checked={cropAnswers[plant.plantId]?.[question.id] === "no"}
                                 onChange={(e) =>
                                   handleAnswerChange(
                                     plant.plantId,
@@ -736,7 +757,7 @@ export function CropProcessing() {
                         {question.questionType === "number" && (
                           <input
                             type="number"
-                            value={(userAnswers[question.id] as string) || ""}
+                            value={(cropAnswers[plant.plantId]?.[question.id] as string) || ""}
                             onChange={(e) =>
                               handleAnswerChange(
                                 plant.plantId,
@@ -752,7 +773,7 @@ export function CropProcessing() {
 
                         {question.questionType === "textarea" && (
                           <textarea
-                            value={(userAnswers[question.id] as string) || ""}
+                            value={(cropAnswers[plant.plantId]?.[question.id] as string) || ""}
                             onChange={(e) =>
                               handleAnswerChange(
                                 plant.plantId,
@@ -775,7 +796,7 @@ export function CropProcessing() {
                               </div>
                               {question.options.map((option) => {
                                 const selectedOptions =
-                                  (userAnswers[question.id] as string[]) || [];
+                                  (cropAnswers[plant.plantId]?.[question.id] as string[]) || [];
                                 const isChecked = selectedOptions.includes(
                                   option.value,
                                 );
@@ -816,7 +837,7 @@ export function CropProcessing() {
                               </div>
                               {question.options.map((option) => {
                                 const selectedOptions =
-                                  (userAnswers[question.id] as string[]) || [];
+                                  (cropAnswers[plant.plantId]?.[question.id] as string[]) || [];
                                 const isChecked = selectedOptions.includes(
                                   option.value,
                                 );
@@ -848,6 +869,21 @@ export function CropProcessing() {
                               })}
                             </div>
                           )}
+
+                        {/* Custom Answer Field */}
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Additional Comments (Optional)
+                          </label>
+                          <textarea
+                            value={customAnswers[plant.plantId]?.[question.id] || ""}
+                            onChange={(e) => handleCustomAnswerChange(plant.plantId, question.id, e.target.value)}
+                            placeholder="Add any additional details or comments..."
+                            rows={2}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none text-sm"
+                            data-testid={`custom-answer-${question.id}`}
+                          />
+                        </div>
                       </label>
                     </div>
                   ))}
