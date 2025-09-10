@@ -227,39 +227,14 @@ export function CropProcessing() {
     try {
       console.log("📤 Submitting answers to bulk endpoint:", answersPayload);
 
-      // Create FormData without stringifying
-      const formData = new FormData();
-      
-      // Add each answer as separate form fields
-      answersPayload.answers.forEach((answer, index) => {
-        formData.append(`answers[${index}][plantId]`, answer.plantId);
-        formData.append(`answers[${index}][questionId]`, answer.questionId);
-        
-        // Handle array answers (for checkboxes)
-        if (Array.isArray(answer.answer)) {
-          answer.answer.forEach((value, valueIndex) => {
-            formData.append(`answers[${index}][answer][${valueIndex}]`, value);
-          });
-        } else {
-          formData.append(`answers[${index}][answer]`, answer.answer.toString());
-        }
-        
-        // Add customAnswer if it exists
-        if (answer.customAnswer) {
-          formData.append(`answers[${index}][customAnswer]`, answer.customAnswer);
-        }
-      });
-
-      console.log("📝 FormData entries:", Array.from(formData.entries()));
-
       const response = await fetch(`${BaseUrl}/api/farmer/answers/bulk`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          // Remove Content-Type header to let browser set it automatically for FormData
+          "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: formData, // Send FormData directly without stringifying
+        body: JSON.stringify(answersPayload),
       });
 
       console.log("📊 Bulk answers API response status:", response.status);
