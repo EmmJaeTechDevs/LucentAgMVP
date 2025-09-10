@@ -341,7 +341,10 @@ export function CropSelection() {
 
     try {
       const requestBody = { plantIds };
-      console.log("🌱 Sending generic plant IDs to questions API:", requestBody);
+      console.log(
+        "🌱 Sending generic plant IDs to questions API:",
+        requestBody,
+      );
 
       const response = await fetch(`${BaseUrl}/api/farmer/plants/questions`, {
         method: "POST",
@@ -431,7 +434,7 @@ export function CropSelection() {
         plantId,
         landSize,
         notes,
-        farmerId
+        farmerId,
       };
 
       console.log(`🌱 Adding plant to farm:`, requestBody);
@@ -455,7 +458,7 @@ export function CropSelection() {
         // Extract the farmer plant ID from the response
         // Based on console output, the server returns { message: "...", farmerPlant: { id: "..." } }
         let farmerPlantId = null;
-        
+
         if (responseData.farmerPlant && responseData.farmerPlant.id) {
           farmerPlantId = responseData.farmerPlant.id;
         } else if (responseData.id) {
@@ -477,7 +480,10 @@ export function CropSelection() {
           // Log the structure to help with debugging
           console.error(`Response structure:`, Object.keys(responseData));
           if (responseData.farmerPlant) {
-            console.error(`FarmerPlant object structure:`, Object.keys(responseData.farmerPlant));
+            console.error(
+              `FarmerPlant object structure:`,
+              Object.keys(responseData.farmerPlant),
+            );
           }
           return null;
         }
@@ -562,7 +568,10 @@ export function CropSelection() {
         .filter((id): id is string => id !== null);
 
       console.log("✅ All plants successfully added to farmer's account");
-      console.log("📋 Using generic plant IDs for questions API:", genericPlantIds);
+      console.log(
+        "📋 Using generic plant IDs for questions API:",
+        genericPlantIds,
+      );
 
       // Step 2: Fetch questions for the selected plant types (using generic IDs)
       console.log("📋 Step 2: Fetching questions for selected plant types...");

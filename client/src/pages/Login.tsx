@@ -161,8 +161,8 @@ export function Login() {
             // Take verified buyer straight to buyer home page
             setLocation("/buyer-home");
           } else if (user.userType === "farmer") {
-            // Take verified farmer through normal process (notification -> harvesting method)
-            setLocation("/notification-preferences");
+            // Take verified farmer to their dashboard
+            setLocation("/farmer-dashboard");
           }
         } else {
           // User is not verified - this should not happen with current flow, but handle it
