@@ -16,7 +16,7 @@ interface Crop {
 }
 
 interface CropDetails {
-  [cropId: string]: {
+  [plantId: string]: {
     landSize: string;
     notes: string;
   };
@@ -40,24 +40,27 @@ const mapFarmerPlantsTocrops = (farmerPlantsData: any[]): Crop[] => {
     console.log("No farmer plants data to map");
     return [];
   }
-  
-  console.log("📋 Raw server response structure:", JSON.stringify(farmerPlantsData, null, 2));
-  
+
+  console.log(
+    "📋 Raw server response structure:",
+    JSON.stringify(farmerPlantsData, null, 2),
+  );
+
   // Transform each farmer plant into crop format with safe property access
   const mappedCrops: Crop[] = [];
-  
+
   farmerPlantsData.forEach((plant, index) => {
     console.log(`🔍 Processing plant ${index + 1}:`, plant);
-    
+
     // Check different possible data structures
     let plantName = null;
     let plantId = null;
     let category = null;
     let landSize = null;
     let notes = null;
-    
+
     // Try different ways the server might structure the data
-    if (plant && typeof plant === 'object') {
+    if (plant && typeof plant === "object") {
       // Case 1: Expected structure { plant: { name: string, category: string }, plantId: string, ... }
       if (plant.plant && plant.plant.name) {
         plantName = plant.plant.name;
@@ -82,7 +85,7 @@ const mapFarmerPlantsTocrops = (farmerPlantsData: any[]): Crop[] => {
         landSize = plant.landSize;
         notes = plant.notes;
       }
-      
+
       // If we found a valid plant name, add it to crops
       if (plantName) {
         console.log(`✅ Successfully extracted plant: ${plantName}`);
@@ -90,9 +93,9 @@ const mapFarmerPlantsTocrops = (farmerPlantsData: any[]): Crop[] => {
           id: plantId || `plant_${index}`,
           name: plantName,
           selected: true,
-          category: category || 'Unknown',
-          landSize: landSize || 'Unknown',
-          notes: notes || '',
+          category: category || "Unknown",
+          landSize: landSize || "Unknown",
+          notes: notes || "",
         });
       } else {
         console.error(`❌ Could not extract plant name from:`, plant);
@@ -102,9 +105,14 @@ const mapFarmerPlantsTocrops = (farmerPlantsData: any[]): Crop[] => {
       console.error(`❌ Invalid plant data at index ${index}:`, plant);
     }
   });
-  
-  console.log(`✅ Successfully mapped ${mappedCrops.length} out of ${farmerPlantsData.length} plants`);
-  console.log("Final mapped crops:", mappedCrops.map(c => c.name));
+
+  console.log(
+    `✅ Successfully mapped ${mappedCrops.length} out of ${farmerPlantsData.length} plants`,
+  );
+  console.log(
+    "Final mapped crops:",
+    mappedCrops.map((c) => c.name),
+  );
   return mappedCrops;
 };
 
@@ -114,20 +122,23 @@ const mapBackendPlantsToSelectionCrops = (plantsData: any[]): Crop[] => {
     console.log("No backend plants data to map");
     return [];
   }
-  
-  console.log("📋 Raw backend plants data:", JSON.stringify(plantsData, null, 2));
-  
+
+  console.log(
+    "📋 Raw backend plants data:",
+    JSON.stringify(plantsData, null, 2),
+  );
+
   const mappedCrops: Crop[] = [];
-  
+
   plantsData.forEach((plant, index) => {
     console.log(`🔍 Processing backend plant ${index + 1}:`, plant);
-    
+
     let plantId = null;
     let plantName = null;
     let category = null;
-    
+
     // Handle different possible data structures from backend
-    if (plant && typeof plant === 'object') {
+    if (plant && typeof plant === "object") {
       // Case 1: Direct structure { id: string, name: string, category: string }
       if (plant.id && plant.name) {
         plantId = plant.id;
@@ -146,14 +157,16 @@ const mapBackendPlantsToSelectionCrops = (plantsData: any[]): Crop[] => {
         plantName = plant.plantName;
         category = plant.plantCategory;
       }
-      
+
       if (plantId && plantName) {
-        console.log(`✅ Successfully extracted plant: ${plantName} (${plantId})`);
+        console.log(
+          `✅ Successfully extracted plant: ${plantName} (${plantId})`,
+        );
         mappedCrops.push({
           id: plantId,
           name: plantName,
           selected: false, // Available for selection, not pre-selected
-          category: category || 'Unknown'
+          category: category || "Unknown",
         });
       } else {
         console.error(`❌ Could not extract plant data from:`, plant);
@@ -163,20 +176,35 @@ const mapBackendPlantsToSelectionCrops = (plantsData: any[]): Crop[] => {
       console.error(`❌ Invalid plant data at index ${index}:`, plant);
     }
   });
-  
-  console.log(`✅ Successfully mapped ${mappedCrops.length} out of ${plantsData.length} backend plants`);
-  console.log("Final mapped crops for selection:", mappedCrops.map(c => `${c.name} (${c.id})`));
+
+  console.log(
+    `✅ Successfully mapped ${mappedCrops.length} out of ${plantsData.length} backend plants`,
+  );
+  console.log(
+    "Final mapped crops for selection:",
+    mappedCrops.map((c) => `${c.name} (${c.id})`),
+  );
   return mappedCrops;
 };
 
 // Function to merge farmer crops with default crops, avoiding duplicates
-const mergeCropsWithDefaults = (farmerCrops: Crop[], defaultCrops: Crop[]): Crop[] => {
-  const existingCropNames = farmerCrops.map(crop => crop.name.toLowerCase());
+const mergeCropsWithDefaults = (
+  farmerCrops: Crop[],
+  defaultCrops: Crop[],
+): Crop[] => {
+  const existingCropNames = farmerCrops.map((crop) => crop.name.toLowerCase());
   const additionalCrops = defaultCrops.filter(
-    defaultCrop => !existingCropNames.includes(defaultCrop.name.toLowerCase())
+    (defaultCrop) =>
+      !existingCropNames.includes(defaultCrop.name.toLowerCase()),
   );
-  
-  console.log("Merging", farmerCrops.length, "farmer crops with", additionalCrops.length, "additional crops");
+
+  console.log(
+    "Merging",
+    farmerCrops.length,
+    "farmer crops with",
+    additionalCrops.length,
+    "additional crops",
+  );
   return [...farmerCrops, ...additionalCrops];
 };
 
@@ -192,20 +220,24 @@ export function CropSelection() {
   useEffect(() => {
     const loadBackendCrops = () => {
       console.log("Loading backend plants data for crop selection...");
-      
+
       try {
         // Load plants data fetched from /api/plants endpoint
         const plantsData = sessionStorage.getItem("farmerPlantsData");
-        
+
         if (plantsData) {
           const parsedPlantsData = JSON.parse(plantsData);
           console.log("✅ Found backend plants data:", parsedPlantsData);
-          
+
           // Convert backend plants to crop selection format
-          const backendCrops = mapBackendPlantsToSelectionCrops(parsedPlantsData);
-          
+          const backendCrops =
+            mapBackendPlantsToSelectionCrops(parsedPlantsData);
+
           if (backendCrops.length > 0) {
-            console.log("✅ Successfully loaded backend crops for selection:", backendCrops.map(c => c.name));
+            console.log(
+              "✅ Successfully loaded backend crops for selection:",
+              backendCrops.map((c) => c.name),
+            );
             setCrops(backendCrops);
           } else {
             console.log("❌ No valid backend crops found, showing empty state");
@@ -213,7 +245,9 @@ export function CropSelection() {
           }
         } else {
           console.log("❌ No backend plants data found in sessionStorage");
-          console.log("User may need to go back to notification preferences page");
+          console.log(
+            "User may need to go back to notification preferences page",
+          );
           // Show empty state or redirect back
           setCrops([]);
         }
@@ -230,13 +264,13 @@ export function CropSelection() {
   }, []);
 
   const handleToggleCrop = (id: string) => {
-    setCrops(prev => 
-      prev.map(crop => {
+    setCrops((prev) =>
+      prev.map((crop) => {
         if (crop.id === id) {
           const newSelected = !crop.selected;
           // If deselecting, remove the crop details
           if (!newSelected && cropDetails[id]) {
-            setCropDetails(prevDetails => {
+            setCropDetails((prevDetails) => {
               const newDetails = { ...prevDetails };
               delete newDetails[id];
               return newDetails;
@@ -244,25 +278,29 @@ export function CropSelection() {
           }
           // If selecting, initialize crop details
           else if (newSelected && !cropDetails[id]) {
-            setCropDetails(prevDetails => ({
+            setCropDetails((prevDetails) => ({
               ...prevDetails,
-              [id]: { landSize: '', notes: '' }
+              [id]: { landSize: "", notes: "" },
             }));
           }
           return { ...crop, selected: newSelected };
         }
         return crop;
-      })
+      }),
     );
   };
 
-  const handleCropDetailChange = (cropId: string, field: 'landSize' | 'notes', value: string) => {
-    setCropDetails(prev => ({
+  const handleCropDetailChange = (
+    plantId: string,
+    field: "landSize" | "notes",
+    value: string,
+  ) => {
+    setCropDetails((prev) => ({
       ...prev,
-      [cropId]: {
-        ...prev[cropId],
-        [field]: value
-      }
+      [plantId]: {
+        ...prev[plantId],
+        [field]: value,
+      },
     }));
   };
 
@@ -290,7 +328,7 @@ export function CropSelection() {
 
   const fetchQuestionsForSelectedCrops = async (farmerPlantIds: string[]) => {
     const token = getAuthToken();
-    
+
     if (!token) {
       toast({
         variant: "destructive",
@@ -304,13 +342,13 @@ export function CropSelection() {
     try {
       const requestBody = { plantIds: farmerPlantIds };
       console.log("🌱 Sending farmer plant IDs to questions API:", requestBody);
-      
+
       const response = await fetch(`${BaseUrl}/api/farmer/plants/questions`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify(requestBody),
       });
@@ -320,10 +358,13 @@ export function CropSelection() {
       if (response.status === 200) {
         const questionsData = await response.json();
         console.log("✅ Questions API Response:", questionsData);
-        
+
         // Store the questions data in sessionStorage for CropProcessing page
-        sessionStorage.setItem("cropQuestionsData", JSON.stringify(questionsData));
-        
+        sessionStorage.setItem(
+          "cropQuestionsData",
+          JSON.stringify(questionsData),
+        );
+
         return questionsData;
       } else if (response.status === 401) {
         toast({
@@ -351,48 +392,56 @@ export function CropSelection() {
     }
   };
 
-  const addPlantToFarm = async (plantId: string, landSize: string, notes: string): Promise<string | null> => {
+  const addPlantToFarm = async (
+    plantId: string,
+    landSize: string,
+    notes: string,
+  ): Promise<string | null> => {
     const token = getAuthToken();
-    
+
     if (!token) {
       console.error("❌ No auth token found");
       return null;
     }
-    
+
     try {
       const requestBody = {
         plantId,
         landSize,
-        notes
+        notes,
       };
-      
+
       console.log(`🌱 Adding plant to farm:`, requestBody);
-      
+
       const response = await fetch(`${BaseUrl}/api/farmer/plants`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify(requestBody),
       });
-      
+
       console.log(`📊 Plant ${plantId} add response status:`, response.status);
-      
+
       if (response.status === 200 || response.status === 201) {
         const responseData = await response.json();
         console.log(`✅ Successfully added plant ${plantId}:`, responseData);
-        
+
         // Extract the farmer plant ID from the response
         // The server should return something like { id: "farmer-plant-123", ... }
-        const farmerPlantId = responseData.id || responseData.farmerPlantId || responseData.plantId;
-        
+        const farmerPlantId =
+          responseData.id || responseData.farmerPlantId || responseData.plantId;
+
         if (farmerPlantId) {
           console.log(`📋 Extracted farmer plant ID: ${farmerPlantId}`);
           return farmerPlantId;
         } else {
-          console.error(`❌ No farmer plant ID found in response:`, responseData);
+          console.error(
+            `❌ No farmer plant ID found in response:`,
+            responseData,
+          );
           // Log the structure to help with debugging
           console.error(`Response structure:`, Object.keys(responseData));
           return null;
@@ -409,9 +458,9 @@ export function CropSelection() {
   };
 
   const handleNext = async () => {
-    const selectedCrops = crops.filter(crop => crop.selected);
+    const selectedCrops = crops.filter((crop) => crop.selected);
     console.log("🎯 Selected crops:", selectedCrops);
-    
+
     if (selectedCrops.length === 0) {
       toast({
         variant: "destructive",
@@ -420,13 +469,13 @@ export function CropSelection() {
       });
       return;
     }
-    
+
     // Validate that all selected crops have required land size (notes are optional)
-    const invalidCrops = selectedCrops.filter(crop => {
+    const invalidCrops = selectedCrops.filter((crop) => {
       const details = cropDetails[crop.id];
       return !details || !details.landSize.trim();
     });
-    
+
     if (invalidCrops.length > 0) {
       toast({
         variant: "destructive",
@@ -435,47 +484,60 @@ export function CropSelection() {
       });
       return;
     }
-    
+
     setIsSaving(true);
-    
+
     try {
       // Step 1: Add all selected plants to farmer's account and collect farmer plant IDs
       console.log("🌱 Step 1: Adding plants to farmer's account...");
-      const plantAddResults: { cropId: string; farmerPlantId: string | null }[] = [];
-      
+      const plantAddResults: {
+        plantId: string;
+        farmerPlantId: string | null;
+      }[] = [];
+
       for (const crop of selectedCrops) {
         const details = cropDetails[crop.id];
-        const farmerPlantId = await addPlantToFarm(crop.id, details.landSize, details.notes || '');
-        plantAddResults.push({ cropId: crop.id, farmerPlantId });
+        const farmerPlantId = await addPlantToFarm(
+          crop.id,
+          details.landSize,
+          details.notes || "",
+        );
+        plantAddResults.push({ plantId: crop.id, farmerPlantId });
       }
-      
-      const failedPlants = plantAddResults.filter(result => !result.farmerPlantId);
-      
+
+      const failedPlants = plantAddResults.filter(
+        (result) => !result.farmerPlantId,
+      );
+
       if (failedPlants.length > 0) {
         console.error("❌ Some plants failed to add:", failedPlants);
         toast({
           variant: "destructive",
           title: "Error Adding Plants",
-          description: "Some plants could not be added to your farm. Please try again.",
+          description:
+            "Some plants could not be added to your farm. Please try again.",
         });
         setIsSaving(false);
         return;
       }
-      
+
       // Extract the farmer plant IDs for the questions API
       const farmerPlantIds = plantAddResults
-        .map(result => result.farmerPlantId)
+        .map((result) => result.farmerPlantId)
         .filter((id): id is string => id !== null);
-      
+
       console.log("✅ All plants successfully added to farmer's account");
       console.log("📋 Farmer plant IDs for questions API:", farmerPlantIds);
-      
+
       // Step 2: Fetch questions for the created farmer plants
       console.log("📋 Step 2: Fetching questions for created farmer plants...");
-      const questionsResult = await fetchQuestionsForSelectedCrops(farmerPlantIds);
-      
+      const questionsResult =
+        await fetchQuestionsForSelectedCrops(farmerPlantIds);
+
       if (questionsResult) {
-        console.log("✅ Successfully completed both steps: plants added and questions fetched");
+        console.log(
+          "✅ Successfully completed both steps: plants added and questions fetched",
+        );
         // Navigate to crop processing page with questions data
         setLocation("/crop-processing");
       } else {
@@ -483,7 +545,8 @@ export function CropSelection() {
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Plants were added but failed to load questions. Please try again.",
+          description:
+            "Plants were added but failed to load questions. Please try again.",
         });
       }
     } catch (error) {
@@ -491,14 +554,15 @@ export function CropSelection() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "An error occurred while processing your request. Please try again.",
+        description:
+          "An error occurred while processing your request. Please try again.",
       });
     } finally {
       setIsSaving(false);
     }
   };
 
-  const hasSelectedCrops = crops.some(crop => crop.selected);
+  const hasSelectedCrops = crops.some((crop) => crop.selected);
 
   if (isLoading) {
     return (
@@ -526,9 +590,10 @@ export function CropSelection() {
           <h1 className="text-2xl font-bold text-gray-900 mb-4 text-center">
             What do you want to grow?
           </h1>
-          
+
           <p className="text-gray-600 text-base leading-relaxed mb-8 text-center">
-            Select the crops you want to add to your farm. This helps us connect you with the right buyers.
+            Select the crops you want to add to your farm. This helps us connect
+            you with the right buyers.
           </p>
 
           {/* Crop selection grid */}
@@ -538,8 +603,8 @@ export function CropSelection() {
                 key={crop.id}
                 onClick={() => handleToggleCrop(crop.id)}
                 className={`relative p-4 rounded-2xl border-2 transition-all ${
-                  crop.selected 
-                    ? "border-green-600 bg-green-50" 
+                  crop.selected
+                    ? "border-green-600 bg-green-50"
                     : "border-gray-200 bg-white hover:border-gray-300"
                 }`}
                 data-testid={`crop-${crop.id}`}
@@ -550,16 +615,20 @@ export function CropSelection() {
                     <div className="w-3 h-3 bg-white rounded-full"></div>
                   </div>
                 )}
-                
+
                 <div className="flex flex-col items-center">
-                  <Leaf className={`w-6 h-6 mb-2 ${crop.selected ? "text-green-600" : "text-gray-400"}`} />
-                  <span className={`text-sm font-medium ${crop.selected ? "text-green-600" : "text-gray-700"}`}>
+                  <Leaf
+                    className={`w-6 h-6 mb-2 ${crop.selected ? "text-green-600" : "text-gray-400"}`}
+                  />
+                  <span
+                    className={`text-sm font-medium ${crop.selected ? "text-green-600" : "text-gray-700"}`}
+                  >
                     {crop.name}
                   </span>
                 </div>
               </button>
             ))}
-            
+
             {/* Add New button */}
             <button
               onClick={handleAddNew}
@@ -583,45 +652,62 @@ export function CropSelection() {
               <h2 className="text-lg font-semibold text-gray-900 text-center">
                 Add Details for Selected Crops
               </h2>
-              
-              {crops.filter(crop => crop.selected).map((crop) => (
-                <div key={crop.id} className="bg-white rounded-xl border border-gray-200 p-4">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Leaf className="w-5 h-5 text-green-600" />
-                    <h3 className="font-medium text-gray-900">{crop.name}</h3>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Land Size
-                      </label>
-                      <input
-                        type="text"
-                        value={cropDetails[crop.id]?.landSize || ''}
-                        onChange={(e) => handleCropDetailChange(crop.id, 'landSize', e.target.value)}
-                        placeholder="e.g., 2 acres"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        data-testid={`input-landsize-${crop.id}`}
-                      />
+
+              {crops
+                .filter((crop) => crop.selected)
+                .map((crop) => (
+                  <div
+                    key={crop.id}
+                    className="bg-white rounded-xl border border-gray-200 p-4"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <Leaf className="w-5 h-5 text-green-600" />
+                      <h3 className="font-medium text-gray-900">{crop.name}</h3>
                     </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Notes
-                      </label>
-                      <textarea
-                        value={cropDetails[crop.id]?.notes || ''}
-                        onChange={(e) => handleCropDetailChange(crop.id, 'notes', e.target.value)}
-                        placeholder="e.g., Located in north field, good soil quality"
-                        rows={2}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
-                        data-testid={`textarea-notes-${crop.id}`}
-                      />
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Land Size
+                        </label>
+                        <input
+                          type="text"
+                          value={cropDetails[crop.id]?.landSize || ""}
+                          onChange={(e) =>
+                            handleCropDetailChange(
+                              crop.id,
+                              "landSize",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="e.g., 2 acres"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                          data-testid={`input-landsize-${crop.id}`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Notes
+                        </label>
+                        <textarea
+                          value={cropDetails[crop.id]?.notes || ""}
+                          onChange={(e) =>
+                            handleCropDetailChange(
+                              crop.id,
+                              "notes",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="e.g., Located in north field, good soil quality"
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                          data-testid={`textarea-notes-${crop.id}`}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           )}
 
@@ -650,9 +736,10 @@ export function CropSelection() {
           <h1 className="text-4xl font-bold text-gray-900 mb-6 text-center">
             What do you want to grow?
           </h1>
-          
+
           <p className="text-gray-600 text-lg leading-relaxed mb-12 text-center max-w-md mx-auto">
-            Select the crops you want to add to your farm. This helps us connect you with the right buyers.
+            Select the crops you want to add to your farm. This helps us connect
+            you with the right buyers.
           </p>
 
           {/* Crop selection grid */}
@@ -662,8 +749,8 @@ export function CropSelection() {
                 key={crop.id}
                 onClick={() => handleToggleCrop(crop.id)}
                 className={`relative p-6 rounded-3xl border-2 transition-all hover:scale-105 ${
-                  crop.selected 
-                    ? "border-green-600 bg-green-50" 
+                  crop.selected
+                    ? "border-green-600 bg-green-50"
                     : "border-gray-200 bg-white hover:border-gray-300"
                 }`}
                 data-testid={`crop-${crop.id}-desktop`}
@@ -674,16 +761,20 @@ export function CropSelection() {
                     <div className="w-4 h-4 bg-white rounded-full"></div>
                   </div>
                 )}
-                
+
                 <div className="flex flex-col items-center">
-                  <Leaf className={`w-8 h-8 mb-3 ${crop.selected ? "text-green-600" : "text-gray-400"}`} />
-                  <span className={`text-lg font-medium ${crop.selected ? "text-green-600" : "text-gray-700"}`}>
+                  <Leaf
+                    className={`w-8 h-8 mb-3 ${crop.selected ? "text-green-600" : "text-gray-400"}`}
+                  />
+                  <span
+                    className={`text-lg font-medium ${crop.selected ? "text-green-600" : "text-gray-700"}`}
+                  >
                     {crop.name}
                   </span>
                 </div>
               </button>
             ))}
-            
+
             {/* Add New button */}
             <button
               onClick={handleAddNew}
@@ -707,45 +798,64 @@ export function CropSelection() {
               <h2 className="text-2xl font-semibold text-gray-900 text-center">
                 Add Details for Selected Crops
               </h2>
-              
-              {crops.filter(crop => crop.selected).map((crop) => (
-                <div key={crop.id} className="bg-gray-50 rounded-2xl border border-gray-200 p-6">
-                  <div className="flex items-center gap-4 mb-6">
-                    <Leaf className="w-6 h-6 text-green-600" />
-                    <h3 className="text-xl font-semibold text-gray-900">{crop.name}</h3>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-lg font-medium text-gray-700 mb-3">
-                        Land Size
-                      </label>
-                      <input
-                        type="text"
-                        value={cropDetails[crop.id]?.landSize || ''}
-                        onChange={(e) => handleCropDetailChange(crop.id, 'landSize', e.target.value)}
-                        placeholder="e.g., 2 acres"
-                        className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        data-testid={`input-landsize-${crop.id}-desktop`}
-                      />
+
+              {crops
+                .filter((crop) => crop.selected)
+                .map((crop) => (
+                  <div
+                    key={crop.id}
+                    className="bg-gray-50 rounded-2xl border border-gray-200 p-6"
+                  >
+                    <div className="flex items-center gap-4 mb-6">
+                      <Leaf className="w-6 h-6 text-green-600" />
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        {crop.name}
+                      </h3>
                     </div>
-                    
-                    <div>
-                      <label className="block text-lg font-medium text-gray-700 mb-3">
-                        Notes
-                      </label>
-                      <textarea
-                        value={cropDetails[crop.id]?.notes || ''}
-                        onChange={(e) => handleCropDetailChange(crop.id, 'notes', e.target.value)}
-                        placeholder="e.g., Located in north field, good soil quality"
-                        rows={3}
-                        className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
-                        data-testid={`textarea-notes-${crop.id}-desktop`}
-                      />
+
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-lg font-medium text-gray-700 mb-3">
+                          Land Size
+                        </label>
+                        <input
+                          type="text"
+                          value={cropDetails[crop.id]?.landSize || ""}
+                          onChange={(e) =>
+                            handleCropDetailChange(
+                              crop.id,
+                              "landSize",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="e.g., 2 acres"
+                          className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                          data-testid={`input-landsize-${crop.id}-desktop`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-lg font-medium text-gray-700 mb-3">
+                          Notes
+                        </label>
+                        <textarea
+                          value={cropDetails[crop.id]?.notes || ""}
+                          onChange={(e) =>
+                            handleCropDetailChange(
+                              crop.id,
+                              "notes",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="e.g., Located in north field, good soil quality"
+                          rows={3}
+                          className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                          data-testid={`textarea-notes-${crop.id}-desktop`}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           )}
 
