@@ -326,7 +326,7 @@ export function CropSelection() {
     return null;
   };
 
-  const fetchQuestionsForSelectedCrops = async (farmerPlantIds: string[]) => {
+  const fetchQuestionsForSelectedCrops = async (plantIds: string[]) => {
     const token = getAuthToken();
 
     if (!token) {
@@ -340,8 +340,8 @@ export function CropSelection() {
     }
 
     try {
-      const requestBody = { plantIds: farmerPlantIds };
-      console.log("🌱 Sending farmer plant IDs to questions API:", requestBody);
+      const requestBody = { plantIds };
+      console.log("🌱 Sending generic plant IDs to questions API:", requestBody);
 
       const response = await fetch(`${BaseUrl}/api/farmer/plants/questions`, {
         method: "POST",
@@ -556,18 +556,18 @@ export function CropSelection() {
         return;
       }
 
-      // Extract the farmer plant IDs for the questions API
-      const farmerPlantIds = plantAddResults
-        .map((result) => result.farmerPlantId)
+      // Use the original generic plant IDs (not farmer plant IDs) for the questions API
+      const genericPlantIds = plantAddResults
+        .map((result) => result.plantId)
         .filter((id): id is string => id !== null);
 
       console.log("✅ All plants successfully added to farmer's account");
-      console.log("📋 Farmer plant IDs for questions API:", farmerPlantIds);
+      console.log("📋 Using generic plant IDs for questions API:", genericPlantIds);
 
-      // Step 2: Fetch questions for the created farmer plants
-      console.log("📋 Step 2: Fetching questions for created farmer plants...");
+      // Step 2: Fetch questions for the selected plant types (using generic IDs)
+      console.log("📋 Step 2: Fetching questions for selected plant types...");
       const questionsResult =
-        await fetchQuestionsForSelectedCrops(farmerPlantIds);
+        await fetchQuestionsForSelectedCrops(genericPlantIds);
 
       if (questionsResult) {
         console.log(
