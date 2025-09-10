@@ -63,34 +63,63 @@ export function CropProcessing() {
   const [isSaving, setIsSaving] = useState(false);
   const [userAnswers, setUserAnswers] = useState<{ [questionId: string]: string | string[] }>({});
   const [cropAnswers, setCropAnswers] = useState<{ [plantId: string]: { [questionId: string]: string | string[] } }>({});
+  const [farmerPlantMapping, setFarmerPlantMapping] = useState<{ [genericPlantId: string]: string }>({});
 
-  // Load questions data from sessionStorage on component mount
+  // Load questions data and farmer plant mapping from sessionStorage on component mount
   useEffect(() => {
     const loadQuestionsData = () => {
       console.log("🔄 Loading questions data from sessionStorage...");
       
       try {
         const questionsData = sessionStorage.getItem("cropQuestionsData");
+        const farmerPlantsData = sessionStorage.getItem("farmerPlantsData");
         
-        if (questionsData) {
-          const parsedData: QuestionsResponse = JSON.parse(questionsData);
-          console.log("✅ Found questions data from API:", parsedData);
+        if (questionsData && farmerPlantsData) {
+          const parsedQuestions: QuestionsResponse = JSON.parse(questionsData);
+          const parsedFarmerPlants = JSON.parse(farmerPlantsData);
           
-          if (parsedData.questions && Array.isArray(parsedData.questions)) {
-            console.log("📊 Mapping questions for", parsedData.questions.length, "plants:");
+          console.log("✅ Found questions data from API:", parsedQuestions);
+          console.log("🌱 Found farmer plants data:", parsedFarmerPlants);
+          
+          // Create mapping between generic plant IDs (from questions) and actual farmer plant IDs
+          const plantMapping: { [genericPlantId: string]: string } = {};
+          
+          if (Array.isArray(parsedFarmerPlants)) {
+            parsedFarmerPlants.forEach((farmerPlant: any) => {
+              if (farmerPlant.plant && farmerPlant.plant.name && farmerPlant.id) {
+                // Map by plant name to find the correct farmer plant ID
+                const plantName = farmerPlant.plant.name.toLowerCase();
+                
+                // Find corresponding question plant by name
+                parsedQuestions.questions?.forEach((questionPlant) => {
+                  if (questionPlant.plantName.toLowerCase().includes(plantName) || 
+                      plantName.includes(questionPlant.plantName.toLowerCase())) {
+                    plantMapping[questionPlant.plantId] = farmerPlant.id;
+                    console.log(`🔗 Mapped ${questionPlant.plantId} (${questionPlant.plantName}) -> ${farmerPlant.id} (${farmerPlant.plant.name})`);
+                  }
+                });
+              }
+            });
+          }
+          
+          console.log("🗺️ Final plant ID mapping:", plantMapping);
+          setFarmerPlantMapping(plantMapping);
+          
+          if (parsedQuestions.questions && Array.isArray(parsedQuestions.questions)) {
+            console.log("📊 Mapping questions for", parsedQuestions.questions.length, "plants:");
             
             // Map the questions data
-            parsedData.questions.forEach((plant) => {
+            parsedQuestions.questions.forEach((plant) => {
               console.log(`🌱 Plant: ${plant.plantName} (${plant.plantId}) has ${plant.questions.length} questions`);
             });
             
-            setPlantQuestions(parsedData.questions);
+            setPlantQuestions(parsedQuestions.questions);
           } else {
-            console.error("❌ Invalid questions data structure:", parsedData);
+            console.error("❌ Invalid questions data structure:", parsedQuestions);
             setPlantQuestions([]);
           }
         } else {
-          console.log("❌ No questions data found in sessionStorage");
+          console.log("❌ No questions or farmer plants data found in sessionStorage");
           // Navigate back to crop selection if no data
           setLocation("/crop-selection");
           return;
@@ -164,15 +193,33 @@ export function CropProcessing() {
     const answers: AnswerSubmission[] = [];
     
     // Transform cropAnswers object into array format expected by API
-    Object.entries(cropAnswers).forEach(([plantId, plantAnswers]) => {
-      Object.entries(plantAnswers).forEach(([questionId, answer]) => {
-        answers.push({
-          plantId,
-          questionId,
-          answer,
-          // Add customAnswer field if needed (can be extended later)
+    Object.entries(cropAnswers).forEach(([genericPlantId, plantAnswers]) => {
+      // Get the actual farmer's plant ID from the mapping
+      const actualFarmerPlantId = farmerPlantMapping[genericPlantId];
+      
+      if (actualFarmerPlantId) {
+        Object.entries(plantAnswers).forEach(([questionId, answer]) => {
+          answers.push({
+            plantId: actualFarmerPlantId, // Use actual farmer plant ID, not generic one
+            questionId,
+            answer,
+            // Add customAnswer field if needed (can be extended later)
+          });
+          
+          console.log(`🔄 Mapped answer: Generic ${genericPlantId} -> Actual ${actualFarmerPlantId} for question ${questionId}`);
         });
-      });
+      } else {
+        console.warn(`⚠️ No farmer plant ID found for generic plant ID: ${genericPlantId}`);
+        // Fallback: use the generic plant ID (this might still cause issues but we'll log it)
+        Object.entries(plantAnswers).forEach(([questionId, answer]) => {
+          answers.push({
+            plantId: genericPlantId,
+            questionId,
+            answer,
+          });
+          console.warn(`⚠️ Using generic plant ID ${genericPlantId} as fallback`);
+        });
+      }
     });
     
     console.log("🔄 Transformed answers for API:", answers);
@@ -480,21 +527,19 @@ export function CropProcessing() {
                         
                         {(question.questionType === "multiple_choice" && question.options) && (
                           <div className="mt-3 space-y-2">
-                            <div className="text-sm font-medium text-gray-700 mb-2">Choose one option:</div>
+                            <div className="text-sm font-medium text-gray-700 mb-2">Select all that apply:</div>
                             {question.options.map((option) => {
-                              const selectedValue = userAnswers[question.id] as string;
-                              const isSelected = selectedValue === option.value;
+                              const selectedOptions = (userAnswers[question.id] as string[]) || [];
+                              const isChecked = selectedOptions.includes(option.value);
                               
                               return (
                                 <label key={option.value} className="flex items-center gap-3 cursor-pointer">
                                   <input
-                                    type="radio"
-                                    name={question.id}
-                                    value={option.value}
-                                    checked={isSelected}
-                                    onChange={() => handleRadioChange(plant.plantId, question.id, option.value)}
-                                    className="w-4 h-4 text-green-600 focus:ring-green-500"
-                                    data-testid={`radio-${question.id}-${option.value}`}
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => handleCheckboxChange(plant.plantId, question.id, option.value, e.target.checked)}
+                                    className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
+                                    data-testid={`checkbox-${question.id}-${option.value}`}
                                   />
                                   <span className="text-sm text-gray-900">
                                     {option.label}
@@ -655,21 +700,19 @@ export function CropProcessing() {
                         
                         {(question.questionType === "multiple_choice" && question.options) && (
                           <div className="mt-4 space-y-3">
-                            <div className="text-lg font-medium text-gray-700 mb-3">Choose one option:</div>
+                            <div className="text-lg font-medium text-gray-700 mb-3">Select all that apply:</div>
                             {question.options.map((option) => {
-                              const selectedValue = userAnswers[question.id] as string;
-                              const isSelected = selectedValue === option.value;
+                              const selectedOptions = (userAnswers[question.id] as string[]) || [];
+                              const isChecked = selectedOptions.includes(option.value);
                               
                               return (
                                 <label key={option.value} className="flex items-center gap-4 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
                                   <input
-                                    type="radio"
-                                    name={question.id}
-                                    value={option.value}
-                                    checked={isSelected}
-                                    onChange={() => handleRadioChange(plant.plantId, question.id, option.value)}
-                                    className="w-5 h-5 text-green-600 focus:ring-green-500"
-                                    data-testid={`radio-${question.id}-${option.value}-desktop`}
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => handleCheckboxChange(plant.plantId, question.id, option.value, e.target.checked)}
+                                    className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
+                                    data-testid={`checkbox-${question.id}-${option.value}-desktop`}
                                   />
                                   <span className="text-lg text-gray-900">
                                     {option.label}
