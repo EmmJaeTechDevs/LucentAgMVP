@@ -453,9 +453,18 @@ export function CropSelection() {
         console.log(`✅ Successfully added plant ${plantId}:`, responseData);
 
         // Extract the farmer plant ID from the response
-        // The server should return something like { id: "farmer-plant-123", ... }
-        const farmerPlantId =
-          responseData.id || responseData.farmerPlantId || responseData.plantId;
+        // Based on console output, the server returns { message: "...", farmerPlant: { id: "..." } }
+        let farmerPlantId = null;
+        
+        if (responseData.farmerPlant && responseData.farmerPlant.id) {
+          farmerPlantId = responseData.farmerPlant.id;
+        } else if (responseData.id) {
+          farmerPlantId = responseData.id;
+        } else if (responseData.farmerPlantId) {
+          farmerPlantId = responseData.farmerPlantId;
+        } else if (responseData.plantId) {
+          farmerPlantId = responseData.plantId;
+        }
 
         if (farmerPlantId) {
           console.log(`📋 Extracted farmer plant ID: ${farmerPlantId}`);
@@ -467,6 +476,9 @@ export function CropSelection() {
           );
           // Log the structure to help with debugging
           console.error(`Response structure:`, Object.keys(responseData));
+          if (responseData.farmerPlant) {
+            console.error(`FarmerPlant object structure:`, Object.keys(responseData.farmerPlant));
+          }
           return null;
         }
       } else {
