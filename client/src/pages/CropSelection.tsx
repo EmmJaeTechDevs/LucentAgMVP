@@ -340,17 +340,22 @@ export function CropSelection() {
     }
 
     try {
-      const requestBody = { plantIds: farmerPlantIds };
-      console.log("🌱 Sending farmer plant IDs to questions API:", requestBody);
+      // Create FormData without stringifying
+      const formData = new FormData();
+      farmerPlantIds.forEach((plantId) => {
+        formData.append('plantIds', plantId);
+      });
+      
+      console.log("🌱 Sending farmer plant IDs to questions API as FormData:", Array.from(formData.entries()));
 
       const response = await fetch(`${BaseUrl}/api/farmer/plants/questions`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+          // Remove Content-Type header to let browser set it for FormData
           Accept: "application/json",
         },
-        body: JSON.stringify(requestBody),
+        body: formData,
       });
 
       console.log("📊 Questions API response status:", response.status);
@@ -404,23 +409,46 @@ export function CropSelection() {
       return null;
     }
 
-    try {
-      const requestBody = {
-        plantId,
-        landSize,
-        notes,
-      };
+    // Get farmer ID from sessionStorage
+    const getUserId = () => {
+      try {
+        const sessionData = sessionStorage.getItem("farmerSession");
+        if (sessionData) {
+          const encryptedData = JSON.parse(sessionData);
+          const parsed = SessionCrypto.decryptSessionData(encryptedData);
+          return parsed.userId;
+        }
+      } catch (error) {
+        console.error("Error getting user ID:", error);
+      }
+      return null;
+    };
 
-      console.log(`🌱 Adding plant to farm:`, requestBody);
+    const farmerId = getUserId();
+
+    if (!farmerId) {
+      console.error("❌ No farmer ID found in session");
+      return null;
+    }
+
+    try {
+      // Create FormData without stringifying
+      const formData = new FormData();
+      formData.append('plantId', plantId);
+      formData.append('landSize', landSize);
+      formData.append('notes', notes);
+      formData.append('farmerId', farmerId);
+
+      console.log(`🌱 Adding plant to farm with FormData:`, Array.from(formData.entries()));
 
       const response = await fetch(`${BaseUrl}/api/farmer/plants`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+          // Remove Content-Type header to let browser set it for FormData
           Accept: "application/json",
         },
-        body: JSON.stringify(requestBody),
+        body: formData,
       });
 
       console.log(`📊 Plant ${plantId} add response status:`, response.status);
