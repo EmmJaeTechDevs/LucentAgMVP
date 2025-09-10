@@ -47,6 +47,47 @@ export function Login() {
     }
   };
 
+  const checkFarmerPlantsAndRedirect = async (userId: string, token: string) => {
+    try {
+      console.log("=== CHECKING FARMER PLANTS ===");
+      console.log("User ID:", userId);
+      
+      const response = await axios.get("https://lucent-ag-api-damidek.replit.app/api/farmer/plants", {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "X-User-ID": userId,
+          "Content-Type": "application/json"
+        }
+      });
+
+      console.log("Farmer plants response:", response.data);
+      
+      // Check if farmer has plants
+      if (response.data && response.data.length > 0) {
+        // Farmer has plants, take them to dashboard
+        setLocation("/farmer-dashboard");
+      } else {
+        // No plants, take them through crop selection flow
+        setLocation("/crop-selection");
+      }
+    } catch (error) {
+      console.error("Error checking farmer plants:", error);
+      
+      // If API call fails, default to crop selection to be safe
+      setLocation("/crop-selection");
+      
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        console.log("Plants API Error Status:", status);
+        
+        if (status === 404 || status === 400) {
+          // No plants found or farmer doesn't exist in plants system
+          setLocation("/crop-selection");
+        }
+      }
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -161,8 +202,8 @@ export function Login() {
             // Take verified buyer straight to buyer home page
             setLocation("/buyer-home");
           } else if (user.userType === "farmer") {
-            // Take verified farmer to their dashboard
-            setLocation("/farmer-dashboard");
+            // Check if farmer has plants before redirecting
+            await checkFarmerPlantsAndRedirect(userId, token);
           }
         } else {
           // User is not verified - this should not happen with current flow, but handle it
