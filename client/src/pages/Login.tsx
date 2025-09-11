@@ -52,54 +52,46 @@ export function Login() {
       console.log("=== CHECKING FARMER PLANTS ===");
       console.log("User ID:", userId);
       
-      let response;
-      let usedMethod = 'POST';
-      
-      // Try POST first (with userId in request body as requested)
-      try {
-        response = await axios.post("https://lucent-ag-api-damidek.replit.app/api/farmer/plants", {
-          userId: userId
-        }, {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        });
-        console.log("POST request successful");
-      } catch (postError) {
-        console.log("POST failed, trying GET fallback");
-        console.log("POST error:", postError);
-        
-        // Try GET fallback for any POST failure (CORS, network, validation, etc.)
-        try {
-          response = await axios.get("https://lucent-ag-api-damidek.replit.app/api/farmer/plants", {
-            headers: {
-              "Authorization": `Bearer ${token}`,
-              "X-User-ID": userId
-            }
-          });
-          usedMethod = 'GET';
-          console.log("GET fallback successful");
-        } catch (getError) {
-          // If both methods fail, re-throw the GET error for normal handling
-          throw getError;
+      // Make POST request first
+      console.log("Making POST request...");
+      const postResponse = await axios.post("https://lucent-ag-api-damidek.replit.app/api/farmer/plants", {
+        userId: userId
+      }, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
         }
-      }
-
-      console.log(`${usedMethod} request successful - Status:`, response.status);
-      console.log("Farmer plants response data:", response.data);
+      });
       
-      // Check status code to determine redirect (treat any 2xx as success)
-      if (response.status >= 200 && response.status < 300) {
-        // Any 2xx status: Farmer has plants, take them to dashboard
+      console.log("POST request successful - Status:", postResponse.status);
+      console.log("POST response data:", postResponse.data);
+      
+      // Make GET request after POST (with userId in request body)
+      console.log("Making GET request...");
+      const getResponse = await axios.get("https://lucent-ag-api-damidek.replit.app/api/farmer/plants", {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        data: {
+          userId: userId
+        }
+      });
+      
+      console.log("GET request successful - Status:", getResponse.status);
+      console.log("GET response data:", getResponse.data);
+      
+      // Check GET response status code to determine redirect
+      if (getResponse.status === 200) {
+        // Status 200: Farmer has plants, take them to dashboard
         setLocation("/farmer-dashboard");
       }
     } catch (error) {
-      console.error("Error checking farmer plants (both methods failed):", error);
+      console.error("Error checking farmer plants:", error);
       
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
-        console.log("Final API Error Status:", status);
+        console.log("API Error Status:", status);
         
         if (status === 400) {
           // Status 400: Take farmer to crop selection page
