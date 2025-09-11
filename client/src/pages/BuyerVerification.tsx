@@ -270,8 +270,8 @@ export function BuyerVerification() {
         localStorage.removeItem("buyerUserId");
         sessionStorage.removeItem("tempBuyerSession");
 
-        // Redirect to buyer home page
-        setLocation("/buyer-home");
+        // Redirect to buyer explanation page
+        setLocation("/buyer-explanation");
       } else if (response.status === 400) {
         console.log("❌ VERIFICATION FAILED - Status 400 (Invalid OTP)");
         toast({

@@ -66,11 +66,20 @@ export function NotificationPreferences() {
 
   const getAuthToken = () => {
     try {
-      const sessionData = sessionStorage.getItem("farmerSession");
+      // Check for farmer session first
+      let sessionData = sessionStorage.getItem("farmerSession");
       if (sessionData) {
         const encryptedData = JSON.parse(sessionData);
         const parsed = SessionCrypto.decryptSessionData(encryptedData);
-        return parsed.token;
+        return { token: parsed.token, userType: "farmer" };
+      }
+      
+      // Check for buyer session
+      sessionData = sessionStorage.getItem("buyerSession");
+      if (sessionData) {
+        const encryptedData = JSON.parse(sessionData);
+        const parsed = SessionCrypto.decryptSessionData(encryptedData);
+        return { token: parsed.token, userType: "buyer" };
       }
     } catch (error) {
       console.error("Error getting auth token:", error);
@@ -78,10 +87,76 @@ export function NotificationPreferences() {
     return null;
   };
 
-  const fetchFarmerPlants = async () => {
-    const token = getAuthToken();
+  const saveNotificationPreferences = async () => {
+    const authInfo = getAuthToken();
 
-    if (!token) {
+    if (!authInfo) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error", 
+        description: "Please log in again.",
+      });
+      setLocation("/login");
+      return false;
+    }
+
+    try {
+      // Convert preferences to API format
+      const preferencesData = {
+        smsEnabled: preferences.find(p => p.id === "sms")?.checked || false,
+        emailEnabled: preferences.find(p => p.id === "email")?.checked || false,
+        whatsappEnabled: preferences.find(p => p.id === "whatsapp")?.checked || false,
+        inAppEnabled: preferences.find(p => p.id === "inapp")?.checked || false
+      };
+
+      console.log("Saving notification preferences:", preferencesData);
+
+      const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/users/notification-preferences", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authInfo.token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(preferencesData)
+      });
+
+      console.log("Notification preferences API response:", response.status);
+
+      if (response.status === 200) {
+        const responseData = await response.json();
+        console.log("Preferences saved successfully:", responseData);
+
+        toast({
+          title: "✅ Preferences Saved!",
+          description: "Your notification preferences have been updated.",
+        });
+
+        return { success: true, userType: authInfo.userType };
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: errorData.message || "Failed to save notification preferences.",
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error("Error saving notification preferences:", error);
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Please check your connection and try again.",
+      });
+      return false;
+    }
+  };
+
+  const fetchFarmerPlants = async () => {
+    const authInfo = getAuthToken();
+
+    if (!authInfo || authInfo.userType !== "farmer") {
       toast({
         variant: "destructive",
         title: "Authentication Error",
@@ -95,7 +170,7 @@ export function NotificationPreferences() {
       const response = await fetch(`${BaseUrl}/api/plants`, {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authInfo.token}`,
           "Content-Type": "application/json",
           Accept: "application/json",
         },
@@ -141,24 +216,51 @@ export function NotificationPreferences() {
     console.log("Notification preferences saved:", preferences);
     setIsLoading(true);
 
-    // Fetch farmer plants data before navigating
-    await fetchFarmerPlants();
+    // Save notification preferences to backend
+    const result = await saveNotificationPreferences();
+
+    if (result && result.success) {
+      if (result.userType === "farmer") {
+        // For farmers, fetch plants data and then navigate to crop selection
+        await fetchFarmerPlants();
+        setLocation("/crop-selection");
+      } else if (result.userType === "buyer") {
+        // For buyers, navigate directly to buyer home
+        setLocation("/buyer-home");
+      }
+    }
 
     setIsLoading(false);
-    // Navigate to crop selection
-    setLocation("/crop-selection");
   };
 
   const handleSkipForNow = async () => {
     console.log("Skipped notification preferences");
     setIsLoading(true);
 
-    // Fetch farmer plants data before navigating
-    await fetchFarmerPlants();
+    // Check user type and navigate accordingly
+    const authInfo = getAuthToken();
+    
+    if (!authInfo) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "Please log in again.",
+      });
+      setLocation("/login");
+      setIsLoading(false);
+      return;
+    }
+
+    if (authInfo.userType === "farmer") {
+      // For farmers, fetch plants data and then navigate to crop selection
+      await fetchFarmerPlants();
+      setLocation("/crop-selection");
+    } else if (authInfo.userType === "buyer") {
+      // For buyers, navigate directly to buyer home
+      setLocation("/buyer-home");
+    }
 
     setIsLoading(false);
-    // Navigate to crop selection
-    setLocation("/crop-selection");
   };
 
   return (

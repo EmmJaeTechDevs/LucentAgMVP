@@ -24,6 +24,7 @@ import { CheckOrders } from "@/pages/CheckOrders";
 import { Notifications } from "@/pages/Notifications";
 import { AddNewCrop } from "@/pages/AddNewCrop";
 import { BuyerVerification } from "@/pages/BuyerVerification";
+import { BuyerExplanation } from "@/pages/BuyerExplanation";
 import { BuyerWelcome } from "@/pages/BuyerWelcome";
 import { BuyerNotificationPreferences } from "@/pages/BuyerNotificationPreferences";
 import { BuyerHome } from "@/pages/BuyerHome";
@@ -59,6 +60,7 @@ function Router() {
       <Route path="/notifications" component={Notifications} />
       <Route path="/add-new-crop" component={AddNewCrop} />
       <Route path="/buyer-verification" component={BuyerVerification} />
+      <Route path="/buyer-explanation" component={BuyerExplanation} />
       <Route path="/buyer-welcome" component={BuyerWelcome} />
       <Route path="/buyer-notification-preferences" component={BuyerNotificationPreferences} />
       <Route path="/buyer-home" component={BuyerHome} />
