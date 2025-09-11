@@ -92,27 +92,6 @@ export function Login() {
       console.log("Account confirmed, redirecting to farmer dashboard...");
       setLocation("/farmer-dashboard");
       
-      // GET request commented out for now
-      // console.log("Making GET request after successful POST...");
-      // const getResponse = await axios.get("https://lucent-ag-api-damidek.replit.app/api/farmer/plants", {
-      //   headers: {
-      //     "Authorization": `Bearer ${token}`,
-      //     "Content-Type": "application/json"
-      //   },
-      //   data: {
-      //     userId: userId
-      //   }
-      // });
-      // 
-      // console.log("GET request successful - Status:", getResponse.status);
-      // console.log("GET response data:", getResponse.data);
-      // 
-      // // Check GET response status code to determine redirect
-      // if (getResponse.status === 200) {
-      //   // Status 200: Farmer has plants, take them to dashboard
-      //   setLocation("/farmer-dashboard");
-      // }
-      
     } catch (error) {
       console.error("Error in farmer account check:", error);
       
