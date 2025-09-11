@@ -740,7 +740,7 @@ export function CropSelection() {
                       <h3 className="font-medium text-gray-900">{crop.name}</h3>
                     </div>
 
-                    <div className="space-y-3">
+                    {/* <div className="space-y-3">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Land Size
@@ -780,7 +780,7 @@ export function CropSelection() {
                           data-testid={`textarea-notes-${crop.id}`}
                         />
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 ))}
             </div>
@@ -889,7 +889,7 @@ export function CropSelection() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">
-                      <div>
+                      {/* <div>
                         <label className="block text-lg font-medium text-gray-700 mb-3">
                           Land Size
                         </label>
@@ -927,7 +927,7 @@ export function CropSelection() {
                           className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
                           data-testid={`textarea-notes-${crop.id}-desktop`}
                         />
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 ))}
