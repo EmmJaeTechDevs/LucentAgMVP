@@ -62,17 +62,17 @@ export function Login() {
   };
 
   const checkFarmerPlantsAndRedirect = async (userId: string) => {
+    // Get token from sessionStorage
+    const token = getAuthToken();
+    if (!token) {
+      console.error("No auth token found in sessionStorage");
+      setLocation("/login");
+      return;
+    }
+
     try {
       console.log("=== CHECKING FARMER PLANTS ===");
       console.log("User ID:", userId);
-      
-      // Get token from sessionStorage
-      const token = getAuthToken();
-      if (!token) {
-        console.error("No auth token found in sessionStorage");
-        setLocation("/login");
-        return;
-      }
       
       // Make POST request first
       console.log("Making POST request...");
@@ -88,8 +88,8 @@ export function Login() {
       console.log("POST request successful - Status:", postResponse.status);
       console.log("POST response data:", postResponse.data);
       
-      // Make GET request after POST (with userId in request body)
-      console.log("Making GET request...");
+      // Only make GET request after POST succeeds
+      console.log("Making GET request after successful POST...");
       const getResponse = await axios.get("https://lucent-ag-api-damidek.replit.app/api/farmer/plants", {
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -108,8 +108,9 @@ export function Login() {
         // Status 200: Farmer has plants, take them to dashboard
         setLocation("/farmer-dashboard");
       }
+      
     } catch (error) {
-      console.error("Error checking farmer plants:", error);
+      console.error("Error in farmer plants check:", error);
       
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
