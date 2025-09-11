@@ -71,11 +71,11 @@ export function Login() {
     }
 
     try {
-      console.log("=== CHECKING FARMER PLANTS ===");
+      console.log("=== CHECKING FARMER ACCOUNT ===");
       console.log("User ID:", userId);
       
-      // Make POST request first
-      console.log("Making POST request...");
+      // Make POST request to confirm account
+      console.log("Making POST request to confirm farmer account...");
       const postResponse = await axios.post("https://lucent-ag-api-damidek.replit.app/api/farmer/plants", {
         userId: userId
       }, {
@@ -88,29 +88,33 @@ export function Login() {
       console.log("POST request successful - Status:", postResponse.status);
       console.log("POST response data:", postResponse.data);
       
-      // Only make GET request after POST succeeds
-      console.log("Making GET request after successful POST...");
-      const getResponse = await axios.get("https://lucent-ag-api-damidek.replit.app/api/farmer/plants", {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        data: {
-          userId: userId
-        }
-      });
+      // After successful POST, take farmer to their dashboard
+      console.log("Account confirmed, redirecting to farmer dashboard...");
+      setLocation("/farmer-dashboard");
       
-      console.log("GET request successful - Status:", getResponse.status);
-      console.log("GET response data:", getResponse.data);
-      
-      // Check GET response status code to determine redirect
-      if (getResponse.status === 200) {
-        // Status 200: Farmer has plants, take them to dashboard
-        setLocation("/farmer-dashboard");
-      }
+      // GET request commented out for now
+      // console.log("Making GET request after successful POST...");
+      // const getResponse = await axios.get("https://lucent-ag-api-damidek.replit.app/api/farmer/plants", {
+      //   headers: {
+      //     "Authorization": `Bearer ${token}`,
+      //     "Content-Type": "application/json"
+      //   },
+      //   data: {
+      //     userId: userId
+      //   }
+      // });
+      // 
+      // console.log("GET request successful - Status:", getResponse.status);
+      // console.log("GET response data:", getResponse.data);
+      // 
+      // // Check GET response status code to determine redirect
+      // if (getResponse.status === 200) {
+      //   // Status 200: Farmer has plants, take them to dashboard
+      //   setLocation("/farmer-dashboard");
+      // }
       
     } catch (error) {
-      console.error("Error in farmer plants check:", error);
+      console.error("Error in farmer account check:", error);
       
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
