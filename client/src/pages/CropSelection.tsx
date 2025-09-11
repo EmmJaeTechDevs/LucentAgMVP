@@ -15,12 +15,6 @@ interface Crop {
   notes?: string;
 }
 
-interface CropDetails {
-  [plantId: string]: {
-    landSize: string;
-    notes: string;
-  };
-}
 
 interface FarmerPlant {
   id: string;
@@ -214,7 +208,6 @@ export function CropSelection() {
   const [crops, setCrops] = useState<Crop[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [cropDetails, setCropDetails] = useState<CropDetails>({});
 
   // Fetch plants data directly from API on component mount
   useEffect(() => {
@@ -298,42 +291,13 @@ export function CropSelection() {
     setCrops((prev) =>
       prev.map((crop) => {
         if (crop.id === id) {
-          const newSelected = !crop.selected;
-          // If deselecting, remove the crop details
-          if (!newSelected && cropDetails[id]) {
-            setCropDetails((prevDetails) => {
-              const newDetails = { ...prevDetails };
-              delete newDetails[id];
-              return newDetails;
-            });
-          }
-          // If selecting, initialize crop details
-          else if (newSelected && !cropDetails[id]) {
-            setCropDetails((prevDetails) => ({
-              ...prevDetails,
-              [id]: { landSize: "", notes: "" },
-            }));
-          }
-          return { ...crop, selected: newSelected };
+          return { ...crop, selected: !crop.selected };
         }
         return crop;
       }),
     );
   };
 
-  const handleCropDetailChange = (
-    plantId: string,
-    field: "landSize" | "notes",
-    value: string,
-  ) => {
-    setCropDetails((prev) => ({
-      ...prev,
-      [plantId]: {
-        ...prev[plantId],
-        [field]: value,
-      },
-    }));
-  };
 
   const handleAddNew = () => {
     // For now, just show a toast - this could open a modal to add custom crops
@@ -542,20 +506,6 @@ export function CropSelection() {
       return;
     }
 
-    // Validate that all selected crops have required land size (notes are optional)
-    const invalidCrops = selectedCrops.filter((crop) => {
-      const details = cropDetails[crop.id];
-      return !details || !details.landSize.trim();
-    });
-
-    if (invalidCrops.length > 0) {
-      toast({
-        variant: "destructive",
-        title: "Incomplete Information",
-        description: "Please fill in land size for all selected crops.",
-      });
-      return;
-    }
 
     setIsSaving(true);
 
@@ -568,11 +518,10 @@ export function CropSelection() {
       }[] = [];
 
       for (const crop of selectedCrops) {
-        const details = cropDetails[crop.id];
         const farmerPlantId = await addPlantToFarm(
           crop.id,
-          details.landSize,
-          details.notes || "",
+          "", // Default empty land size
+          "", // Default empty notes
         );
         plantAddResults.push({ plantId: crop.id, farmerPlantId });
       }
@@ -722,69 +671,6 @@ export function CropSelection() {
           </div>
 
           {/* Selected crops details section */}
-          {hasSelectedCrops && (
-            <div className="mb-8 space-y-6">
-              <h2 className="text-lg font-semibold text-gray-900 text-center">
-                Add Details for Selected Crops
-              </h2>
-
-              {crops
-                .filter((crop) => crop.selected)
-                .map((crop) => (
-                  <div
-                    key={crop.id}
-                    className="bg-white rounded-xl border border-gray-200 p-4"
-                  >
-                    <div className="flex items-center gap-3 mb-4">
-                      <Leaf className="w-5 h-5 text-green-600" />
-                      <h3 className="font-medium text-gray-900">{crop.name}</h3>
-                    </div>
-
-                    {/* <div className="space-y-3">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Land Size
-                        </label>
-                        <input
-                          type="text"
-                          value={cropDetails[crop.id]?.landSize || ""}
-                          onChange={(e) =>
-                            handleCropDetailChange(
-                              crop.id,
-                              "landSize",
-                              e.target.value,
-                            )
-                          }
-                          placeholder="e.g., 2 acres"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                          data-testid={`input-landsize-${crop.id}`}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Notes
-                        </label>
-                        <textarea
-                          value={cropDetails[crop.id]?.notes || ""}
-                          onChange={(e) =>
-                            handleCropDetailChange(
-                              crop.id,
-                              "notes",
-                              e.target.value,
-                            )
-                          }
-                          placeholder="e.g., Located in north field, good soil quality"
-                          rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
-                          data-testid={`textarea-notes-${crop.id}`}
-                        />
-                      </div>
-                    </div> */}
-                  </div>
-                ))}
-            </div>
-          )}
 
           {/* Next button */}
           <Button
@@ -868,71 +754,6 @@ export function CropSelection() {
           </div>
 
           {/* Selected crops details section - Desktop */}
-          {hasSelectedCrops && (
-            <div className="mb-12 space-y-6">
-              <h2 className="text-2xl font-semibold text-gray-900 text-center">
-                Add Details for Selected Crops
-              </h2>
-
-              {crops
-                .filter((crop) => crop.selected)
-                .map((crop) => (
-                  <div
-                    key={crop.id}
-                    className="bg-gray-50 rounded-2xl border border-gray-200 p-6"
-                  >
-                    <div className="flex items-center gap-4 mb-6">
-                      <Leaf className="w-6 h-6 text-green-600" />
-                      <h3 className="text-xl font-semibold text-gray-900">
-                        {crop.name}
-                      </h3>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                      {/* <div>
-                        <label className="block text-lg font-medium text-gray-700 mb-3">
-                          Land Size
-                        </label>
-                        <input
-                          type="text"
-                          value={cropDetails[crop.id]?.landSize || ""}
-                          onChange={(e) =>
-                            handleCropDetailChange(
-                              crop.id,
-                              "landSize",
-                              e.target.value,
-                            )
-                          }
-                          placeholder="e.g., 2 acres"
-                          className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                          data-testid={`input-landsize-${crop.id}-desktop`}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-lg font-medium text-gray-700 mb-3">
-                          Notes
-                        </label>
-                        <textarea
-                          value={cropDetails[crop.id]?.notes || ""}
-                          onChange={(e) =>
-                            handleCropDetailChange(
-                              crop.id,
-                              "notes",
-                              e.target.value,
-                            )
-                          }
-                          placeholder="e.g., Located in north field, good soil quality"
-                          rows={3}
-                          className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
-                          data-testid={`textarea-notes-${crop.id}-desktop`}
-                        />
-                      </div> */}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
 
           {/* Next button */}
           <div className="text-center">
