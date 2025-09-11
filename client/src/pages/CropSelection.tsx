@@ -216,22 +216,41 @@ export function CropSelection() {
   const [isSaving, setIsSaving] = useState(false);
   const [cropDetails, setCropDetails] = useState<CropDetails>({});
 
-  // Load backend plants data from sessionStorage on component mount
+  // Fetch plants data directly from API on component mount
   useEffect(() => {
-    const loadBackendCrops = () => {
-      console.log("Loading backend plants data for crop selection...");
+    const fetchPlantsFromAPI = async () => {
+      console.log("Fetching plants data directly from API...");
+
+      const token = getAuthToken();
+      if (!token) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: "Please log in again.",
+        });
+        setLocation("/login");
+        setIsLoading(false);
+        return;
+      }
 
       try {
-        // Load plants data fetched from /api/plants endpoint
-        const plantsData = sessionStorage.getItem("farmerPlantsData");
+        const response = await fetch(`${BaseUrl}/api/plants`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        });
 
-        if (plantsData) {
-          const parsedPlantsData = JSON.parse(plantsData);
-          console.log("✅ Found backend plants data:", parsedPlantsData);
+        console.log("Plants API response status:", response.status);
+
+        if (response.status === 200) {
+          const plantsData = await response.json();
+          console.log("✅ Fetched plants data:", plantsData);
 
           // Convert backend plants to crop selection format
-          const backendCrops =
-            mapBackendPlantsToSelectionCrops(parsedPlantsData);
+          const backendCrops = mapBackendPlantsToSelectionCrops(plantsData);
 
           if (backendCrops.length > 0) {
             console.log(
@@ -243,16 +262,28 @@ export function CropSelection() {
             console.log("❌ No valid backend crops found, showing empty state");
             setCrops([]);
           }
+        } else if (response.status === 401) {
+          toast({
+            variant: "destructive",
+            title: "Unauthorized",
+            description: "Please log in again.",
+          });
+          setLocation("/login");
         } else {
-          console.log("❌ No backend plants data found in sessionStorage");
-          console.log(
-            "User may need to go back to notification preferences page",
-          );
-          // Show empty state or redirect back
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to load available crops.",
+          });
           setCrops([]);
         }
       } catch (error) {
-        console.error("❌ Error loading backend crops:", error);
+        console.error("❌ Error fetching plants from API:", error);
+        toast({
+          variant: "destructive",
+          title: "Network Error",
+          description: "Please check your connection and try again.",
+        });
         setCrops([]);
       } finally {
         setIsLoading(false);
@@ -260,7 +291,7 @@ export function CropSelection() {
       }
     };
 
-    loadBackendCrops();
+    fetchPlantsFromAPI();
   }, []);
 
   const handleToggleCrop = (id: string) => {
