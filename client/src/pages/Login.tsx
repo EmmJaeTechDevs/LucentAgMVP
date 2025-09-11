@@ -47,10 +47,32 @@ export function Login() {
     }
   };
 
-  const checkFarmerPlantsAndRedirect = async (userId: string, token: string) => {
+  const getAuthToken = () => {
+    try {
+      const sessionData = sessionStorage.getItem("farmerSession");
+      if (sessionData) {
+        const encryptedData = JSON.parse(sessionData);
+        const parsed = SessionCrypto.decryptSessionData(encryptedData);
+        return parsed.token;
+      }
+    } catch (error) {
+      console.error("Error getting auth token:", error);
+    }
+    return null;
+  };
+
+  const checkFarmerPlantsAndRedirect = async (userId: string) => {
     try {
       console.log("=== CHECKING FARMER PLANTS ===");
       console.log("User ID:", userId);
+      
+      // Get token from sessionStorage
+      const token = getAuthToken();
+      if (!token) {
+        console.error("No auth token found in sessionStorage");
+        setLocation("/login");
+        return;
+      }
       
       // Make POST request first
       console.log("Making POST request...");
@@ -222,7 +244,7 @@ export function Login() {
             setLocation("/buyer-home");
           } else if (user.userType === "farmer") {
             // Check if farmer has plants before redirecting
-            await checkFarmerPlantsAndRedirect(userId, token);
+            await checkFarmerPlantsAndRedirect(userId);
           }
         } else {
           // User is not verified - this should not happen with current flow, but handle it
