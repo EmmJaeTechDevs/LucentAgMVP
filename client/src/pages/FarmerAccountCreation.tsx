@@ -4,6 +4,7 @@ import { api } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 import { Eye, EyeOff } from "lucide-react";
+import { PasswordValidator, validatePasswordStrength } from "@/components/PasswordValidator";
 
 interface FormData {
   firstName: string;
@@ -72,6 +73,17 @@ export const FarmerAccountCreation = (): JSX.Element => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate password strength before submitting
+    if (!validatePasswordStrength(formData.password, formData.email || formData.firstName)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Password",
+        description: "Please ensure your password meets all requirements.",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
@@ -207,7 +219,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-              <div className="relative">
+              <div className="relative mb-2">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
@@ -225,6 +237,11 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+              <PasswordValidator 
+                password={formData.password} 
+                username={formData.email || formData.firstName}
+                className="mb-2"
+              />
             </div>
           </div>
 

@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 import { Eye, EyeOff } from "lucide-react";
+import { PasswordValidator, validatePasswordStrength } from "@/components/PasswordValidator";
 import { BaseUrl } from "../../../Baseconfig";
 
 // THIS IS THE NEW BUYER REGISTRATION FORM
@@ -55,6 +56,17 @@ export const BuyerAccountCreation = (): JSX.Element => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate password strength before submitting
+    if (!validatePasswordStrength(formData.password, formData.email || formData.firstName)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Password",
+        description: "Please ensure your password meets all requirements.",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
@@ -353,7 +365,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
               >
                 Password *
               </label>
-              <div style={{ position: "relative" }}>
+              <div style={{ position: "relative", marginBottom: "8px" }}>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
@@ -392,6 +404,11 @@ export const BuyerAccountCreation = (): JSX.Element => {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+              <PasswordValidator 
+                password={formData.password} 
+                username={formData.email || formData.firstName}
+                className="mb-2"
+              />
             </div>
           </div>
 
