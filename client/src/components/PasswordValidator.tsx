@@ -64,7 +64,7 @@ export function PasswordValidator({
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-white text-black rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full flex items-center justify-between px-4 py-3 bg-white text-black rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
         data-testid="password-rules-toggle"
       >
         <span className="text-sm font-medium">Password rules</span>
@@ -78,7 +78,7 @@ export function PasswordValidator({
       {/* Password Rules Content */}
       {isExpanded && (
         <div
-          className="mt-2 p-4 bg-gray-800 rounded-lg space-y-3"
+          className="mt-2 p-4 bg-gray-50 rounded-lg space-y-3"
           data-testid="password-rules-content"
         >
           {rules.map((rule) => (
