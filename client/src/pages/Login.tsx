@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 import { Eye, EyeOff } from "lucide-react";
-import { PasswordValidator, validatePasswordStrength } from "@/components/PasswordValidator";
 import axios from "axios";
 import { config } from "process";
 import { BaseUrl } from "../../../Baseconfig";
@@ -566,7 +565,7 @@ export function Login() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
-              <div className="relative mb-2">
+              <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
@@ -589,11 +588,6 @@ export function Login() {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              <PasswordValidator 
-                password={formData.password} 
-                username={formData.emailOrPhone}
-                className="mb-2"
-              />
               {errors.password && (
                 <p
                   className="mt-2 text-sm text-orange-600"
@@ -715,7 +709,7 @@ export function Login() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
-              <div className="relative mb-2">
+              <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
@@ -738,11 +732,6 @@ export function Login() {
                   {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
                 </button>
               </div>
-              <PasswordValidator 
-                password={formData.password} 
-                username={formData.emailOrPhone}
-                className="mb-2"
-              />
               {errors.password && (
                 <p
                   className="mt-2 text-orange-600"
