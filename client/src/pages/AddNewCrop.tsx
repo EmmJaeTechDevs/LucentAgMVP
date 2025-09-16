@@ -529,6 +529,38 @@ export function AddNewCrop() {
               </div>
             </div>
 
+            {/* Farm Address */}
+            <div>
+              <label className="block text-base font-medium text-gray-900 mb-3">
+                Farm Address
+              </label>
+              <input
+                type="text"
+                placeholder="e.g Plot 123, Farm Road, Ikeja"
+                value={formData.farmAddress}
+                onChange={(e) => handleInputChange("farmAddress", e.target.value)}
+                className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                data-testid="input-farm-address"
+                required
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-base font-medium text-gray-900 mb-3">
+                Description
+              </label>
+              <textarea
+                placeholder="e.g High-quality maize, organic farming"
+                value={formData.description}
+                onChange={(e) => handleInputChange("description", e.target.value)}
+                rows={3}
+                className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none"
+                data-testid="textarea-description"
+                required
+              />
+            </div>
+
             {/* Submit Button */}
             <div className="pt-6">
               <button
@@ -708,6 +740,38 @@ export function AddNewCrop() {
                     </select>
                   </div>
                 </div>
+              </div>
+
+              {/* Farm Address */}
+              <div>
+                <label className="block text-xl font-medium text-gray-900 mb-4">
+                  Farm Address
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g Plot 123, Farm Road, Ikeja"
+                  value={formData.farmAddress}
+                  onChange={(e) => handleInputChange("farmAddress", e.target.value)}
+                  className="w-full px-6 py-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
+                  data-testid="input-farm-address-desktop"
+                  required
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-xl font-medium text-gray-900 mb-4">
+                  Description
+                </label>
+                <textarea
+                  placeholder="e.g High-quality maize, organic farming"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange("description", e.target.value)}
+                  rows={4}
+                  className="w-full px-6 py-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none text-lg"
+                  data-testid="textarea-description-desktop"
+                  required
+                />
               </div>
 
               {/* Submit Button */}
