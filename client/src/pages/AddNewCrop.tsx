@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, Calendar } from "lucide-react";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
+import { useToast } from "@/hooks/use-toast";
+import { SessionCrypto } from "@/utils/sessionCrypto";
 
 interface CropFormData {
   cropType: string;
@@ -12,10 +14,14 @@ interface CropFormData {
   harvestDate: string;
   state: string;
   lga: string;
+  farmAddress: string;
+  description: string;
 }
 
 export function AddNewCrop() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Validate farmer session
   useSessionValidation("farmer");
@@ -23,12 +29,14 @@ export function AddNewCrop() {
   const [formData, setFormData] = useState<CropFormData>({
     cropType: "",
     quantity: "",
-    unit: "Bags",
+    unit: "bags",
     pricePerUnit: "",
     priceUnit: "Per Bag",
     harvestDate: "",
     state: "",
-    lga: ""
+    lga: "",
+    farmAddress: "",
+    description: ""
   });
 
   const handleGoBack = () => {
@@ -51,12 +59,105 @@ export function AddNewCrop() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const getAuthToken = () => {
+    try {
+      const sessionData = sessionStorage.getItem("farmerSession");
+      if (sessionData) {
+        const encryptedData = JSON.parse(sessionData);
+        const parsed = SessionCrypto.decryptSessionData(encryptedData);
+        return parsed.token;
+      }
+    } catch (error) {
+      console.error("Error getting auth token:", error);
+    }
+    return null;
+  };
+
+  // Map crop type to plant ID format
+  const getPlantId = (cropType: string): string => {
+    return `plant-${cropType.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, '')}`;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Crop data:", formData);
-    // TODO: API call to save crop
-    // Navigate back to view crops or show success
-    setLocation("/view-crops");
+    setIsSubmitting(true);
+
+    const token = getAuthToken();
+    if (!token) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "Please log in again.",
+      });
+      setLocation("/login");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      // Format the harvest date to ISO format
+      const harvestDate = formData.harvestDate 
+        ? new Date(formData.harvestDate).toISOString()
+        : new Date().toISOString();
+
+      // Prepare request body according to API structure
+      const requestBody = {
+        plantId: getPlantId(formData.cropType),
+        totalQuantity: parseInt(formData.quantity),
+        unit: formData.unit,
+        pricePerUnit: parseFloat(formData.pricePerUnit),
+        harvestDate: harvestDate,
+        state: formData.state,
+        lga: formData.lga,
+        farmAddress: formData.farmAddress,
+        description: formData.description
+      };
+
+      console.log("Sending crop data:", requestBody);
+
+      const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/farmer/crops", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      console.log("API Response Status:", response.status);
+
+      if (response.status === 201) {
+        const responseData = await response.json();
+        console.log("Crop created successfully:", responseData);
+        
+        toast({
+          title: "✅ Crop Added Successfully!",
+          description: "Your crop has been saved to your farm.",
+        });
+
+        // Navigate back to view crops
+        setLocation("/view-crops");
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("API Error:", errorData);
+        
+        toast({
+          variant: "destructive",
+          title: "Failed to Add Crop",
+          description: errorData.message || "Something went wrong. Please try again.",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving crop:", error);
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Please check your connection and try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Crop types
@@ -267,10 +368,11 @@ export function AddNewCrop() {
             <div className="pt-6">
               <button
                 type="submit"
-                className="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-colors"
+                disabled={isSubmitting}
+                className="w-full bg-green-700 hover:bg-green-800 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-4 rounded-xl font-semibold text-lg transition-colors"
                 data-testid="button-save-crop"
               >
-                Save My Crop
+                {isSubmitting ? "Saving..." : "Save My Crop"}
               </button>
             </div>
           </form>
@@ -444,10 +546,11 @@ export function AddNewCrop() {
               <div className="pt-8">
                 <button
                   type="submit"
-                  className="w-full bg-green-700 hover:bg-green-800 text-white py-6 rounded-xl font-semibold text-xl transition-all hover:scale-105"
+                  disabled={isSubmitting}
+                  className="w-full bg-green-700 hover:bg-green-800 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-6 rounded-xl font-semibold text-xl transition-all hover:scale-105 disabled:hover:scale-100"
                   data-testid="button-save-crop-desktop"
                 >
-                  Save My Crop
+                  {isSubmitting ? "Saving..." : "Save My Crop"}
                 </button>
               </div>
             </form>

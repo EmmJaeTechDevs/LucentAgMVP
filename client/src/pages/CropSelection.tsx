@@ -299,13 +299,6 @@ export function CropSelection() {
   };
 
 
-  const handleAddNew = () => {
-    // For now, just show a toast - this could open a modal to add custom crops
-    toast({
-      title: "Feature Coming Soon",
-      description: "Add new crop functionality would be implemented here",
-    });
-  };
 
   const getAuthToken = () => {
     try {
@@ -654,20 +647,6 @@ export function CropSelection() {
             ))}
 
             {/* Add New button */}
-            <button
-              onClick={handleAddNew}
-              className="p-4 rounded-2xl border-2 border-gray-200 bg-white hover:border-gray-300 transition-all"
-              data-testid="button-add-new"
-            >
-              <div className="flex flex-col items-center">
-                <div className="w-6 h-6 mb-2 bg-green-100 rounded-full flex items-center justify-center">
-                  <Plus className="w-4 h-4 text-green-600" />
-                </div>
-                <span className="text-sm font-medium text-gray-700">
-                  Add New
-                </span>
-              </div>
-            </button>
           </div>
 
           {/* Selected crops details section */}
@@ -737,20 +716,6 @@ export function CropSelection() {
             ))}
 
             {/* Add New button */}
-            <button
-              onClick={handleAddNew}
-              className="p-6 rounded-3xl border-2 border-gray-200 bg-white hover:border-gray-300 transition-all hover:scale-105"
-              data-testid="button-add-new-desktop"
-            >
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-8 mb-3 bg-green-100 rounded-full flex items-center justify-center">
-                  <Plus className="w-5 h-5 text-green-600" />
-                </div>
-                <span className="text-lg font-medium text-gray-700">
-                  Add New
-                </span>
-              </div>
-            </button>
           </div>
 
           {/* Selected crops details section - Desktop */}
