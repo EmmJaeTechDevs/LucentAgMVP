@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Calendar } from "lucide-react";
+import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
@@ -18,10 +18,20 @@ interface CropFormData {
   description: string;
 }
 
+interface Plant {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+}
+
 export function AddNewCrop() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingPlants, setIsLoadingPlants] = useState(true);
+  const [availablePlants, setAvailablePlants] = useState<Plant[]>([]);
+  const [hasValidPlants, setHasValidPlants] = useState(false);
 
   // Validate farmer session
   useSessionValidation("farmer");
@@ -73,10 +83,108 @@ export function AddNewCrop() {
     return null;
   };
 
-  // Map crop type to plant ID format
-  const getPlantId = (cropType: string): string => {
-    return `plant-${cropType.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, '')}`;
+  // Get plant ID from stored plants data - NO FALLBACK GENERATION
+  const getPlantId = (cropType: string): string | null => {
+    try {
+      const matchingPlant = availablePlants.find((plant: Plant) => 
+        plant.name.toLowerCase() === cropType.toLowerCase()
+      );
+      
+      if (matchingPlant) {
+        console.log(`Found plant ID ${matchingPlant.id} for crop ${cropType}`);
+        return matchingPlant.id;
+      } else {
+        console.warn(`No plant ID found for crop type: ${cropType}`);
+        return null; // Return null instead of generating synthetic ID
+      }
+    } catch (error) {
+      console.error("Error getting plant ID:", error);
+      return null;
+    }
   };
+
+  // Fetch plants from API
+  const fetchPlants = async (): Promise<Plant[]> => {
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error("No authentication token");
+    }
+
+    const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/plants", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    });
+
+    if (response.status !== 200) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to fetch plants");
+    }
+
+    return await response.json();
+  };
+
+  // Check for plants data and fetch if needed
+  useEffect(() => {
+    const initializePlants = async () => {
+      setIsLoadingPlants(true);
+      
+      try {
+        // First check if plants are already in sessionStorage
+        const storedPlants = sessionStorage.getItem("availablePlants");
+        
+        if (storedPlants) {
+          const plants: Plant[] = JSON.parse(storedPlants);
+          if (plants && plants.length > 0) {
+            console.log("Using cached plants data:", plants);
+            setAvailablePlants(plants);
+            setHasValidPlants(true);
+            setIsLoadingPlants(false);
+            return;
+          }
+        }
+
+        // If no cached plants, fetch from API
+        console.log("No cached plants found, fetching from API...");
+        const plants = await fetchPlants();
+        
+        if (plants && plants.length > 0) {
+          console.log("Plants fetched successfully:", plants);
+          setAvailablePlants(plants);
+          setHasValidPlants(true);
+          
+          // Store in sessionStorage for future use
+          sessionStorage.setItem("availablePlants", JSON.stringify(plants));
+        } else {
+          console.warn("No plants available from API");
+          setHasValidPlants(false);
+          toast({
+            variant: "destructive",
+            title: "No Crops Available",
+            description: "No crop types are currently available. Please try again later.",
+          });
+        }
+      } catch (error) {
+        console.error("Error initializing plants:", error);
+        setHasValidPlants(false);
+        toast({
+          variant: "destructive",
+          title: "Failed to Load Crops",
+          description: error instanceof Error ? error.message : "Could not load available crop types. Please try again.",
+        });
+        
+        // Redirect back to view crops after a delay
+        setTimeout(() => setLocation("/view-crops"), 2000);
+      } finally {
+        setIsLoadingPlants(false);
+      }
+    };
+
+    initializePlants();
+  }, [toast, setLocation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,9 +208,20 @@ export function AddNewCrop() {
         ? new Date(formData.harvestDate).toISOString()
         : new Date().toISOString();
 
+      const plantId = getPlantId(formData.cropType);
+      if (!plantId) {
+        toast({
+          variant: "destructive",
+          title: "Invalid Crop Selection",
+          description: "The selected crop type is not recognized. Please choose a different crop or try refreshing the page.",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       // Prepare request body according to API structure
       const requestBody = {
-        plantId: getPlantId(formData.cropType),
+        plantId: plantId,
         totalQuantity: parseInt(formData.quantity),
         unit: formData.unit,
         pricePerUnit: parseFloat(formData.pricePerUnit),
@@ -160,14 +279,10 @@ export function AddNewCrop() {
     }
   };
 
-  // Crop types
-  const cropTypes = [
-    "Rice", "Maize (Corn)", "Cassava", "Yam", "Sweet Potato", "Plantain", 
-    "Beans (Cowpea)", "Groundnut", "Soybean", "Millet", "Sorghum", 
-    "Tomatoes", "Pepper", "Onions", "Okra", "Spinach", "Cucumber",
-    "Watermelon", "Pineapple", "Banana", "Orange", "Mango", "Cocoa", 
-    "Oil Palm", "Cotton", "Sugar Cane"
-  ];
+  // Get dynamic crop types from fetched plants data
+  const getCropTypes = (): string[] => {
+    return availablePlants.map(plant => plant.name).sort();
+  };
 
   // Units
   const units = ["Bags", "Tonnes", "Kilograms", "Pieces", "Bunches", "Baskets"];
@@ -199,6 +314,41 @@ export function AddNewCrop() {
         return ["Municipal", "Central", "North", "South", "East", "West"];
     }
   };
+
+  // Show loading screen while fetching plants
+  if (isLoadingPlants) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-green-600 animate-spin mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Available Crops</h2>
+          <p className="text-gray-600">Please wait while we fetch the latest crop types...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error screen if no valid plants
+  if (!hasValidPlants) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ArrowLeft className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Crops Available</h2>
+          <p className="text-gray-600 mb-6">We couldn't load the available crop types. Please try again later.</p>
+          <button
+            onClick={handleGoBack}
+            className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-xl font-medium transition-colors"
+            data-testid="button-back-error"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -237,9 +387,12 @@ export function AddNewCrop() {
                 className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all bg-white text-gray-900"
                 data-testid="select-crop-type"
                 required
+                disabled={isLoadingPlants || !hasValidPlants}
               >
-                <option value="">Select a crop</option>
-                {cropTypes.map(crop => (
+                <option value="">
+                  {isLoadingPlants ? "Loading crops..." : (hasValidPlants ? "Select a crop" : "No crops available")}
+                </option>
+                {hasValidPlants && getCropTypes().map(crop => (
                   <option key={crop} value={crop}>{crop}</option>
                 ))}
               </select>
@@ -368,11 +521,11 @@ export function AddNewCrop() {
             <div className="pt-6">
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isLoadingPlants || !hasValidPlants}
                 className="w-full bg-green-700 hover:bg-green-800 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-4 rounded-xl font-semibold text-lg transition-colors"
                 data-testid="button-save-crop"
               >
-                {isSubmitting ? "Saving..." : "Save My Crop"}
+                {isSubmitting ? "Saving..." : (isLoadingPlants ? "Loading..." : (!hasValidPlants ? "No Crops Available" : "Save My Crop"))}
               </button>
             </div>
           </form>
@@ -415,9 +568,12 @@ export function AddNewCrop() {
                   className="w-full px-6 py-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all bg-white text-gray-900 text-lg"
                   data-testid="select-crop-type-desktop"
                   required
+                  disabled={isLoadingPlants || !hasValidPlants}
                 >
-                  <option value="">Select a crop</option>
-                  {cropTypes.map(crop => (
+                  <option value="">
+                    {isLoadingPlants ? "Loading crops..." : (hasValidPlants ? "Select a crop" : "No crops available")}
+                  </option>
+                  {hasValidPlants && getCropTypes().map(crop => (
                     <option key={crop} value={crop}>{crop}</option>
                   ))}
                 </select>
@@ -546,11 +702,11 @@ export function AddNewCrop() {
               <div className="pt-8">
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isLoadingPlants || !hasValidPlants}
                   className="w-full bg-green-700 hover:bg-green-800 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-6 rounded-xl font-semibold text-xl transition-all hover:scale-105 disabled:hover:scale-100"
                   data-testid="button-save-crop-desktop"
                 >
-                  {isSubmitting ? "Saving..." : "Save My Crop"}
+                  {isSubmitting ? "Saving..." : (isLoadingPlants ? "Loading..." : (!hasValidPlants ? "No Crops Available" : "Save My Crop"))}
                 </button>
               </div>
             </form>

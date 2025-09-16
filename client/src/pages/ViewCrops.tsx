@@ -1,13 +1,106 @@
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Leaf } from "lucide-react";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
+import { useToast } from "@/hooks/use-toast";
+import { SessionCrypto } from "@/utils/sessionCrypto";
+
+interface Plant {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  growthDuration: string;
+  isActive: boolean;
+  createdAt: string;
+}
 
 export function ViewCrops() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
 
   // Validate farmer session
   useSessionValidation("farmer");
+
+  const getAuthToken = () => {
+    try {
+      const sessionData = sessionStorage.getItem("farmerSession");
+      if (sessionData) {
+        const encryptedData = JSON.parse(sessionData);
+        const parsed = SessionCrypto.decryptSessionData(encryptedData);
+        return parsed.token;
+      }
+    } catch (error) {
+      console.error("Error getting auth token:", error);
+    }
+    return null;
+  };
+
+  // Fetch plants on component mount
+  useEffect(() => {
+    const fetchPlants = async () => {
+      const token = getAuthToken();
+      if (!token) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: "Please log in again.",
+        });
+        setLocation("/login");
+        return;
+      }
+
+      try {
+        console.log("Fetching plants from API...");
+        const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/plants", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+          },
+        });
+
+        console.log("Plants API Response Status:", response.status);
+
+        if (response.status === 200) {
+          const plants: Plant[] = await response.json();
+          console.log("Plants fetched successfully:", plants);
+
+          // Store plant IDs in sessionStorage
+          const plantIds = plants.map(plant => ({
+            id: plant.id,
+            name: plant.name
+          }));
+          
+          sessionStorage.setItem("availablePlants", JSON.stringify(plantIds));
+          console.log("Plant IDs stored in sessionStorage:", plantIds);
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          console.error("API Error:", errorData);
+          
+          toast({
+            variant: "destructive",
+            title: "Failed to Load Plants",
+            description: errorData.message || "Could not fetch available plants.",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching plants:", error);
+        toast({
+          variant: "destructive",
+          title: "Network Error",
+          description: "Please check your connection and try again.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPlants();
+  }, [toast, setLocation]);
 
   const handleGoBack = () => {
     setLocation("/farmer-dashboard");
