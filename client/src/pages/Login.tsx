@@ -72,7 +72,7 @@ export function Login() {
 
     try {
       console.log("=== CHECKING FARMER ACCOUNT ===");
-      console.log("User ID:", userId);
+      console.log("Checking farmer account...");
       
       // Make POST request to confirm account
       console.log("Making POST request to confirm farmer account...");
@@ -86,7 +86,7 @@ export function Login() {
       });
       
       console.log("POST request successful - Status:", postResponse.status);
-      console.log("POST response data:", postResponse.data);
+      console.log("POST request successful - farmer account confirmed");
       
       // After successful POST, take farmer to their dashboard
       console.log("Account confirmed, redirecting to farmer dashboard...");
@@ -100,15 +100,15 @@ export function Login() {
         console.log("API Error Status:", status);
         
         if (status === 400) {
-          // Status 400: Take farmer to crop selection page
-          setLocation("/crop-selection");
+          // Status 400: Take farmer to dashboard 
+          setLocation("/farmer-dashboard");
         } else {
-          // For other errors, default to crop selection to be safe
-          setLocation("/crop-selection");
+          // For other errors, default to farmer dashboard
+          setLocation("/farmer-dashboard");
         }
       } else {
-        // Non-axios errors, default to crop selection
-        setLocation("/crop-selection");
+        // Non-axios errors, default to farmer dashboard
+        setLocation("/farmer-dashboard");
       }
     }
   };
@@ -137,7 +137,7 @@ export function Login() {
 
       console.log("=== LOGIN REQUEST (AXIOS) ===");
       console.log("Input Type:", inputType);
-      console.log("Login Data:", loginData);
+      // Login data contains sensitive information - not logging for security
 
       // Backend API endpoint (using the same as signup pages)
       const API_BASE_URL = "https://lucent-ag-api-damidek.replit.app";
@@ -157,7 +157,7 @@ export function Login() {
 
       console.log("=== LOGIN RESPONSE (AXIOS) ===");
       console.log("Response Status:", response.status);
-      console.log("Response Data:", response.data);
+      console.log("Login response received successfully");
 
       if (response.status === 200) {
         console.log("✅ LOGIN SUCCESSFUL");
@@ -255,7 +255,7 @@ export function Login() {
         const errorMessage = error.response?.data?.message || "";
 
         console.log("Axios Error Status:", status);
-        console.log("Axios Error Message:", errorMessage);
+        console.log("Axios Error - See server logs for details");
 
         if (status === 401) {
           // Handle 401 - Invalid credentials
@@ -330,7 +330,7 @@ export function Login() {
             
             if (userId) {
               console.log("=== 403 ACCOUNT NOT VERIFIED ===");
-              console.log("User ID:", userId);
+              console.log("Account verification required");
               
               // Store user ID for verification with 24-hour expiry
               const verificationData = {
@@ -429,7 +429,7 @@ export function Login() {
   const requestOTPForLogin = async (userId: string, userType: string) => {
     try {
       console.log("=== REQUEST OTP FOR LOGIN ===");
-      console.log("User ID:", userId);
+      console.log("Requesting OTP for login verification");
       console.log("User Type:", userType);
 
       // Prepare OTP request data (same format as signup pages)
@@ -439,7 +439,7 @@ export function Login() {
         purpose: "verification",
       };
 
-      console.log("OTP Request Data:", otpRequestData);
+      console.log("OTP request prepared for submission");
 
       // Send OTP request using axios
       const otpResponse = await axios.post(
@@ -456,7 +456,7 @@ export function Login() {
 
       console.log("=== OTP REQUEST RESPONSE ===");
       console.log("OTP Response Status:", otpResponse.status);
-      console.log("OTP Response Data:", otpResponse.data);
+      console.log("OTP response received successfully");
 
       if (otpResponse.status === 200) {
         console.log("✅ OTP REQUEST SUCCESSFUL");
