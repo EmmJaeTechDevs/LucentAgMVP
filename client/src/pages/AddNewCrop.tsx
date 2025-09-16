@@ -203,22 +203,22 @@ export function AddNewCrop() {
     }
 
     try {
-      // Format the harvest date to the specific format expected by server: "2024-03-15T00:00:00Z"
-      // HTML date input provides YYYY-MM-DD format, so we just append the time portion
-      const formatDateForServer = (dateString: string) => `${dateString}T00:00:00Z`;
+      // Convert harvest date string to Date object for server
+      const convertToDateObject = (dateString: string): Date => {
+        // HTML date input provides YYYY-MM-DD format, convert to Date object
+        return new Date(dateString + 'T00:00:00Z');
+      };
       
-      // Get today's date in YYYY-MM-DD format for fallback
-      const getTodayDateString = () => {
+      // Get today's date as fallback
+      const getTodayDate = (): Date => {
         const today = new Date();
-        const year = today.getUTCFullYear();
-        const month = String(today.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(today.getUTCDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        // Set to start of day in UTC
+        return new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
       };
 
       const harvestDate = formData.harvestDate 
-        ? formatDateForServer(formData.harvestDate)
-        : formatDateForServer(getTodayDateString());
+        ? convertToDateObject(formData.harvestDate)
+        : getTodayDate();
 
       const plantId = getPlantId(formData.cropType);
       if (!plantId) {
