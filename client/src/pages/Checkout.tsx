@@ -18,10 +18,13 @@ export function Checkout() {
   const [hasFetched, setHasFetched] = useState(false);
 
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryState, setDeliveryState] = useState("");
+  const [deliveryLga, setDeliveryLga] = useState("");
   const [deliveryNote, setDeliveryNote] = useState("");
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   // Track when cart has been fetched to show proper states
   useEffect(() => {
@@ -34,9 +37,48 @@ export function Checkout() {
   const deliveryFee: number = 0;
   const total: number = subtotal + deliveryFee;
 
-  const handlePlaceOrder = () => {
-    // Show success modal first, clear cart when modal closes
-    setIsSuccessModalOpen(true);
+  const handlePlaceOrder = async () => {
+    if (!deliveryAddress || !deliveryState || !deliveryLga) {
+      return;
+    }
+
+    setIsPlacingOrder(true);
+    
+    try {
+      // Send order for each cart item
+      for (const item of cartItems) {
+        const orderData = {
+          cropId: item.id,
+          quantityOrdered: item.quantity,
+          deliveryFee: deliveryFee,
+          deliveryAddress: deliveryAddress,
+          deliveryState: deliveryState,
+          deliveryLga: deliveryLga,
+          deliveryNote: deliveryNote || ""
+        };
+
+        const response = await fetch('https://lucent-ag-api-damidek.replit.app/api/buyer/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_BUYER_TOKEN || ''}`
+          },
+          body: JSON.stringify(orderData)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to place order for ${item.plantName}`);
+        }
+      }
+      
+      // Show success modal after all orders are placed
+      setIsSuccessModalOpen(true);
+    } catch (error) {
+      console.error('Error placing order:', error);
+      alert('Failed to place order. Please try again.');
+    } finally {
+      setIsPlacingOrder(false);
+    }
   };
 
   const handleSuccessModalClose = async () => {
@@ -172,6 +214,34 @@ export function Checkout() {
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </button>
 
+              {/* Delivery State */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Delivery State *</label>
+                <input
+                  type="text"
+                  value={deliveryState}
+                  onChange={(e) => setDeliveryState(e.target.value)}
+                  placeholder="Enter delivery state (e.g., Lagos)"
+                  className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  data-testid="input-delivery-state"
+                  required
+                />
+              </div>
+
+              {/* Delivery LGA */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Local Government Area (LGA) *</label>
+                <input
+                  type="text"
+                  value={deliveryLga}
+                  onChange={(e) => setDeliveryLga(e.target.value)}
+                  placeholder="Enter LGA (e.g., Lagos Island)"
+                  className="w-full px-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  data-testid="input-delivery-lga"
+                  required
+                />
+              </div>
+
               <button
                 onClick={() => setIsNoteModalOpen(true)}
                 className="w-full flex items-center justify-between py-4 border-b border-gray-200"
@@ -180,7 +250,7 @@ export function Checkout() {
                 <div className="flex items-center gap-3">
                   <FileText className="w-5 h-5 text-gray-600" />
                   <span className="text-gray-900 text-left">
-                    {deliveryNote ? "Edit Delivery Note" : "Add Delivery Note"}
+                    {deliveryNote ? "Edit Delivery Note" : "Add Delivery Note (Optional)"}
                   </span>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
@@ -219,12 +289,14 @@ export function Checkout() {
             onClick={handlePlaceOrder}
             className="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-colors disabled:opacity-50"
             data-testid="button-place-order"
-            disabled={!deliveryAddress}
+            disabled={!deliveryAddress || !deliveryState || !deliveryLga || isPlacingOrder}
           >
-            Place Order - ₦{total.toLocaleString()}
+            {isPlacingOrder ? 'Placing Order...' : `Place Order - ₦${total.toLocaleString()}`}
           </button>
-          {!deliveryAddress && (
-            <p className="text-red-600 text-sm text-center mt-2">Please set a delivery address to continue</p>
+          {(!deliveryAddress || !deliveryState || !deliveryLga) && (
+            <p className="text-red-600 text-sm text-center mt-2">
+              Please fill in all required delivery information to continue
+            </p>
           )}
         </div>
       )}
