@@ -19,10 +19,6 @@ externalPort = 80
 localPort = 34981
 externalPort = 3000
 
-[[ports]]
-localPort = 38159
-externalPort = 3001
-
 [workflows]
 runButton = "Project"
 
@@ -43,3 +39,6 @@ author = "agent"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[agent]
+integrations = ["javascript_database:1.0.0"]
