@@ -49,8 +49,8 @@ class LocalStorageCartService {
   addToCart(item: AddToCartData): CartItem {
     const items = this.getCartItems();
     
-    // Check if item already exists (same cropId)
-    const existingIndex = items.findIndex(cartItem => cartItem.cropId === item.cropId);
+    // Check if item already exists (same cropId) - ensure both are strings for comparison
+    const existingIndex = items.findIndex(cartItem => String(cartItem.cropId) === String(item.cropId));
     
     if (existingIndex >= 0) {
       // Update existing item quantity
@@ -157,7 +157,7 @@ export function useCart() {
       
       // Transform product data to cart item format
       const cartItemData: AddToCartData = {
-        cropId: productData.id || productData.cropId,
+        cropId: String(productData.id || productData.cropId), // Ensure cropId is always a string
         plantName: productData.name,
         quantity,
         pricePerUnit: parseFloat(productData.rawData?.pricePerUnit || 0),

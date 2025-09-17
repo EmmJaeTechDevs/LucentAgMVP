@@ -16,23 +16,17 @@ export function Cart() {
     fetchCartItems();
   }, []);
 
-  // Calculate total from database cart items
-  const total = cartItems.reduce((sum, item) => sum + parseFloat(item.totalPrice), 0);
+  // Calculate total from cart items (totalPrice is already a number)
+  const total = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
-  // Helper function to get price per unit as number for calculations
-  const getPricePerUnit = (item: any) => {
-    return parseFloat(item.pricePerUnit.replace('₦', '').replace(',', '')) || 0;
-  };
-
-  // Handle quantity update with price calculation
+  // Handle quantity update
   const handleUpdateQuantity = async (item: any, change: number) => {
     const newQuantity = Math.max(1, item.quantity + change);
-    const pricePerUnit = getPricePerUnit(item);
-    await updateQuantity(item.id, newQuantity, pricePerUnit);
+    await updateQuantity(item.id, newQuantity);
   };
 
   // Handle item removal
-  const handleRemoveItem = async (itemId: number) => {
+  const handleRemoveItem = async (itemId: string) => {
     await removeItem(itemId);
   };
 
@@ -98,7 +92,7 @@ export function Cart() {
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 mb-1">{item.plantName}</h3>
                     <p className="text-gray-600 text-sm mb-2">{item.quantity} {item.unit}</p>
-                    <p className="font-bold text-gray-900">₦{parseFloat(item.totalPrice).toLocaleString()}</p>
+                    <p className="font-bold text-gray-900">₦{item.totalPrice.toLocaleString()}</p>
                     {item.farmName && (
                       <p className="text-gray-500 text-xs">From {item.farmName}</p>
                     )}
