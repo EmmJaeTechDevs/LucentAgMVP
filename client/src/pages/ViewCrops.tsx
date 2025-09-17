@@ -379,7 +379,7 @@ export function ViewCrops() {
 
         {/* Desktop Popup - Modal style */}
         <div className="hidden md:block fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 space-y-6 relative">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 space-y-6 relative">
             {/* Close button */}
             <button
               onClick={handleCloseCropDetails}
