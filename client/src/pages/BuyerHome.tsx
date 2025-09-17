@@ -548,6 +548,7 @@ export function BuyerHome() {
               </p>
             </div>
             <div className="flex items-center gap-4">
+              <HamburgerMenu userType="buyer" />
               <button
                 onClick={handleProfileClick}
                 className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
