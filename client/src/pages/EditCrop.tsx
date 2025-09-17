@@ -160,11 +160,8 @@ export function EditCrop() {
 
     try {
       // Format harvest date to exact string format server expects: "2024-03-15T00:00:00Z"
-      const formatDateForServer = (dateString: string): string => {
-        return `${dateString}T00:00:00Z`;
-      };
-
-      const harvestDate = formatDateForServer(formData.harvestDate);
+      // HTML date input provides YYYY-MM-DD format, just append the time portion
+      const harvestDate = formData.harvestDate ? `${formData.harvestDate}T00:00:00Z` : "";
 
       // Prepare request body according to API structure
       const requestBody = {
