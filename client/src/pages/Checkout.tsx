@@ -57,17 +57,17 @@ export function Checkout() {
           deliveryNote: deliveryNote || ""
         };
 
-        const response = await fetch('https://lucent-ag-api-damidek.replit.app/api/buyer/orders', {
+        const response = await fetch('/api/orders', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_BUYER_TOKEN || ''}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify(orderData)
         });
 
         if (!response.ok) {
-          throw new Error(`Failed to place order for ${item.plantName}`);
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(errorData.error || `Failed to place order for ${item.plantName}`);
         }
       }
       
