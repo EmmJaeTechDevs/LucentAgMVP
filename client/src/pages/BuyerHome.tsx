@@ -117,9 +117,77 @@ export function BuyerHome() {
     await addToCart(product, quantity);
   };
 
-  const handleNotifyMe = (product: any) => {
+  const handleNotifyMe = async (product: any) => {
     console.log("Notify me for:", product.name);
-    // TODO: Implement notification signup
+    
+    try {
+      // Get buyer token from session storage
+      const buyerSession = sessionStorage.getItem("buyerSession");
+      if (!buyerSession) {
+        toast({
+          title: "Authentication Error",
+          description: "Please log in again to set up notifications.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const encryptedSessionData = JSON.parse(buyerSession);
+      const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
+      const now = new Date().getTime();
+      
+      // Check if session is still valid and has token
+      if (!sessionData.token || now >= sessionData.expiry) {
+        toast({
+          title: "Session Expired",
+          description: "Please log in again to set up notifications.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Prepare request body
+      const requestBody = {
+        cropId: product.rawData?.id || product.id,
+        message: "Please notify me when this crop is ready",
+        notificationType: "crop_ready"
+      };
+
+      console.log('Making notification request with:', requestBody);
+
+      // Make POST request to notifications endpoint
+      const response = await fetch('https://lucent-ag-api-damidek.replit.app/api/buyer/notifications', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${sessionData.token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to set up notification: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('Notification API Response:', result);
+      
+      // Show success message
+      toast({
+        title: "Notification Set!",
+        description: `We'll notify you when ${product.name} is ready for harvest.`,
+        className: "bg-green-50 border-green-200 text-green-800",
+      });
+      
+    } catch (error) {
+      console.error('Error setting up notification:', error);
+      toast({
+        title: "Failed to Set Notification",
+        description: error instanceof Error ? error.message : "Please try again later.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCartClick = () => {
