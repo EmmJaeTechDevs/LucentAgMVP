@@ -34,6 +34,8 @@ import { Checkout } from "@/pages/Checkout";
 import { Login } from "@/pages/Login";
 import { BuyerProfile } from "@/pages/BuyerProfile";
 import { FarmerProfile } from "@/pages/FarmerProfile";
+import { BuyerOrders } from "@/pages/BuyerOrders";
+import { Communities } from "@/pages/Communities";
 import { ForgotPassword } from "@/pages/ForgotPassword";
 import { ResetOTP } from "@/pages/ResetOTP";
 import { ResetPassword } from "@/pages/ResetPassword";
@@ -71,6 +73,8 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/buyer-profile" component={BuyerProfile} />
       <Route path="/farmer-profile" component={FarmerProfile} />
+      <Route path="/buyer-orders" component={BuyerOrders} />
+      <Route path="/communities" component={Communities} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-otp" component={ResetOTP} />
       <Route path="/reset-password" component={ResetPassword} />
