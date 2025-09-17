@@ -33,7 +33,9 @@ export function BuyerHome() {
   const [isHarvestingModalOpen, setIsHarvestingModalOpen] = useState(false);
   const [userLastName, setUserLastName] = useState("John");
   const [availableCrops, setAvailableCrops] = useState<any[]>([]);
+  const [soonReadyCrops, setSoonReadyCrops] = useState<any[]>([]);
   const [isLoadingCrops, setIsLoadingCrops] = useState(true);
+  const [isLoadingSoonReady, setIsLoadingSoonReady] = useState(true);
   const { toast } = useToast();
 
   // Validate buyer session
@@ -76,12 +78,8 @@ export function BuyerHome() {
   };
 
   // Transform API data to products
-  const allProducts = availableCrops.map(mapCropToProduct);
-  
-  // For now, treat all as "Fresh Today" since we're getting available crops
-  // In the future, you could separate based on harvest date or other criteria
-  const freshTodayProducts = allProducts;
-  const harvestingSoonProducts: any[] = [];
+  const freshTodayProducts = availableCrops.map(mapCropToProduct);
+  const harvestingSoonProducts = soonReadyCrops.map(mapCropToProduct);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -219,6 +217,69 @@ export function BuyerHome() {
     };
 
     fetchAvailableCrops();
+  }, []);
+
+  // Fetch soon-ready crops when component mounts
+  useEffect(() => {
+    const fetchSoonReadyCrops = async () => {
+      try {
+        setIsLoadingSoonReady(true);
+        
+        // Get buyer token from session storage
+        const buyerSession = sessionStorage.getItem("buyerSession");
+        if (!buyerSession) {
+          console.error("No buyer session found for soon-ready crops");
+          setIsLoadingSoonReady(false);
+          return;
+        }
+
+        const encryptedSessionData = JSON.parse(buyerSession);
+        const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
+        const now = new Date().getTime();
+        
+        if (now >= sessionData.expiry) {
+          console.error("Buyer session has expired for soon-ready crops");
+          setIsLoadingSoonReady(false);
+          return;
+        }
+
+        const token = sessionData.token;
+        if (!token) {
+          console.error("No buyer token found in session for soon-ready crops");
+          setIsLoadingSoonReady(false);
+          return;
+        }
+
+        // Make GET request to fetch soon-ready crops
+        const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/buyer/crops/soon-ready", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json",
+          },
+        });
+
+        // Console log the response
+        console.log("Soon-ready crops API response status:", response.status);
+        const responseData = await response.json();
+        console.log("Soon-ready crops API response data:", responseData);
+
+        if (response.status === 200 && responseData.crops) {
+          setSoonReadyCrops(responseData.crops);
+        } else {
+          console.error("Failed to fetch soon-ready crops or no crops available");
+          setSoonReadyCrops([]);
+        }
+
+      } catch (error) {
+        console.error("Error fetching soon-ready crops:", error);
+        setSoonReadyCrops([]);
+      } finally {
+        setIsLoadingSoonReady(false);
+      }
+    };
+
+    fetchSoonReadyCrops();
   }, []);
 
   return (
@@ -388,7 +449,20 @@ export function BuyerHome() {
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Harvesting Soon
             </h2>
-            {harvestingSoonProducts.length > 0 ? (
+            {isLoadingSoonReady ? (
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex-shrink-0 w-48 bg-white rounded-xl shadow-sm animate-pulse">
+                    <div className="w-full h-32 bg-gray-200 rounded-t-xl"></div>
+                    <div className="p-4 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : harvestingSoonProducts.length > 0 ? (
               <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
                 {harvestingSoonProducts.map((product) => (
                 <div
@@ -604,7 +678,20 @@ export function BuyerHome() {
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
               Harvesting Soon
             </h2>
-            {harvestingSoonProducts.length > 0 ? (
+            {isLoadingSoonReady ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white rounded-xl shadow-sm animate-pulse">
+                    <div className="w-full h-48 bg-gray-200 rounded-t-xl"></div>
+                    <div className="p-6 space-y-3">
+                      <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-5 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : harvestingSoonProducts.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {harvestingSoonProducts.map((product) => (
                 <div
