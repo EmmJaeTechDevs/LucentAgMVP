@@ -185,6 +185,13 @@ export function ViewCrops() {
   useEffect(() => {
     fetchPlants(); // Fetch plants for sessionStorage
     fetchCrops(1); // Fetch first page of crops
+    
+    // Clear any edit crop data from sessionStorage on page load
+    // This ensures clean state when returning from edit page
+    const editCropData = sessionStorage.getItem("editCropData");
+    if (editCropData) {
+      sessionStorage.removeItem("editCropData");
+    }
   }, [fetchPlants, fetchCrops]);
 
   // Infinite scroll with IntersectionObserver
@@ -230,20 +237,75 @@ export function ViewCrops() {
   };
 
   const handleEditCrop = () => {
-    // TODO: Implement edit functionality
-    toast({
-      title: "Edit Crop",
-      description: "Edit functionality coming soon!",
-    });
+    if (selectedCrop) {
+      // Store crop data in sessionStorage for EditCrop page
+      sessionStorage.setItem("editCropData", JSON.stringify(selectedCrop));
+      setLocation("/edit-crop");
+    }
   };
 
-  const handleRemoveCrop = () => {
-    // TODO: Implement remove functionality
-    toast({
-      variant: "destructive",
-      title: "Remove Crop",
-      description: "Remove functionality coming soon!",
-    });
+  const handleRemoveCrop = async () => {
+    if (!selectedCrop) return;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete your ${selectedCrop.plant?.name || 'crop'}? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: "Please log in again.",
+        });
+        setLocation("/login");
+        return;
+      }
+
+      const response = await fetch(
+        `https://lucent-ag-api-damidek.replit.app/api/farmer/crops/${selectedCrop.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 204) {
+        toast({
+          title: "✅ Crop Deleted Successfully!",
+          description: "Your crop has been removed from your farm.",
+        });
+
+        // Close popup
+        setShowCropDetails(false);
+        setSelectedCrop(null);
+
+        // Refresh the crop list by re-fetching from page 1
+        setCrops([]); // Clear existing crops first
+        setPagination(prev => ({ ...prev, page: 1, totalPages: 0, total: 0 }));
+        fetchCrops(1, false); // Fetch fresh data without appending
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        toast({
+          variant: "destructive",
+          title: "Failed to Delete Crop",
+          description: errorData.message || "Something went wrong. Please try again.",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting crop:", error);
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Please check your connection and try again.",
+      });
+    }
   };
 
   // Crop list item component matching the design
