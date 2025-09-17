@@ -184,6 +184,54 @@ export function BuyerHome() {
     }
   }, []);
 
+  // Fetch available crops when component mounts
+  useEffect(() => {
+    const fetchAvailableCrops = async () => {
+      try {
+        // Get buyer token from session storage
+        const buyerSession = sessionStorage.getItem("buyerSession");
+        if (!buyerSession) {
+          console.error("No buyer session found");
+          return;
+        }
+
+        const encryptedSessionData = JSON.parse(buyerSession);
+        const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
+        const now = new Date().getTime();
+        
+        if (now >= sessionData.expiry) {
+          console.error("Buyer session has expired");
+          return;
+        }
+
+        const token = sessionData.token;
+        if (!token) {
+          console.error("No buyer token found in session");
+          return;
+        }
+
+        // Make GET request to fetch available crops
+        const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/buyer/crops/available", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json",
+          },
+        });
+
+        // Console log the response
+        console.log("Available crops API response status:", response.status);
+        const responseData = await response.json();
+        console.log("Available crops API response data:", responseData);
+
+      } catch (error) {
+        console.error("Error fetching available crops:", error);
+      }
+    };
+
+    fetchAvailableCrops();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Layout */}
