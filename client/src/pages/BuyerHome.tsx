@@ -45,17 +45,20 @@ export function BuyerHome() {
 
   // Mapping function to transform API crop data to UI format
   const mapCropToProduct = (crop: any) => {
-    // Map plantId to display name and image
-    const plantMapping: { [key: string]: { name: string; image: any } } = {
-      'plant-beans': { name: 'Green Beans', image: GreenBeansImage },
-      'plant-yam': { name: 'Yam', image: SweetPotatoImage },
-      'plant-tomatoes': { name: 'Tomatoes', image: TomatoesImage },
-      'plant-cabbage': { name: 'Cabbage', image: CabbageImage },
-      'plant-groundnuts': { name: 'Groundnuts', image: GroundnutsImage },
-      'plant-plantain': { name: 'Plantain', image: PlantainImage },
+    // Get plant name from the API response Plant object, fallback to plantId-based name
+    const plantName = crop.plant?.name || crop.plantId?.replace('plant-', '').replace('-', ' ') || 'Unknown Crop';
+    
+    // Map plantId to images (keeping image mapping for now)
+    const plantImageMapping: { [key: string]: any } = {
+      'plant-beans': GreenBeansImage,
+      'plant-yam': SweetPotatoImage,
+      'plant-tomatoes': TomatoesImage,
+      'plant-cabbage': CabbageImage,
+      'plant-groundnuts': GroundnutsImage,
+      'plant-plantain': PlantainImage,
     };
 
-    const plantInfo = plantMapping[crop.plantId] || { name: crop.plantId?.replace('plant-', '').replace('-', ' ') || 'Unknown Crop', image: TomatoesImage };
+    const plantImage = plantImageMapping[crop.plantId] || TomatoesImage;
     
     // Calculate stock left message
     const stockLeft = crop.availableQuantity < crop.totalQuantity 
@@ -64,11 +67,11 @@ export function BuyerHome() {
 
     return {
       id: crop.id,
-      name: plantInfo.name,
+      name: plantName, // Use actual plant name from API response
       farm: crop.farmerName || crop.farmer?.name || "Local Farm", // Use farmer name if available
       price: `₦${crop.pricePerUnit?.toLocaleString() || '0'}`,
       unit: `per ${crop.unit || 'Unit'}`,
-      image: plantInfo.image,
+      image: plantImage, // Use mapped image
       stockLeft: stockLeft,
       availableQuantity: `${crop.availableQuantity} ${crop.unit || 'Units'} Available`,
       location: `Grown in ${crop.state || 'Nigeria'}`,
@@ -202,6 +205,10 @@ export function BuyerHome() {
         console.log("Available crops API response data:", responseData);
 
         if (response.status === 200 && responseData.crops) {
+          // Debug: Log crop structure to see plant object
+          if (responseData.crops.length > 0) {
+            console.log("Available crop sample:", responseData.crops[0]);
+          }
           setAvailableCrops(responseData.crops);
         } else {
           console.error("Failed to fetch crops or no crops available");
@@ -265,6 +272,10 @@ export function BuyerHome() {
         console.log("Soon-ready crops API response data:", responseData);
 
         if (response.status === 200 && responseData.crops) {
+          // Debug: Log crop structure to see plant object
+          if (responseData.crops.length > 0) {
+            console.log("Soon-ready crop sample:", responseData.crops[0]);
+          }
           setSoonReadyCrops(responseData.crops);
         } else {
           console.error("Failed to fetch soon-ready crops or no crops available");
