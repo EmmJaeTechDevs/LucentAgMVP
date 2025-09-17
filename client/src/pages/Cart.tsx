@@ -9,7 +9,7 @@ export function Cart() {
   // Validate buyer session (only buyers can have shopping carts)
   useSessionValidation("buyer");
 
-  const { cartItems, updateQuantity, removeItem, isLoading, fetchCartItems } = useCart();
+  const { cartItems, updateQuantity, removeItem, clearCart, isLoading, fetchCartItems } = useCart();
 
   // Load cart items when component mounts
   useEffect(() => {
@@ -28,6 +28,13 @@ export function Cart() {
   // Handle item removal
   const handleRemoveItem = async (itemId: string) => {
     await removeItem(itemId);
+  };
+
+  // Handle clear cart
+  const handleClearCart = async () => {
+    if (window.confirm("Are you sure you want to remove all items from your cart?")) {
+      await clearCart();
+    }
   };
 
   return (
@@ -149,15 +156,27 @@ export function Cart() {
             </div>
             <p className="text-sm text-gray-500">Taxes and shipping calculated at checkout</p>
           </div>
-          <Link href="/checkout">
+          
+          <div className="space-y-3">
+            <Link href="/checkout">
+              <button
+                className="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-colors disabled:opacity-50"
+                data-testid="button-proceed-checkout"
+                disabled={isLoading}
+              >
+                Proceed to Checkout - ₦{total.toLocaleString()}
+              </button>
+            </Link>
+            
             <button
-              className="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-colors disabled:opacity-50"
-              data-testid="button-proceed-checkout"
+              onClick={handleClearCart}
+              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
+              data-testid="button-clear-cart"
               disabled={isLoading}
             >
-              Proceed to Checkout - ₦{total.toLocaleString()}
+              Clear Cart
             </button>
-          </Link>
+          </div>
         </div>
       )}
     </div>
