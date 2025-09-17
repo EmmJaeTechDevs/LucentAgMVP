@@ -81,10 +81,34 @@ export function EditCrop() {
         setCropData(crop);
         
         // Pre-populate form with existing data
+        // Safely handle harvest date formatting
+        let harvestDateForInput = "";
+        try {
+          if (crop.harvestDate) {
+            // Handle different possible date formats
+            if (crop.harvestDate.includes('T')) {
+              // ISO format: "2024-12-30T00:00:00Z" -> "2024-12-30"
+              harvestDateForInput = crop.harvestDate.split('T')[0];
+            } else if (crop.harvestDate.includes('-')) {
+              // Already in YYYY-MM-DD format
+              harvestDateForInput = crop.harvestDate;
+            } else {
+              // Try to parse as Date and format
+              const date = new Date(crop.harvestDate);
+              if (!isNaN(date.getTime())) {
+                harvestDateForInput = date.toISOString().split('T')[0];
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error formatting harvest date:", error);
+          harvestDateForInput = ""; // Fallback to empty string
+        }
+        
         setFormData({
           totalQuantity: crop.totalQuantity.toString(),
           pricePerUnit: crop.pricePerUnit.toString(),
-          harvestDate: crop.harvestDate.split('T')[0], // Convert from ISO to date input format
+          harvestDate: harvestDateForInput,
           description: crop.description
         });
         
