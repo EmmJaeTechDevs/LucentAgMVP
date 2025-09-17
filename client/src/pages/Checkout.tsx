@@ -7,6 +7,7 @@ import { OrderSuccessModal } from "../components/OrderSuccessModal";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { useCart } from "@/hooks/useCart";
 import { CartItem } from "@shared/schema";
+import { SessionCrypto } from "@/utils/sessionCrypto";
 
 
 export function Checkout() {
@@ -37,8 +38,34 @@ export function Checkout() {
   const deliveryFee: number = 0;
   const total: number = subtotal + deliveryFee;
 
+  const getBuyerToken = (): string | null => {
+    try {
+      const buyerSession = sessionStorage.getItem("buyerSession");
+      if (buyerSession) {
+        const encryptedSessionData = JSON.parse(buyerSession);
+        const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
+        const now = new Date().getTime();
+        
+        // Check if session is still valid and has token
+        if (sessionData.token && now < sessionData.expiry) {
+          return sessionData.token;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error retrieving buyer token:', error);
+      return null;
+    }
+  };
+
   const handlePlaceOrder = async () => {
     if (!deliveryAddress || !deliveryState || !deliveryLga) {
+      return;
+    }
+
+    const buyerToken = getBuyerToken();
+    if (!buyerToken) {
+      alert('Please log in again to place an order.');
       return;
     }
 
@@ -48,6 +75,7 @@ export function Checkout() {
       // Send order for each cart item
       for (const item of cartItems) {
         const orderData = {
+          buyerToken: buyerToken,
           cropId: item.id,
           quantityOrdered: item.quantity,
           deliveryFee: deliveryFee,

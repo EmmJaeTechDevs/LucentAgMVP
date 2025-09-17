@@ -6,25 +6,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // All cart functionality has been moved to localStorage in the frontend
   // No cart API routes needed since cart data is stored locally
 
-  // Order placement endpoint - handles external API calls securely
+  // Order placement endpoint - handles external API calls with dynamic buyer tokens
   app.post('/api/orders', async (req, res) => {
     try {
-      const orderData = req.body;
+      const { buyerToken, ...orderData } = req.body;
+      
+      // Validate buyer token
+      if (!buyerToken) {
+        return res.status(401).json({ error: 'Buyer token is required' });
+      }
       
       // Validate required fields
       const requiredFields = ['cropId', 'quantityOrdered', 'deliveryFee', 'deliveryAddress', 'deliveryState', 'deliveryLga'];
       for (const field of requiredFields) {
-        if (!orderData[field]) {
+        const value = orderData[field];
+        // Allow 0 for numeric fields, only reject if truly missing
+        if (value === undefined || value === null || (typeof value === 'string' && value.trim() === '')) {
           return res.status(400).json({ error: `Missing required field: ${field}` });
         }
       }
 
-      // Make request to external API with buyer token from environment
+      // Make request to external API with buyer token from request
       const response = await fetch('https://lucent-ag-api-damidek.replit.app/api/buyer/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.BUYER_TOKEN}`
+          'Authorization': `Bearer ${buyerToken}`
         },
         body: JSON.stringify(orderData)
       });
