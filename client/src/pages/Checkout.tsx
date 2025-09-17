@@ -76,7 +76,7 @@ export function Checkout() {
       // Send order for each cart item
       for (const item of cartItems) {
         const orderData = {
-          cropId: item.id,
+          cropId: item.cropId,
           quantityOrdered: item.quantity,
           deliveryFee: deliveryFee,
           deliveryAddress: deliveryAddress,
