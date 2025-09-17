@@ -1,194 +1,128 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { SessionCrypto } from "@/utils/sessionCrypto";
+import { CartItem, AddToCartData } from "@shared/schema";
 
-export interface CartItem {
-  id: number;
-  userId: number;
-  cropId: string;
-  plantName: string;
-  quantity: number;
-  pricePerUnit: string;
-  totalPrice: string;
-  unit: string;
-  farmName?: string;
-  imageUrl?: string;
-  maxAvailable?: number;
-  cropData?: any;
-  createdAt?: string;
-  updatedAt?: string;
-}
+const CART_STORAGE_KEY = "agricultural_marketplace_cart";
 
-export interface AddToCartData {
-  cropId: string;
-  plantName: string;
-  quantity: number;
-  pricePerUnit: string;
-  totalPrice: string;
-  unit: string;
-  farmName?: string;
-  imageUrl?: string;
-  maxAvailable?: number;
-  cropData?: any;
-}
-
-class CartService {
-  private static instance: CartService;
-  private apiUrl = "/api/cart";
+class LocalStorageCartService {
+  private static instance: LocalStorageCartService;
 
   private constructor() {}
 
-  public static getInstance(): CartService {
-    if (!CartService.instance) {
-      CartService.instance = new CartService();
+  public static getInstance(): LocalStorageCartService {
+    if (!LocalStorageCartService.instance) {
+      LocalStorageCartService.instance = new LocalStorageCartService();
     }
-    return CartService.instance;
+    return LocalStorageCartService.instance;
   }
 
-  // Get Authorization headers with buyer token
-  private getAuthHeaders(): HeadersInit {
-    try {
-      const buyerSession = sessionStorage.getItem("buyerSession");
-      if (!buyerSession) {
-        throw new Error("No buyer session found");
-      }
+  // Generate unique ID for cart items
+  private generateId(): string {
+    return `cart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
 
-      const encryptedSessionData = JSON.parse(buyerSession);
-      const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
-      const now = new Date().getTime();
+  // Get cart items from localStorage
+  getCartItems(): CartItem[] {
+    try {
+      const stored = localStorage.getItem(CART_STORAGE_KEY);
+      if (!stored) return [];
       
-      if (now >= sessionData.expiry) {
-        throw new Error("Buyer session has expired");
-      }
-
-      const token = sessionData.token;
-      if (!token) {
-        throw new Error("No buyer token found in session");
-      }
-
-      return {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      };
+      const items = JSON.parse(stored) as CartItem[];
+      return Array.isArray(items) ? items : [];
     } catch (error) {
-      console.error("Error getting auth headers:", error);
-      throw error;
+      console.error("Error reading cart from localStorage:", error);
+      return [];
     }
   }
 
-  // Get all cart items
-  async getCartItems(): Promise<CartItem[]> {
+  // Save cart items to localStorage
+  private saveCartItems(items: CartItem[]): void {
     try {
-      const response = await fetch(this.apiUrl, {
-        headers: this.getAuthHeaders(),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return data.cartItems || [];
-      }
-      throw new Error(`Failed to fetch cart items: ${response.status}`);
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     } catch (error) {
-      console.error("Error fetching cart items:", error);
-      throw error;
+      console.error("Error saving cart to localStorage:", error);
+      throw new Error("Failed to save cart data");
     }
   }
 
   // Add item to cart
-  async addToCart(item: AddToCartData): Promise<CartItem> {
-    try {
-      const response = await fetch(this.apiUrl, {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(item),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return data.cartItem;
-      }
-      throw new Error(`Failed to add to cart: ${response.status}`);
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      throw error;
+  addToCart(item: AddToCartData): CartItem {
+    const items = this.getCartItems();
+    
+    // Check if item already exists (same cropId)
+    const existingIndex = items.findIndex(cartItem => cartItem.cropId === item.cropId);
+    
+    if (existingIndex >= 0) {
+      // Update existing item quantity
+      items[existingIndex].quantity += item.quantity;
+      items[existingIndex].totalPrice = items[existingIndex].quantity * items[existingIndex].pricePerUnit;
+      this.saveCartItems(items);
+      return items[existingIndex];
+    } else {
+      // Add new item
+      const newItem: CartItem = {
+        id: this.generateId(),
+        cropId: item.cropId,
+        plantName: item.plantName,
+        quantity: item.quantity,
+        pricePerUnit: item.pricePerUnit,
+        totalPrice: item.pricePerUnit * item.quantity,
+        unit: item.unit,
+        farmName: item.farmName,
+        imageUrl: item.imageUrl,
+        maxAvailable: item.maxAvailable,
+        cropData: item.cropData,
+        createdAt: new Date().toISOString(),
+      };
+      
+      items.push(newItem);
+      this.saveCartItems(items);
+      return newItem;
     }
   }
 
   // Update cart item quantity
-  async updateCartItem(id: number, quantity: number, pricePerUnit: number): Promise<CartItem> {
-    try {
-      const response = await fetch(`${this.apiUrl}/${id}`, {
-        method: "PUT",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          quantity,
-          pricePerUnit: pricePerUnit.toString(),
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return data.cartItem;
-      }
-      throw new Error(`Failed to update cart item: ${response.status}`);
-    } catch (error) {
-      console.error("Error updating cart item:", error);
-      throw error;
+  updateCartItem(id: string, quantity: number): CartItem | null {
+    const items = this.getCartItems();
+    const itemIndex = items.findIndex(item => item.id === id);
+    
+    if (itemIndex >= 0) {
+      items[itemIndex].quantity = quantity;
+      items[itemIndex].totalPrice = quantity * items[itemIndex].pricePerUnit;
+      this.saveCartItems(items);
+      return items[itemIndex];
     }
+    
+    return null;
   }
 
   // Remove item from cart
-  async removeCartItem(id: number): Promise<void> {
-    try {
-      const response = await fetch(`${this.apiUrl}/${id}`, {
-        method: "DELETE",
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to remove cart item: ${response.status}`);
-      }
-    } catch (error) {
-      console.error("Error removing cart item:", error);
-      throw error;
+  removeCartItem(id: string): boolean {
+    const items = this.getCartItems();
+    const initialLength = items.length;
+    const filteredItems = items.filter(item => item.id !== id);
+    
+    if (filteredItems.length !== initialLength) {
+      this.saveCartItems(filteredItems);
+      return true;
     }
+    
+    return false;
   }
 
   // Clear entire cart
-  async clearCart(): Promise<void> {
-    try {
-      const response = await fetch(this.apiUrl, {
-        method: "DELETE",
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to clear cart: ${response.status}`);
-      }
-    } catch (error) {
-      console.error("Error clearing cart:", error);
-      throw error;
-    }
+  clearCart(): void {
+    localStorage.removeItem(CART_STORAGE_KEY);
   }
 
-  // Get cart item count
-  async getCartCount(): Promise<number> {
-    try {
-      const response = await fetch(`${this.apiUrl}/count`, {
-        headers: this.getAuthHeaders(),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return data.count || 0;
-      }
-      throw new Error(`Failed to fetch cart count: ${response.status}`);
-    } catch (error) {
-      console.error("Error fetching cart count:", error);
-      return 0;
-    }
+  // Get cart item count (sum of all quantities)
+  getCartCount(): number {
+    const items = this.getCartItems();
+    return items.reduce((total, item) => total + item.quantity, 0);
   }
 }
 
-export const cartService = CartService.getInstance();
+export const cartService = LocalStorageCartService.getInstance();
 
 export function useCart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -196,11 +130,11 @@ export function useCart() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Fetch cart items
-  const fetchCartItems = async () => {
+  // Fetch cart items from localStorage
+  const fetchCartItems = () => {
     setIsLoading(true);
     try {
-      const items = await cartService.getCartItems();
+      const items = cartService.getCartItems();
       setCartItems(items);
       const count = items.reduce((total, item) => total + item.quantity, 0);
       setCartCount(count);
@@ -226,8 +160,7 @@ export function useCart() {
         cropId: productData.id || productData.cropId,
         plantName: productData.name,
         quantity,
-        pricePerUnit: parseFloat(productData.rawData?.pricePerUnit || 0).toString(),
-        totalPrice: (parseFloat(productData.rawData?.pricePerUnit || 0) * quantity).toString(),
+        pricePerUnit: parseFloat(productData.rawData?.pricePerUnit || 0),
         unit: productData.rawData?.unit || 'kg',
         farmName: productData.farm,
         imageUrl: typeof productData.image === 'string' ? productData.image : undefined,
@@ -235,8 +168,8 @@ export function useCart() {
         cropData: productData.rawData
       };
 
-      await cartService.addToCart(cartItemData);
-      await fetchCartItems(); // Refresh cart items
+      cartService.addToCart(cartItemData);
+      fetchCartItems(); // Refresh cart items
       
       toast({
         title: "Added to Cart",
@@ -255,11 +188,16 @@ export function useCart() {
   };
 
   // Update cart item quantity
-  const updateQuantity = async (cartItemId: number, newQuantity: number, pricePerUnit: number) => {
+  const updateQuantity = async (cartItemId: string, newQuantity: number) => {
     try {
       setIsLoading(true);
-      await cartService.updateCartItem(cartItemId, newQuantity, pricePerUnit);
-      await fetchCartItems(); // Refresh cart items
+      const updatedItem = cartService.updateCartItem(cartItemId, newQuantity);
+      
+      if (updatedItem) {
+        fetchCartItems(); // Refresh cart items
+      } else {
+        throw new Error("Item not found");
+      }
     } catch (error) {
       console.error("Failed to update cart item:", error);
       toast({
@@ -273,16 +211,21 @@ export function useCart() {
   };
 
   // Remove item from cart
-  const removeItem = async (cartItemId: number) => {
+  const removeItem = async (cartItemId: string) => {
     try {
       setIsLoading(true);
-      await cartService.removeCartItem(cartItemId);
-      await fetchCartItems(); // Refresh cart items
+      const removed = cartService.removeCartItem(cartItemId);
       
-      toast({
-        title: "Removed from Cart",
-        description: "Item has been removed from your cart",
-      });
+      if (removed) {
+        fetchCartItems(); // Refresh cart items
+        
+        toast({
+          title: "Removed from Cart",
+          description: "Item has been removed from your cart",
+        });
+      } else {
+        throw new Error("Item not found");
+      }
     } catch (error) {
       console.error("Failed to remove cart item:", error);
       toast({
@@ -299,7 +242,7 @@ export function useCart() {
   const clearCart = async () => {
     try {
       setIsLoading(true);
-      await cartService.clearCart();
+      cartService.clearCart();
       setCartItems([]);
       setCartCount(0);
       
@@ -320,9 +263,9 @@ export function useCart() {
   };
 
   // Fetch cart count only (for badge display)
-  const fetchCartCount = async () => {
+  const fetchCartCount = () => {
     try {
-      const count = await cartService.getCartCount();
+      const count = cartService.getCartCount();
       setCartCount(count);
     } catch (error) {
       console.error("Failed to fetch cart count:", error);
