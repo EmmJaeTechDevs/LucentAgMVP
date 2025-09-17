@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Leaf, Plus, Loader2, ChevronRight, MapPin, Calendar, Edit, Trash2, X } from "lucide-react";
+import { ArrowLeft, Leaf, Plus, Loader2, ChevronRight, MapPin, Calendar, Edit, Trash2, X, AlertTriangle } from "lucide-react";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
@@ -46,6 +46,8 @@ export function ViewCrops() {
   const [crops, setCrops] = useState<Crop[]>([]);
   const [selectedCrop, setSelectedCrop] = useState<Crop | null>(null);
   const [showCropDetails, setShowCropDetails] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
     totalPages: 0,
@@ -244,14 +246,15 @@ export function ViewCrops() {
     }
   };
 
-  const handleRemoveCrop = async () => {
+  const handleRemoveCrop = () => {
+    // Show the custom confirmation dialog
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
     if (!selectedCrop) return;
-
-    const confirmed = window.confirm(
-      `Are you sure you want to delete your ${selectedCrop.plant?.name || 'crop'}? This action cannot be undone.`
-    );
-
-    if (!confirmed) return;
+    
+    setIsDeleting(true);
 
     try {
       const token = getAuthToken();
@@ -262,6 +265,7 @@ export function ViewCrops() {
           description: "Please log in again.",
         });
         setLocation("/login");
+        setIsDeleting(false);
         return;
       }
 
@@ -282,7 +286,8 @@ export function ViewCrops() {
           description: "Your crop has been removed from your farm.",
         });
 
-        // Close popup
+        // Close dialogs
+        setShowDeleteConfirm(false);
         setShowCropDetails(false);
         setSelectedCrop(null);
 
@@ -305,7 +310,13 @@ export function ViewCrops() {
         title: "Network Error",
         description: "Please check your connection and try again.",
       });
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   // Crop list item component matching the design
@@ -779,6 +790,115 @@ export function ViewCrops() {
       {/* Crop Details Popup */}
       {showCropDetails && selectedCrop && (
         <CropDetailsPopup crop={selectedCrop} />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && selectedCrop && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-50"
+            onClick={handleCancelDelete}
+          />
+          
+          {/* Mobile Dialog */}
+          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-50 p-6 space-y-6">
+            {/* Warning Icon */}
+            <div className="flex justify-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-8 h-8 text-red-600" />
+              </div>
+            </div>
+
+            {/* Title and Message */}
+            <div className="text-center space-y-3">
+              <h3 className="text-xl font-bold text-gray-900">
+                Delete Crop?
+              </h3>
+              <p className="text-gray-600">
+                Are you sure you want to delete your <span className="font-semibold">{selectedCrop.plant?.name || 'crop'}</span>? This action cannot be undone.
+              </p>
+            </div>
+
+            {/* Buttons */}
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={handleCancelDelete}
+                variant="outline"
+                className="py-3 text-gray-700 border-gray-300"
+                data-testid="button-cancel-delete"
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmDelete}
+                className="py-3 bg-red-600 hover:bg-red-700 text-white"
+                data-testid="button-confirm-delete"
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Desktop Dialog */}
+          <div className="hidden md:block fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 space-y-6">
+              {/* Warning Icon */}
+              <div className="flex justify-center">
+                <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-10 h-10 text-red-600" />
+                </div>
+              </div>
+
+              {/* Title and Message */}
+              <div className="text-center space-y-4">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Delete Crop?
+                </h3>
+                <p className="text-gray-600 text-lg">
+                  Are you sure you want to delete your <span className="font-semibold">{selectedCrop.plant?.name || 'crop'}</span>? This action cannot be undone.
+                </p>
+              </div>
+
+              {/* Buttons */}
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  onClick={handleCancelDelete}
+                  variant="outline"
+                  className="py-4 text-gray-700 border-gray-300 text-lg"
+                  data-testid="button-cancel-delete-desktop"
+                  disabled={isDeleting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirmDelete}
+                  className="py-4 bg-red-600 hover:bg-red-700 text-white text-lg"
+                  data-testid="button-confirm-delete-desktop"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </>
   );
