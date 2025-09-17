@@ -48,7 +48,7 @@ export function Cart() {
       </div>
 
       {/* Cart Items */}
-      <div className="p-6">
+      <div className="p-6 pb-40">
         {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
