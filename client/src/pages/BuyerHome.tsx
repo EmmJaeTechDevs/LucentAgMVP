@@ -32,6 +32,8 @@ export function BuyerHome() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isHarvestingModalOpen, setIsHarvestingModalOpen] = useState(false);
   const [userLastName, setUserLastName] = useState("John");
+  const [availableCrops, setAvailableCrops] = useState<any[]>([]);
+  const [isLoadingCrops, setIsLoadingCrops] = useState(true);
   const { toast } = useToast();
 
   // Validate buyer session
@@ -39,75 +41,47 @@ export function BuyerHome() {
 
   const categories = ["All", "Leafy Greens", "Fruits", "Grains", "Vegetables"];
 
-  // Sample product data matching your design
-  const freshTodayProducts = [
-    {
-      id: 1,
-      name: "Tomatoes",
-      farm: "Oshuporu Farms",
-      price: "₦2,000",
-      unit: "per Basket",
-      image: TomatoesImage,
-      stockLeft: "8 Baskets Left",
-    },
-    {
-      id: 2,
-      name: "Sweet Potatoes",
-      farm: "Chika & Sons Farms",
-      price: "₦3,500",
-      unit: "per Bag",
-      image: SweetPotatoImage,
-      stockLeft: "",
-    },
-    {
-      id: 3,
-      name: "Green Beans",
-      farm: "Emeka Farms",
-      price: "₦1,800",
-      unit: "per Basket",
-      image: GreenBeansImage,
-      stockLeft: "",
-    },
-  ];
+  // Mapping function to transform API crop data to UI format
+  const mapCropToProduct = (crop: any) => {
+    // Map plantId to display name and image
+    const plantMapping: { [key: string]: { name: string; image: any } } = {
+      'plant-beans': { name: 'Green Beans', image: GreenBeansImage },
+      'plant-yam': { name: 'Yam', image: SweetPotatoImage },
+      'plant-tomatoes': { name: 'Tomatoes', image: TomatoesImage },
+      'plant-cabbage': { name: 'Cabbage', image: CabbageImage },
+      'plant-groundnuts': { name: 'Groundnuts', image: GroundnutsImage },
+      'plant-plantain': { name: 'Plantain', image: PlantainImage },
+    };
 
-  const harvestingSoonProducts = [
-    {
-      id: 4,
-      name: "Cabbage",
-      farm: "Lily Farms",
-      price: "₦2,500",
-      unit: "per Basket",
-      image: CabbageImage,
-      stockLeft: "",
-      availableQuantity: "50 Bags Available",
-      location: "Grown in Lagos, Nigeria",
-      harvestDate: "Ready by September 23, 2025",
-    },
-    {
-      id: 5,
-      name: "Groundnuts",
-      farm: "Lily Farms",
-      price: "₦4,200",
-      unit: "per Bag",
-      image: GroundnutsImage,
-      stockLeft: "",
-      availableQuantity: "30 Bags Available",
-      location: "Grown in Kaduna, Nigeria",
-      harvestDate: "Ready by October 15, 2025",
-    },
-    {
-      id: 6,
-      name: "Plantain",
-      farm: "Lily Farms",
-      price: "₦3,000",
-      unit: "per Bunch",
-      image: PlantainImage,
-      stockLeft: "",
-      availableQuantity: "100 Bunches Available",
-      location: "Grown in Oyo, Nigeria",
-      harvestDate: "Ready by September 30, 2025",
-    },
-  ];
+    const plantInfo = plantMapping[crop.plantId] || { name: crop.plantId?.replace('plant-', '').replace('-', ' ') || 'Unknown Crop', image: TomatoesImage };
+    
+    // Calculate stock left message
+    const stockLeft = crop.availableQuantity < crop.totalQuantity 
+      ? `${crop.availableQuantity} ${crop.unit || 'Units'} Left`
+      : "";
+
+    return {
+      id: crop.id,
+      name: plantInfo.name,
+      farm: crop.farmerName || crop.farmer?.name || "Local Farm", // Use farmer name if available
+      price: `₦${crop.pricePerUnit?.toLocaleString() || '0'}`,
+      unit: `per ${crop.unit || 'Unit'}`,
+      image: plantInfo.image,
+      stockLeft: stockLeft,
+      availableQuantity: `${crop.availableQuantity} ${crop.unit || 'Units'} Available`,
+      location: `Grown in ${crop.state || 'Nigeria'}`,
+      harvestDate: crop.harvestDate ? `Ready by ${new Date(crop.harvestDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}` : "Available now",
+      rawData: crop // Keep original data for detailed view
+    };
+  };
+
+  // Transform API data to products
+  const allProducts = availableCrops.map(mapCropToProduct);
+  
+  // For now, treat all as "Fresh Today" since we're getting available crops
+  // In the future, you could separate based on harvest date or other criteria
+  const freshTodayProducts = allProducts;
+  const harvestingSoonProducts: any[] = [];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,10 +162,13 @@ export function BuyerHome() {
   useEffect(() => {
     const fetchAvailableCrops = async () => {
       try {
+        setIsLoadingCrops(true);
+        
         // Get buyer token from session storage
         const buyerSession = sessionStorage.getItem("buyerSession");
         if (!buyerSession) {
           console.error("No buyer session found");
+          setIsLoadingCrops(false);
           return;
         }
 
@@ -201,12 +178,14 @@ export function BuyerHome() {
         
         if (now >= sessionData.expiry) {
           console.error("Buyer session has expired");
+          setIsLoadingCrops(false);
           return;
         }
 
         const token = sessionData.token;
         if (!token) {
           console.error("No buyer token found in session");
+          setIsLoadingCrops(false);
           return;
         }
 
@@ -224,8 +203,18 @@ export function BuyerHome() {
         const responseData = await response.json();
         console.log("Available crops API response data:", responseData);
 
+        if (response.status === 200 && responseData.crops) {
+          setAvailableCrops(responseData.crops);
+        } else {
+          console.error("Failed to fetch crops or no crops available");
+          setAvailableCrops([]);
+        }
+
       } catch (error) {
         console.error("Error fetching available crops:", error);
+        setAvailableCrops([]);
+      } finally {
+        setIsLoadingCrops(false);
       }
     };
 
@@ -326,8 +315,22 @@ export function BuyerHome() {
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Fresh Today
             </h2>
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-              {freshTodayProducts.map((product) => (
+            {isLoadingCrops ? (
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex-shrink-0 w-48 bg-white rounded-xl shadow-sm animate-pulse">
+                    <div className="w-full h-32 bg-gray-200 rounded-t-xl"></div>
+                    <div className="p-4 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : freshTodayProducts.length > 0 ? (
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+                {freshTodayProducts.map((product) => (
                 <div
                   key={product.id}
                   onClick={() => handleProductClick(product.id)}
@@ -372,7 +375,12 @@ export function BuyerHome() {
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No fresh crops available at the moment</p>
+              </div>
+            )}
           </div>
 
           {/* Harvesting Soon Section */}
@@ -380,8 +388,9 @@ export function BuyerHome() {
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Harvesting Soon
             </h2>
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-              {harvestingSoonProducts.map((product) => (
+            {harvestingSoonProducts.length > 0 ? (
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+                {harvestingSoonProducts.map((product) => (
                 <div
                   key={product.id}
                   onClick={() => handleHarvestingProductClick(product.id)}
@@ -419,7 +428,12 @@ export function BuyerHome() {
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No harvesting soon crops available</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -517,8 +531,22 @@ export function BuyerHome() {
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
               Fresh Today
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {freshTodayProducts.map((product) => (
+            {isLoadingCrops ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white rounded-xl shadow-sm animate-pulse">
+                    <div className="w-full h-48 bg-gray-200 rounded-t-xl"></div>
+                    <div className="p-6 space-y-3">
+                      <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-5 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : freshTodayProducts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {freshTodayProducts.map((product) => (
                 <div
                   key={product.id}
                   onClick={() => handleProductClick(product.id)}
@@ -563,7 +591,12 @@ export function BuyerHome() {
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-xl">No fresh crops available at the moment</p>
+              </div>
+            )}
           </div>
 
           {/* Harvesting Soon Section */}
@@ -571,8 +604,9 @@ export function BuyerHome() {
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
               Harvesting Soon
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {harvestingSoonProducts.map((product) => (
+            {harvestingSoonProducts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {harvestingSoonProducts.map((product) => (
                 <div
                   key={product.id}
                   onClick={() => handleHarvestingProductClick(product.id)}
@@ -610,7 +644,12 @@ export function BuyerHome() {
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-xl">No harvesting soon crops available</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
