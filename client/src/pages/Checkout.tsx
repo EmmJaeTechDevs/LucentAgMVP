@@ -14,7 +14,8 @@ export function Checkout() {
   useSessionValidation("buyer");
   
   const [, navigate] = useLocation();
-  const { cartItems, clearCart, fetchCartItems, isLoading } = useCart();
+  const { cartItems, clearCart, isLoading } = useCart();
+  const [hasFetched, setHasFetched] = useState(false);
 
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryNote, setDeliveryNote] = useState("");
@@ -22,26 +23,28 @@ export function Checkout() {
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
-  // Fetch cart items when component mounts
+  // Track when cart has been fetched to show proper states
   useEffect(() => {
-    fetchCartItems();
-  }, []);
-
-  // Redirect to cart if no items
-  useEffect(() => {
-    if (!isLoading && cartItems.length === 0) {
-      navigate('/cart');
+    if (!isLoading) {
+      setHasFetched(true);
     }
-  }, [cartItems, isLoading, navigate]);
+  }, [isLoading]);
 
   const subtotal: number = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
   const deliveryFee: number = 0;
   const total: number = subtotal + deliveryFee;
 
-  const handlePlaceOrder = async () => {
-    // Clear the cart after successful order
-    await clearCart();
+  const handlePlaceOrder = () => {
+    // Show success modal first, clear cart when modal closes
     setIsSuccessModalOpen(true);
+  };
+
+  const handleSuccessModalClose = async () => {
+    // Clear cart when success modal closes
+    await clearCart();
+    setIsSuccessModalOpen(false);
+    // Navigate to buyer home after successful order
+    navigate('/buyer-home');
   };
 
   const handleAddressSet = (address: string) => {
@@ -67,17 +70,25 @@ export function Checkout() {
       {/* Content */}
       <div className="p-4 sm:p-6 pb-32">
         {/* Empty Cart State */}
-        {!isLoading && cartItems.length === 0 && (
+        {hasFetched && !isLoading && cartItems.length === 0 && (
           <div className="text-center py-12">
             <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full">
               <ShoppingCart className="w-8 h-8 text-gray-400" />
             </div>
-            <p className="text-gray-500 text-lg mb-6">Your cart is empty</p>
-            <Link href="/buyer-home">
-              <button className="px-6 py-3 bg-green-700 hover:bg-green-800 text-white rounded-xl font-medium transition-colors">
-                Start Shopping
-              </button>
-            </Link>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h2>
+            <p className="text-gray-500 mb-6">Add some fresh crops to your cart before checking out</p>
+            <div className="space-y-3">
+              <Link href="/buyer-home">
+                <button className="w-full sm:w-auto px-6 py-3 bg-green-700 hover:bg-green-800 text-white rounded-xl font-medium transition-colors">
+                  Continue Shopping
+                </button>
+              </Link>
+              <Link href="/cart">
+                <button className="w-full sm:w-auto px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors ml-0 sm:ml-3">
+                  View Cart
+                </button>
+              </Link>
+            </div>
           </div>
         )}
 
@@ -100,7 +111,7 @@ export function Checkout() {
         )}
 
         {/* Order Items */}
-        {!isLoading && cartItems.length > 0 && (
+        {hasFetched && !isLoading && cartItems.length > 0 && (
           <>
             <div className="space-y-4 mb-6 sm:mb-8">
               {cartItems.map((item) => (
@@ -202,7 +213,7 @@ export function Checkout() {
       </div>
 
       {/* Place Order Button */}
-      {!isLoading && cartItems.length > 0 && (
+      {hasFetched && !isLoading && cartItems.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-white border-t border-gray-200 max-w-md mx-auto sm:max-w-none">
           <button
             onClick={handlePlaceOrder}
@@ -235,7 +246,7 @@ export function Checkout() {
 
       <OrderSuccessModal
         isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
+        onClose={handleSuccessModalClose}
       />
     </div>
   );
