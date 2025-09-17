@@ -1,8 +1,19 @@
-import React, { useEffect } from "react";
-import { ArrowLeft, Trash2, Minus, Plus } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { ArrowLeft, Trash2, Minus, Plus, ShoppingCart } from "lucide-react";
 import { Link } from "wouter";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { useCart } from "@/hooks/useCart";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 
 export function Cart() {
@@ -10,6 +21,7 @@ export function Cart() {
   useSessionValidation("buyer");
 
   const { cartItems, updateQuantity, removeItem, clearCart, isLoading, fetchCartItems } = useCart();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Load cart items when component mounts
   useEffect(() => {
@@ -32,9 +44,8 @@ export function Cart() {
 
   // Handle clear cart
   const handleClearCart = async () => {
-    if (window.confirm("Are you sure you want to remove all items from your cart?")) {
-      await clearCart();
-    }
+    await clearCart();
+    setIsDialogOpen(false);
   };
 
   return (
@@ -168,14 +179,42 @@ export function Cart() {
               </button>
             </Link>
             
-            <button
-              onClick={handleClearCart}
-              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
-              data-testid="button-clear-cart"
-              disabled={isLoading}
-            >
-              Clear Cart
-            </button>
+            <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <AlertDialogTrigger asChild>
+                <button
+                  className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
+                  data-testid="button-clear-cart"
+                  disabled={isLoading}
+                >
+                  Clear Cart
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="max-w-md">
+                <AlertDialogHeader>
+                  <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full">
+                    <ShoppingCart className="w-8 h-8 text-red-600" />
+                  </div>
+                  <AlertDialogTitle className="text-xl font-semibold text-center">
+                    Clear Your Cart?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-center text-gray-600">
+                    This will remove all {cartItems.length} item{cartItems.length !== 1 ? 's' : ''} from your cart. 
+                    This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex flex-col sm:flex-row gap-2">
+                  <AlertDialogCancel className="w-full sm:w-auto">
+                    Keep Items
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleClearCart}
+                    className="w-full sm:w-auto bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                  >
+                    Clear Cart
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       )}
