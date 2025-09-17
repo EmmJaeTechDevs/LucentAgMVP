@@ -81,28 +81,19 @@ export function EditCrop() {
         setCropData(crop);
         
         // Pre-populate form with existing data
-        // Safely handle harvest date formatting
+        // Safely handle harvest date formatting - keep it simple as string only
         let harvestDateForInput = "";
-        try {
-          if (crop.harvestDate) {
-            // Handle different possible date formats
-            if (crop.harvestDate.includes('T')) {
-              // ISO format: "2024-12-30T00:00:00Z" -> "2024-12-30"
-              harvestDateForInput = crop.harvestDate.split('T')[0];
-            } else if (crop.harvestDate.includes('-')) {
-              // Already in YYYY-MM-DD format
-              harvestDateForInput = crop.harvestDate;
-            } else {
-              // Try to parse as Date and format
-              const date = new Date(crop.harvestDate);
-              if (!isNaN(date.getTime())) {
-                harvestDateForInput = date.toISOString().split('T')[0];
-              }
-            }
+        if (crop.harvestDate) {
+          if (crop.harvestDate.includes('T')) {
+            // ISO format: "2024-12-30T00:00:00Z" -> "2024-12-30"
+            harvestDateForInput = crop.harvestDate.split('T')[0];
+          } else if (crop.harvestDate.includes('-') && crop.harvestDate.length >= 10) {
+            // Already in YYYY-MM-DD format or similar
+            harvestDateForInput = crop.harvestDate.substring(0, 10);
+          } else {
+            // For any other format, just use as-is or leave empty
+            harvestDateForInput = "";
           }
-        } catch (error) {
-          console.error("Error formatting harvest date:", error);
-          harvestDateForInput = ""; // Fallback to empty string
         }
         
         setFormData({
