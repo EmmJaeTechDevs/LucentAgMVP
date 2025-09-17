@@ -150,9 +150,13 @@ export function EditCrop() {
     }
 
     try {
-      // Format harvest date to exact string format server expects: "2024-03-15T00:00:00Z"
-      // HTML date input provides YYYY-MM-DD format, just append the time portion
-      const harvestDate = formData.harvestDate ? `${formData.harvestDate}T00:00:00Z` : "";
+      // Convert date string to a proper Date object for JSON serialization
+      let harvestDate: Date | string = "";
+      if (formData.harvestDate) {
+        // Create a Date object from the YYYY-MM-DD string
+        // The API expects a Date object that will be serialized to JSON
+        harvestDate = new Date(formData.harvestDate + "T00:00:00.000Z");
+      }
 
       // Prepare request body according to API structure
       const requestBody = {
