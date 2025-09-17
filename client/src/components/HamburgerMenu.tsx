@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Menu, X, Settings, Package, Users, LogOut } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { SessionCrypto } from "@/utils/sessionCrypto";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -111,7 +110,7 @@ export function HamburgerMenu({ userType = "buyer" }: HamburgerMenuProps) {
           onClick={() => setIsOpen(!isOpen)}
           className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           data-testid="hamburger-button"
-          aria-label="Open menu"
+          aria-label={isOpen ? "Close menu" : "Open menu"}
         >
           {isOpen ? (
             <X className="w-6 h-6 text-gray-700 dark:text-gray-300" />

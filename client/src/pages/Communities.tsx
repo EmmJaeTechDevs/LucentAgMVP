@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft, Users, MessageCircle, Calendar, TrendingUp, Search, Plus } from "lucide-react";
 import { Link } from "wouter";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
+import { HamburgerMenu } from "@/components/HamburgerMenu";
 
 interface Community {
   id: string;
@@ -159,11 +160,14 @@ export function Communities() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 max-w-md mx-auto sm:max-w-none">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 px-6 py-4 flex items-center gap-4 shadow-sm">
-        <Link href="/buyer-home">
-          <ArrowLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" data-testid="button-back" />
-        </Link>
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Communities</h1>
+      <div className="bg-white dark:bg-gray-800 px-6 py-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-4">
+          <Link href="/buyer-home">
+            <ArrowLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" data-testid="button-back" />
+          </Link>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Communities</h1>
+        </div>
+        <HamburgerMenu userType="buyer" />
       </div>
 
       {/* Tabs */}

@@ -3,6 +3,7 @@ import { ArrowLeft, Trash2, Minus, Plus, ShoppingCart } from "lucide-react";
 import { Link } from "wouter";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { useCart } from "@/hooks/useCart";
+import { HamburgerMenu } from "@/components/HamburgerMenu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,11 +52,14 @@ export function Cart() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white px-6 py-4 flex items-center gap-4 shadow-sm">
-        <Link href="/buyer-home">
-          <ArrowLeft className="w-6 h-6 text-gray-700" data-testid="button-back" />
-        </Link>
-        <h1 className="text-xl font-semibold text-gray-900">Cart</h1>
+      <div className="bg-white px-6 py-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-4">
+          <Link href="/buyer-home">
+            <ArrowLeft className="w-6 h-6 text-gray-700" data-testid="button-back" />
+          </Link>
+          <h1 className="text-xl font-semibold text-gray-900">Cart</h1>
+        </div>
+        <HamburgerMenu userType="buyer" />
       </div>
 
       {/* Cart Items */}

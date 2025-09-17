@@ -3,6 +3,7 @@ import { ArrowLeft, Package, Clock, CheckCircle, XCircle, MapPin, Phone } from "
 import { Link } from "wouter";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { SessionCrypto } from "@/utils/sessionCrypto";
+import { HamburgerMenu } from "@/components/HamburgerMenu";
 
 interface Order {
   id: string;
@@ -137,11 +138,14 @@ export function BuyerOrders() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 max-w-md mx-auto sm:max-w-none">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 px-6 py-4 flex items-center gap-4 shadow-sm">
-        <Link href="/buyer-home">
-          <ArrowLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" data-testid="button-back" />
-        </Link>
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">My Orders</h1>
+      <div className="bg-white dark:bg-gray-800 px-6 py-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-4">
+          <Link href="/buyer-home">
+            <ArrowLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" data-testid="button-back" />
+          </Link>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">My Orders</h1>
+        </div>
+        <HamburgerMenu userType="buyer" />
       </div>
 
       {/* Filter Tabs */}

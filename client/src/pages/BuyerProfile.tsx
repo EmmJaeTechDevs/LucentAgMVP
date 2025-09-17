@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, User, Phone, Mail, MapPin, Edit3 } from "lucide-react";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
+import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 
 interface UserData {
@@ -106,13 +107,7 @@ export function BuyerProfile() {
               <ArrowLeft className="w-6 h-6 text-gray-700" />
             </button>
             <h1 className="text-xl font-bold text-gray-900">My Profile</h1>
-            <button
-              onClick={handleEditProfile}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              data-testid="button-edit"
-            >
-              <Edit3 className="w-6 h-6 text-gray-700" />
-            </button>
+            <HamburgerMenu userType="buyer" />
           </div>
 
           {/* Profile Card */}
@@ -193,13 +188,7 @@ export function BuyerProfile() {
               <ArrowLeft className="w-6 h-6 text-gray-700" />
             </button>
             <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-            <button
-              onClick={handleEditProfile}
-              className="p-3 hover:bg-gray-100 rounded-xl transition-colors"
-              data-testid="button-edit-desktop"
-            >
-              <Edit3 className="w-6 h-6 text-gray-700" />
-            </button>
+            <HamburgerMenu userType="buyer" />
           </div>
 
           {/* Profile Content */}
