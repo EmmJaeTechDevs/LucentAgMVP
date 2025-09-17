@@ -3,6 +3,7 @@ import { Search, ShoppingCart, User, LogOut } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
+import { useCart } from "@/hooks/useCart";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 import {
   AlertDialog,
@@ -37,6 +38,7 @@ export function BuyerHome() {
   const [isLoadingCrops, setIsLoadingCrops] = useState(true);
   const [isLoadingSoonReady, setIsLoadingSoonReady] = useState(true);
   const { toast } = useToast();
+  const { addToCart, cartCount, isLoading: isCartLoading, fetchCartCount } = useCart();
 
   // Validate buyer session
   useSessionValidation("buyer");
@@ -110,9 +112,8 @@ export function BuyerHome() {
     }
   };
 
-  const handleAddToCart = (product: any, quantity: number) => {
-    console.log("Adding to cart:", product.name, "Quantity:", quantity);
-    // TODO: Implement add to cart functionality
+  const handleAddToCart = async (product: any, quantity: number) => {
+    await addToCart(product, quantity);
   };
 
   const handleNotifyMe = (product: any) => {
@@ -293,6 +294,11 @@ export function BuyerHome() {
     fetchSoonReadyCrops();
   }, []);
 
+  // Initialize cart count on component mount
+  useEffect(() => {
+    fetchCartCount();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Layout */}
@@ -317,10 +323,15 @@ export function BuyerHome() {
               </button>
               <button
                 onClick={handleCartClick}
-                className="p-3 hover:bg-gray-100 rounded-xl transition-colors"
+                className="p-3 hover:bg-gray-100 rounded-xl transition-colors relative"
                 data-testid="button-cart"
               >
                 <ShoppingCart className="w-6 h-6 text-gray-700" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
               </button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -545,10 +556,15 @@ export function BuyerHome() {
               </button>
               <button
                 onClick={handleCartClick}
-                className="p-4 hover:bg-gray-100 rounded-xl transition-colors"
+                className="p-4 hover:bg-gray-100 rounded-xl transition-colors relative"
                 data-testid="button-cart-desktop"
               >
                 <ShoppingCart className="w-8 h-8 text-gray-700" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center min-w-[24px]">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
               </button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>

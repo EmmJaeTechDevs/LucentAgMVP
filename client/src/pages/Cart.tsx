@@ -1,48 +1,40 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { ArrowLeft, Trash2, Minus, Plus } from "lucide-react";
 import { Link } from "wouter";
-import TomatoesImage from "@assets/image 15.png";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
+import { useCart } from "@/hooks/useCart";
 
-interface CartItem {
-  id: number;
-  name: string;
-  quantity: number;
-  price: number;
-  pricePerUnit: string;
-  image: string;
-}
 
 export function Cart() {
   // Validate buyer session (only buyers can have shopping carts)
   useSessionValidation("buyer");
 
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: 1,
-      name: "Tomatoes",
-      quantity: 8,
-      price: 16000,
-      pricePerUnit: "per Basket",
-      image: TomatoesImage,
-    },
-  ]);
+  const { cartItems, updateQuantity, removeItem, isLoading, fetchCartItems } = useCart();
 
-  const updateQuantity = (id: number, change: number) => {
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + change) }
-          : item
-      )
-    );
+  // Load cart items when component mounts
+  useEffect(() => {
+    fetchCartItems();
+  }, []);
+
+  // Calculate total from database cart items
+  const total = cartItems.reduce((sum, item) => sum + parseFloat(item.totalPrice), 0);
+
+  // Helper function to get price per unit as number for calculations
+  const getPricePerUnit = (item: any) => {
+    return parseFloat(item.pricePerUnit.replace('₦', '').replace(',', '')) || 0;
   };
 
-  const removeItem = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id));
+  // Handle quantity update with price calculation
+  const handleUpdateQuantity = async (item: any, change: number) => {
+    const newQuantity = Math.max(1, item.quantity + change);
+    const pricePerUnit = getPricePerUnit(item);
+    await updateQuantity(item.id, newQuantity, pricePerUnit);
   };
 
-  const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+  // Handle item removal
+  const handleRemoveItem = async (itemId: number) => {
+    await removeItem(itemId);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -56,9 +48,31 @@ export function Cart() {
 
       {/* Cart Items */}
       <div className="p-6">
-        {cartItems.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-xl p-4 shadow-sm animate-pulse">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gray-200 rounded-xl"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : cartItems.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">Your cart is empty</p>
+            <div className="text-6xl mb-4">🛒</div>
+            <p className="text-gray-500 text-lg mb-2">Your cart is empty</p>
+            <p className="text-gray-400 text-sm mb-6">Add some fresh crops to get started!</p>
+            <Link href="/buyer-home">
+              <button className="px-6 py-3 bg-green-700 hover:bg-green-800 text-white rounded-xl font-medium transition-colors">
+                Continue Shopping
+              </button>
+            </Link>
           </div>
         ) : (
           <div className="space-y-4">
@@ -67,33 +81,37 @@ export function Cart() {
                 <div className="flex items-center gap-4">
                   {/* Product Image */}
                   <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                    {typeof item.image === 'string' && item.image.startsWith('/') ? (
+                    {item.imageUrl ? (
                       <img
-                        src={item.image}
-                        alt={item.name}
+                        src={item.imageUrl}
+                        alt={item.plantName}
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-2xl">
-                        {item.image}
+                      <div className="w-full h-full flex items-center justify-center text-2xl bg-green-100 text-green-600">
+                        🌱
                       </div>
                     )}
                   </div>
 
                   {/* Product Details */}
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 mb-1">{item.name}</h3>
-                    <p className="text-gray-600 text-sm mb-2">{item.quantity} Baskets</p>
-                    <p className="font-bold text-gray-900">₦{item.price.toLocaleString()}</p>
+                    <h3 className="font-semibold text-gray-900 mb-1">{item.plantName}</h3>
+                    <p className="text-gray-600 text-sm mb-2">{item.quantity} {item.unit}</p>
+                    <p className="font-bold text-gray-900">₦{parseFloat(item.totalPrice).toLocaleString()}</p>
+                    {item.farmName && (
+                      <p className="text-gray-500 text-xs">From {item.farmName}</p>
+                    )}
                   </div>
                 </div>
 
                 {/* Quantity Controls */}
                 <div className="flex items-center justify-between mt-4">
                   <button
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => handleRemoveItem(item.id)}
                     className="flex items-center gap-2 text-red-600 hover:text-red-700 transition-colors"
                     data-testid={`button-remove-${item.id}`}
+                    disabled={isLoading}
                   >
                     <Trash2 className="w-4 h-4" />
                     <span className="text-sm font-medium">Remove</span>
@@ -101,9 +119,10 @@ export function Cart() {
 
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => updateQuantity(item.id, -1)}
-                      className="w-10 h-10 bg-green-700 hover:bg-green-800 rounded-lg flex items-center justify-center transition-colors"
+                      onClick={() => handleUpdateQuantity(item, -1)}
+                      className="w-10 h-10 bg-green-700 hover:bg-green-800 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
                       data-testid={`button-decrease-${item.id}`}
+                      disabled={isLoading}
                     >
                       <Minus className="w-4 h-4 text-white" />
                     </button>
@@ -111,9 +130,10 @@ export function Cart() {
                       {item.quantity}
                     </span>
                     <button
-                      onClick={() => updateQuantity(item.id, 1)}
-                      className="w-10 h-10 bg-green-700 hover:bg-green-800 rounded-lg flex items-center justify-center transition-colors"
+                      onClick={() => handleUpdateQuantity(item, 1)}
+                      className="w-10 h-10 bg-green-700 hover:bg-green-800 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
                       data-testid={`button-increase-${item.id}`}
+                      disabled={isLoading}
                     >
                       <Plus className="w-4 h-4 text-white" />
                     </button>
@@ -126,14 +146,22 @@ export function Cart() {
       </div>
 
       {/* Proceed to Checkout Button */}
-      {cartItems.length > 0 && (
+      {cartItems.length > 0 && !isLoading && (
         <div className="fixed bottom-0 left-0 right-0 p-6 bg-white border-t border-gray-200">
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-gray-600">Subtotal ({cartItems.reduce((total, item) => total + item.quantity, 0)} items)</span>
+              <span className="text-2xl font-bold text-gray-900">₦{total.toLocaleString()}</span>
+            </div>
+            <p className="text-sm text-gray-500">Taxes and shipping calculated at checkout</p>
+          </div>
           <Link href="/checkout">
             <button
-              className="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-colors"
+              className="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-colors disabled:opacity-50"
               data-testid="button-proceed-checkout"
+              disabled={isLoading}
             >
-              Proceed to Checkout
+              Proceed to Checkout - ₦{total.toLocaleString()}
             </button>
           </Link>
         </div>

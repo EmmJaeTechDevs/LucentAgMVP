@@ -1,4 +1,4 @@
-import { users, cartItems, type User, type InsertUser, type CartItem, type InsertCartItem, type UpdateCartItem } from "@shared/schema";
+import { users, cartItems, type User, type InsertUser, type CartItem, type InsertCartItem } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -11,12 +11,12 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   
   // Cart operations
-  getCartItems(userId: number): Promise<CartItem[]>;
+  getCartItems(externalUserId: string): Promise<CartItem[]>;
   addToCart(cartItem: InsertCartItem): Promise<CartItem>;
-  updateCartItemQuantity(userId: number, cartItemId: number, quantity: number, totalPrice: string): Promise<CartItem | undefined>;
-  removeCartItem(userId: number, cartItemId: number): Promise<boolean>;
-  clearCart(userId: number): Promise<boolean>;
-  getCartItem(userId: number, cropId: string): Promise<CartItem | undefined>;
+  updateCartItemQuantity(externalUserId: string, cartItemId: number, quantity: number, totalPrice: string): Promise<CartItem | undefined>;
+  removeCartItem(externalUserId: string, cartItemId: number): Promise<boolean>;
+  clearCart(externalUserId: string): Promise<boolean>;
+  getCartItem(externalUserId: string, cropId: string): Promise<CartItem | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -39,8 +39,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Cart operations
-  async getCartItems(userId: number): Promise<CartItem[]> {
-    return db.select().from(cartItems).where(eq(cartItems.userId, userId));
+  async getCartItems(externalUserId: string): Promise<CartItem[]> {
+    return db.select().from(cartItems).where(eq(cartItems.externalUserId, externalUserId));
   }
 
   async addToCart(cartItem: InsertCartItem): Promise<CartItem> {
@@ -51,7 +51,7 @@ export class DatabaseStorage implements IStorage {
     return newCartItem;
   }
 
-  async updateCartItemQuantity(userId: number, cartItemId: number, quantity: number, totalPrice: string): Promise<CartItem | undefined> {
+  async updateCartItemQuantity(externalUserId: string, cartItemId: number, quantity: number, totalPrice: string): Promise<CartItem | undefined> {
     const [updatedItem] = await db
       .update(cartItems)
       .set({ 
@@ -59,30 +59,30 @@ export class DatabaseStorage implements IStorage {
         totalPrice, 
         updatedAt: new Date()
       })
-      .where(and(eq(cartItems.id, cartItemId), eq(cartItems.userId, userId)))
+      .where(and(eq(cartItems.id, cartItemId), eq(cartItems.externalUserId, externalUserId)))
       .returning();
     return updatedItem || undefined;
   }
 
-  async removeCartItem(userId: number, cartItemId: number): Promise<boolean> {
+  async removeCartItem(externalUserId: string, cartItemId: number): Promise<boolean> {
     const result = await db
       .delete(cartItems)
-      .where(and(eq(cartItems.id, cartItemId), eq(cartItems.userId, userId)));
+      .where(and(eq(cartItems.id, cartItemId), eq(cartItems.externalUserId, externalUserId)));
     return (result.rowCount ?? 0) > 0;
   }
 
-  async clearCart(userId: number): Promise<boolean> {
+  async clearCart(externalUserId: string): Promise<boolean> {
     const result = await db
       .delete(cartItems)
-      .where(eq(cartItems.userId, userId));
+      .where(eq(cartItems.externalUserId, externalUserId));
     return (result.rowCount ?? 0) >= 0; // Return true even if cart was already empty
   }
 
-  async getCartItem(userId: number, cropId: string): Promise<CartItem | undefined> {
+  async getCartItem(externalUserId: string, cropId: string): Promise<CartItem | undefined> {
     const [item] = await db
       .select()
       .from(cartItems)
-      .where(and(eq(cartItems.userId, userId), eq(cartItems.cropId, cropId)));
+      .where(and(eq(cartItems.externalUserId, externalUserId), eq(cartItems.cropId, cropId)));
     return item || undefined;
   }
 }

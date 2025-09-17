@@ -20,7 +20,7 @@ export type User = typeof users.$inferSelect;
 // Cart Items Table
 export const cartItems = pgTable("cart_items", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  externalUserId: text("external_user_id").notNull(), // Hash-based user identifier, no FK
   cropId: text("crop_id").notNull(), // External API crop ID
   plantName: text("plant_name").notNull(),
   quantity: integer("quantity").notNull().default(1),
@@ -35,21 +35,14 @@ export const cartItems = pgTable("cart_items", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Relations
+// Relations (removed cart relations since we no longer use FK)
 export const usersRelations = relations(users, ({ many }) => ({
-  cartItems: many(cartItems),
-}));
-
-export const cartItemsRelations = relations(cartItems, ({ one }) => ({
-  user: one(users, {
-    fields: [cartItems.userId],
-    references: [users.id],
-  }),
+  // Removed cartItems relation since cart is decoupled
 }));
 
 // Cart schemas for validation
 export const insertCartItemSchema = createInsertSchema(cartItems).pick({
-  userId: true,
+  externalUserId: true,
   cropId: true,
   plantName: true,
   quantity: true,
@@ -62,11 +55,5 @@ export const insertCartItemSchema = createInsertSchema(cartItems).pick({
   cropData: true,
 });
 
-export const updateCartItemSchema = createInsertSchema(cartItems).pick({
-  quantity: true,
-  totalPrice: true,
-});
-
 export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
-export type UpdateCartItem = z.infer<typeof updateCartItemSchema>;
 export type CartItem = typeof cartItems.$inferSelect;
