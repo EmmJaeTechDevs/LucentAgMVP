@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Search, ShoppingCart, User, LogOut } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +38,9 @@ export function BuyerHome() {
   const [soonReadyCrops, setSoonReadyCrops] = useState<any[]>([]);
   const [isLoadingCrops, setIsLoadingCrops] = useState(true);
   const [isLoadingSoonReady, setIsLoadingSoonReady] = useState(true);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   const { toast } = useToast();
   const { addToCart, cartCount, isLoading: isCartLoading, fetchCartCount } = useCart();
 
@@ -86,10 +89,106 @@ export function BuyerHome() {
   // Transform API data to products
   const freshTodayProducts = availableCrops.map(mapCropToProduct);
   const harvestingSoonProducts = soonReadyCrops.map(mapCropToProduct);
+  const searchResultProducts = searchResults.map(mapCropToProduct);
+
+  // Get buyer token helper function
+  const getBuyerToken = () => {
+    try {
+      const buyerSession = sessionStorage.getItem("buyerSession");
+      if (!buyerSession) return null;
+      
+      const encryptedSessionData = JSON.parse(buyerSession);
+      const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
+      const now = new Date().getTime();
+      
+      if (sessionData.token && now < sessionData.expiry) {
+        return sessionData.token;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error retrieving buyer token:', error);
+      return null;
+    }
+  };
+
+  // Search API function
+  const performSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setHasSearched(false);
+      return;
+    }
+
+    setIsSearching(true);
+    setHasSearched(true);
+
+    try {
+      const token = getBuyerToken();
+      if (!token) {
+        toast({
+          title: "Authentication Error",
+          description: "Please log in again to search for crops.",
+          variant: "destructive",
+        });
+        setIsSearching(false);
+        return;
+      }
+
+      // Make search request with query parameter
+      const response = await fetch(`https://lucent-ag-api-damidek.replit.app/api/buyer/crops/search?query=${encodeURIComponent(query)}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json",
+        },
+      });
+
+      console.log("Search API response status:", response.status);
+      const responseData = await response.json();
+      console.log("Search API response data:", responseData);
+
+      if (response.status === 200 && responseData.crops) {
+        setSearchResults(responseData.crops);
+      } else {
+        console.error("Search failed or no results found");
+        setSearchResults([]);
+      }
+
+    } catch (error) {
+      console.error("Error performing search:", error);
+      setSearchResults([]);
+      toast({
+        title: "Search Error",
+        description: "Failed to search for crops. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    (() => {
+      let timeoutId: NodeJS.Timeout;
+      return (query: string) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => performSearch(query), 300);
+      };
+    })(),
+    []
+  );
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    debouncedSearch(value);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Searching for:", searchQuery);
+    performSearch(searchQuery);
   };
 
   const handleCategorySelect = (category: string) => {
@@ -98,7 +197,11 @@ export function BuyerHome() {
   };
 
   const handleProductClick = (productId: number) => {
-    const product = freshTodayProducts.find((p) => p.id === productId);
+    // Look for product in all possible arrays
+    let product = freshTodayProducts.find((p) => p.id === productId);
+    if (!product) {
+      product = searchResultProducts.find((p) => p.id === productId);
+    }
     if (product) {
       setSelectedProduct(product);
       setIsProductModalOpen(true);
@@ -106,7 +209,11 @@ export function BuyerHome() {
   };
 
   const handleHarvestingProductClick = (productId: number) => {
-    const product = harvestingSoonProducts.find((p) => p.id === productId);
+    // Look for product in all possible arrays
+    let product = harvestingSoonProducts.find((p) => p.id === productId);
+    if (!product) {
+      product = searchResultProducts.find((p) => p.id === productId);
+    }
     if (product) {
       setSelectedProduct(product);
       setIsHarvestingModalOpen(true);
@@ -438,10 +545,15 @@ export function BuyerHome() {
                 type="text"
                 placeholder="Search produce e.g. Fresh carrots..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 className="w-full pl-12 pr-4 py-4 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-green-500 transition-all"
                 data-testid="input-search"
               />
+              {isSearching && (
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                  <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
             </div>
           </form>
 
@@ -463,12 +575,98 @@ export function BuyerHome() {
             ))}
           </div>
 
-          {/* Fresh Today Section */}
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Fresh Today
-            </h2>
-            {isLoadingCrops ? (
+          {/* Search Results Section */}
+          {hasSearched ? (
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                Search Results {searchQuery && `for "${searchQuery}"`}
+              </h2>
+              {isSearching ? (
+                <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex-shrink-0 w-48 bg-white rounded-xl shadow-sm animate-pulse">
+                      <div className="w-full h-32 bg-gray-200 rounded-t-xl"></div>
+                      <div className="p-4 space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : searchResultProducts.length > 0 ? (
+                <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+                  {searchResultProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      onClick={() => handleProductClick(product.id)}
+                      className="flex-shrink-0 w-48 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                      data-testid={`search-result-${product.id}`}
+                    >
+                      <div className="relative">
+                        <div className="w-full h-32 bg-gray-100 rounded-t-xl overflow-hidden">
+                          {typeof product.image === "string" &&
+                          product.image.startsWith("/") ? (
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-4xl">
+                              {product.image}
+                            </div>
+                          )}
+                        </div>
+                        {product.stockLeft && (
+                          <div className="absolute top-2 left-2 bg-orange-100 text-orange-800 px-2 py-1 rounded-lg text-xs font-medium">
+                            {product.stockLeft}
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-gray-900 mb-1">
+                          {product.name}
+                        </h3>
+                        <p className="text-gray-600 text-sm mb-2 flex items-center gap-1">
+                          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                          {product.farm}
+                        </p>
+                        <p className="font-bold text-gray-900">
+                          {product.price}{" "}
+                          <span className="font-normal text-sm text-gray-600">
+                            {product.unit}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No crops found matching "{searchQuery}"</p>
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setHasSearched(false);
+                      setSearchResults([]);
+                    }}
+                    className="mt-2 text-green-600 hover:text-green-700 font-medium"
+                    data-testid="button-clear-search"
+                  >
+                    Clear search
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Fresh Today Section */}
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  Fresh Today
+                </h2>
+                {isLoadingCrops ? (
               <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="flex-shrink-0 w-48 bg-white rounded-xl shadow-sm animate-pulse">
@@ -601,6 +799,8 @@ export function BuyerHome() {
               </div>
             )}
           </div>
+            </>
+          )}
         </div>
       </div>
 
