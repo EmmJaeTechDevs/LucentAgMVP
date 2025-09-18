@@ -254,32 +254,35 @@ export function OrderDetails() {
                   Order Details
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  Order #{orderDetails.id.slice(0, 8)}...
+                  Order #{orderDetails?.id?.slice(0, 8) || '...'}
                 </p>
               </div>
             </div>
 
             {/* Order Status */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="font-semibold text-gray-900 dark:text-gray-100">Order Status</h2>
-                <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(orderDetails.status)}`}>
-                  {getStatusIcon(orderDetails.status)}
-                  {orderDetails.status.charAt(0).toUpperCase() + orderDetails.status.slice(1)}
+            {orderDetails && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="font-semibold text-gray-900 dark:text-gray-100">Order Status</h2>
+                  <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(orderDetails.status)}`}>
+                    {getStatusIcon(orderDetails.status)}
+                    {orderDetails.status.charAt(0).toUpperCase() + orderDetails.status.slice(1)}
+                  </div>
                 </div>
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Ordered on {formatDate(orderDetails.orderDate)}
-              </p>
-              {orderDetails.deliveredAt && (
-                <p className="text-green-600 dark:text-green-400 text-sm">
-                  Delivered on {formatDate(orderDetails.deliveredAt)}
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Ordered on {formatDate(orderDetails.orderDate)}
                 </p>
-              )}
-            </div>
+                {orderDetails.deliveredAt && (
+                  <p className="text-green-600 dark:text-green-400 text-sm">
+                    Delivered on {formatDate(orderDetails.deliveredAt)}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Crop Information */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            {orderDetails && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
               <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">Crop Details</h2>
               <div className="flex gap-3">
                 <img
@@ -303,9 +306,11 @@ export function OrderDetails() {
                 </div>
               </div>
             </div>
+            )}
 
             {/* Order Summary */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            {orderDetails && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
               <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">Order Summary</h2>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
@@ -342,9 +347,11 @@ export function OrderDetails() {
                 </div>
               </div>
             </div>
+            )}
 
             {/* Buyer Information */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            {orderDetails && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-sm border border-gray-200 dark:border-gray-700">
               <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
                 <User className="w-5 h-5" />
                 Buyer Information
@@ -365,9 +372,11 @@ export function OrderDetails() {
                 </div>
               </div>
             </div>
+            )}
 
             {/* Delivery Information */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+            {orderDetails && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
               <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
                 <MapPin className="w-5 h-5" />
                 Delivery Information
@@ -384,6 +393,7 @@ export function OrderDetails() {
                 )}
               </div>
             </div>
+            )}
           </div>
         </div>
       </div>
@@ -405,12 +415,13 @@ export function OrderDetails() {
                 Order Details
               </h1>
               <p className="text-gray-600 dark:text-gray-400 text-lg">
-                Order #{orderDetails.id}
+                Order #{orderDetails?.id || '...'}
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {orderDetails && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Order Status */}
@@ -419,7 +430,7 @@ export function OrderDetails() {
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Order Status</h2>
                   <div className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium ${getStatusColor(orderDetails.status)}`}>
                     {getStatusIcon(orderDetails.status)}
-                    {orderDetails.status.charAt(0).toUpperCase() + orderDetails.status.slice(1)}
+                    {orderDetails?.status ? orderDetails.status.charAt(0).toUpperCase() + orderDetails.status.slice(1) : 'Loading...'}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-2">
@@ -564,6 +575,7 @@ export function OrderDetails() {
               </div>
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>
