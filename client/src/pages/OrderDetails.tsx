@@ -122,10 +122,8 @@ export function OrderDetails() {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ orderId })
+            'Accept': 'application/json'
+          }
         });
 
         if (!response.ok) {
