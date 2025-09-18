@@ -77,6 +77,7 @@ export function CheckOrders() {
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<FarmerOrder | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDelivering, setIsDelivering] = useState(false);
 
   // Validate farmer session
   useSessionValidation("farmer");
@@ -167,6 +168,53 @@ export function CheckOrders() {
       case "delivered": return <CheckCircle className="w-5 h-5" />;
       case "cancelled": return <XCircle className="w-5 h-5" />;
       default: return <Clock className="w-5 h-5" />;
+    }
+  };
+
+  const handleDeliveryConfirm = async () => {
+    if (!selectedOrder) return;
+
+    setIsDelivering(true);
+    
+    try {
+      const token = getFarmerToken();
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
+      const response = await fetch(`https://lucent-ag-api-damidek.replit.app/api/farmer/orders/${selectedOrder.id}/deliver`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to mark order as delivered: ${response.status} ${response.statusText}`);
+      }
+
+      console.log('Order marked as delivered successfully');
+      
+      // Update the local order status
+      if (orderResponse) {
+        const updatedOrders = orderResponse.orders.map(order => 
+          order.id === selectedOrder.id 
+            ? { ...order, status: "delivered" as const, deliveredAt: new Date().toISOString() }
+            : order
+        );
+        setOrderResponse({ ...orderResponse, orders: updatedOrders });
+      }
+
+      // Close the modal
+      closeModal();
+      
+    } catch (error) {
+      console.error('Error marking order as delivered:', error);
+      alert(error instanceof Error ? error.message : 'Failed to mark order as delivered');
+    } finally {
+      setIsDelivering(false);
     }
   };
 
@@ -643,6 +691,27 @@ export function CheckOrders() {
                   <span>Ordered on {formatDate(selectedOrder.orderDate)}</span>
                 </div>
               </div>
+
+              {/* Action Buttons */}
+              {selectedOrder.status !== "delivered" && selectedOrder.status !== "cancelled" && (
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={closeModal}
+                    className="flex-1 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                    data-testid="button-cancel-order"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeliveryConfirm}
+                    disabled={isDelivering}
+                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-lg font-medium transition-colors"
+                    data-testid="button-mark-delivered"
+                  >
+                    {isDelivering ? 'Processing...' : 'I have delivered'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -773,6 +842,27 @@ export function CheckOrders() {
                 </div>
               </div>
             </div>
+
+            {/* Action Buttons */}
+            {selectedOrder.status !== "delivered" && selectedOrder.status !== "cancelled" && (
+              <div className="flex gap-4 mt-8 pt-6 border-t border-gray-200 dark:border-gray-600">
+                <button
+                  onClick={closeModal}
+                  className="flex-1 px-6 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                  data-testid="button-cancel-order-desktop"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeliveryConfirm}
+                  disabled={isDelivering}
+                  className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-xl font-medium transition-colors"
+                  data-testid="button-mark-delivered-desktop"
+                >
+                  {isDelivering ? 'Processing...' : 'I have delivered'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
