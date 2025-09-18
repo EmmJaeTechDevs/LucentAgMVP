@@ -21,7 +21,6 @@ import { CropProcessing } from "@/pages/CropProcessing";
 import { FarmerDashboard } from "@/pages/FarmerDashboard";
 import { ViewCrops } from "@/pages/ViewCrops";
 import { CheckOrders } from "@/pages/CheckOrders";
-import { OrderDetails } from "@/pages/OrderDetails";
 import { Notifications } from "@/pages/Notifications";
 import { AddNewCrop } from "@/pages/AddNewCrop";
 import { EditCrop } from "@/pages/EditCrop";
@@ -61,7 +60,6 @@ function Router() {
       <Route path="/farmer-dashboard" component={FarmerDashboard} />
       <Route path="/view-crops" component={ViewCrops} />
       <Route path="/check-orders" component={CheckOrders} />
-      <Route path="/order/details/:orderId" component={OrderDetails} />
       <Route path="/notifications" component={Notifications} />
       <Route path="/add-new-crop" component={AddNewCrop} />
       <Route path="/edit-crop" component={EditCrop} />
