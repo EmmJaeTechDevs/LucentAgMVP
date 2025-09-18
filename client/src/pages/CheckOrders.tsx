@@ -146,7 +146,7 @@ export function CheckOrders() {
 
   const handleOrderClick = (orderId: string) => {
     console.log("Order clicked:", orderId);
-    // Navigate to order details page
+    setLocation(`/order/details/${orderId}`);
   };
 
   const formatDate = (dateString: string) => {
