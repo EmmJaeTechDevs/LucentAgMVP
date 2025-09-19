@@ -3,6 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { ArrowLeft, User, Package, MapPin, Calendar, Phone, Mail, CheckCircle, Clock, XCircle } from "lucide-react";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { SessionCrypto } from "@/utils/sessionCrypto";
+import { BaseUrl } from "../../../Baseconfig";
 
 interface OrderDetailsResponse {
   id: string;
@@ -83,7 +84,7 @@ export function OrderDetails() {
           throw new Error('No authentication token found. Please log in again.');
         }
 
-        const response = await fetch(`https://lucent-ag-api-damidek.replit.app/api/farmer/orders/${orderId}`, {
+        const response = await fetch(`${BaseUrl}/api/farmer/orders/${orderId}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,

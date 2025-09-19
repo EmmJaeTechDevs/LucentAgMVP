@@ -5,6 +5,7 @@ import { ArrowLeft, Leaf, Plus, Loader2, ChevronRight, MapPin, Calendar, Edit, T
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
+import { BaseUrl } from "../../../Baseconfig";
 
 interface Plant {
   id: string;
@@ -95,7 +96,7 @@ export function ViewCrops() {
 
       console.log(`Fetching crops - page: ${page}, limit: ${pagination.limit}`);
       const response = await fetch(
-        `https://lucent-ag-api-damidek.replit.app/api/farmer/crops?page=${page}&limit=${pagination.limit}`,
+        `${BaseUrl}/api/farmer/crops?page=${page}&limit=${pagination.limit}`,
         {
           method: "GET",
           headers: {
@@ -149,7 +150,7 @@ export function ViewCrops() {
 
     try {
       console.log("Fetching plants from API...");
-      const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/plants", {
+      const response = await fetch(`${BaseUrl}/api/plants`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -270,7 +271,7 @@ export function ViewCrops() {
       }
 
       const response = await fetch(
-        `https://lucent-ag-api-damidek.replit.app/api/farmer/crops/${selectedCrop.id}`,
+        `${BaseUrl}/api/farmer/crops/${selectedCrop.id}`,
         {
           method: "DELETE",
           headers: {

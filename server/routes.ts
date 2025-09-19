@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { BaseUrl } from "../Baseconfig";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // All cart functionality has been moved to localStorage in the frontend
@@ -27,7 +28,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Make request to external API with buyer token from request
-      const response = await fetch('https://lucent-ag-api-damidek.replit.app/api/buyer/orders', {
+      const response = await fetch(`${BaseUrl}/api/buyer/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

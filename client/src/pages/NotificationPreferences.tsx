@@ -111,7 +111,7 @@ export function NotificationPreferences() {
 
       console.log("Saving notification preferences:", preferencesData);
 
-      const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/users/notification-preferences", {
+      const response = await fetch(`${BaseUrl}/api/users/notification-preferences`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${authInfo.token}`,

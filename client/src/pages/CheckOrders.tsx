@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { ArrowLeft, Leaf, ChevronRight, User, Package, MapPin, Calendar, Phone, Mail, X, CheckCircle, Clock, XCircle } from "lucide-react";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { SessionCrypto } from "@/utils/sessionCrypto";
+import { BaseUrl } from "../../../Baseconfig";
 
 interface FarmerOrderResponse {
   orders: FarmerOrder[];
@@ -114,7 +115,7 @@ export function CheckOrders() {
           throw new Error('No authentication token found. Please log in again.');
         }
 
-        const response = await fetch('https://lucent-ag-api-damidek.replit.app/api/farmer/orders', {
+        const response = await fetch(`${BaseUrl}/api/farmer/orders`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -182,7 +183,7 @@ export function CheckOrders() {
         throw new Error('No authentication token found. Please log in again.');
       }
 
-      const response = await fetch(`https://lucent-ag-api-damidek.replit.app/api/farmer/orders/${selectedOrder.id}/deliver`, {
+      const response = await fetch(`${BaseUrl}/api/farmer/orders/${selectedOrder.id}/deliver`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
+import { BaseUrl } from "../../../Baseconfig";
 
 interface CropFormData {
   cropType: string;
@@ -110,7 +111,7 @@ export function AddNewCrop() {
       throw new Error("No authentication token");
     }
 
-    const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/plants", {
+    const response = await fetch(`${BaseUrl}/api/plants`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -248,7 +249,7 @@ export function AddNewCrop() {
 
       console.log("Sending crop data:", requestBody);
 
-      const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/farmer/crops", {
+      const response = await fetch(`${BaseUrl}/api/farmer/crops`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,

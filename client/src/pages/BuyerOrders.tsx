@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
+import { BaseUrl } from "../../../Baseconfig";
 
 interface OrderResponse {
   orders: Order[];
@@ -112,7 +113,7 @@ export function BuyerOrders() {
           throw new Error('No authentication token found. Please log in again.');
         }
 
-        const response = await fetch('https://lucent-ag-api-damidek.replit.app/api/buyer/orders', {
+        const response = await fetch(`${BaseUrl}/api/buyer/orders`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,

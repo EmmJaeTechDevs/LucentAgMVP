@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
+import { BaseUrl } from "../../../Baseconfig";
 
 interface EditCropFormData {
   totalQuantity: string;
@@ -168,7 +169,7 @@ export function EditCrop() {
 
       console.log("Updating crop data:", requestBody);
 
-      const response = await fetch(`https://lucent-ag-api-damidek.replit.app/api/farmer/crops/${cropData.id}`, {
+      const response = await fetch(`${BaseUrl}/api/farmer/crops/${cropData.id}`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${token}`,

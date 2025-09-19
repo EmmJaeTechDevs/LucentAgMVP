@@ -9,6 +9,7 @@ import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { useCart } from "@/hooks/useCart";
 import { CartItem } from "@shared/schema";
 import { SessionCrypto } from "@/utils/sessionCrypto";
+import { BaseUrl } from "../../../Baseconfig";
 
 
 export function Checkout() {
@@ -87,7 +88,7 @@ export function Checkout() {
 
         console.log('Placing order with data:', orderData);
 
-        const response = await fetch('https://lucent-ag-api-damidek.replit.app/api/buyer/orders', {
+        const response = await fetch(`${BaseUrl}/api/buyer/orders`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${buyerToken}`,

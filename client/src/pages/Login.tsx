@@ -76,7 +76,7 @@ export function Login() {
       
       // Make POST request to confirm account
       console.log("Making POST request to confirm farmer account...");
-      const postResponse = await axios.post("https://lucent-ag-api-damidek.replit.app/api/farmer/plants", {
+      const postResponse = await axios.post(`${BaseUrl}/api/farmer/plants`, {
         userId: userId
       }, {
         headers: {
@@ -140,7 +140,7 @@ export function Login() {
       // Login data contains sensitive information - not logging for security
 
       // Backend API endpoint (using the same as signup pages)
-      const API_BASE_URL = "https://lucent-ag-api-damidek.replit.app";
+      const API_BASE_URL = BaseUrl;
 
       // Call login API using axios
       const response = await axios.post(

@@ -25,6 +25,7 @@ import GreenBeansImage from "@assets/image 2_1756522296288.jpg";
 import { ProductDetailsModal } from "@/components/ProductDetailsModal";
 import { HarvestingSoonModal } from "@/components/HarvestingSoonModal";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
+import { BaseUrl } from "../../../Baseconfig";
 
 export function BuyerHome() {
   const [, setLocation] = useLocation();
@@ -135,7 +136,7 @@ export function BuyerHome() {
       }
 
       // Make search request with query parameter
-      const response = await fetch(`https://lucent-ag-api-damidek.replit.app/api/buyer/crops/search?query=${encodeURIComponent(query)}`, {
+      const response = await fetch(`${BaseUrl}/api/buyer/crops/search?query=${encodeURIComponent(query)}`, {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -263,7 +264,7 @@ export function BuyerHome() {
       console.log('Making notification request with:', requestBody);
 
       // Make POST request to notifications endpoint
-      const response = await fetch('https://lucent-ag-api-damidek.replit.app/api/buyer/notifications', {
+      const response = await fetch(`${BaseUrl}/api/buyer/notifications`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${sessionData.token}`,
@@ -368,7 +369,7 @@ export function BuyerHome() {
         }
 
         // Make GET request to fetch available crops
-        const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/buyer/crops/available", {
+        const response = await fetch(`${BaseUrl}/api/buyer/crops/available`, {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -435,7 +436,7 @@ export function BuyerHome() {
         }
 
         // Make GET request to fetch soon-ready crops
-        const response = await fetch("https://lucent-ag-api-damidek.replit.app/api/buyer/crops/soon-ready", {
+        const response = await fetch(`${BaseUrl}/api/buyer/crops/soon-ready`, {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${token}`,

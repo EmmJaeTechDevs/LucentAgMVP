@@ -1,8 +1,8 @@
-import { BaseUrl } from "../../../config";
+import { BaseUrl } from "../../../Baseconfig";
 
 // API Configuration for CORS-compliant requests
 export const API_CONFIG = {
-  BASE_URL: 'https://lucent-ag-api-damidek.replit.app',
+  BASE_URL: BaseUrl,
   TIMEOUT: 15000,
   CORS_ENABLED: true,
   
