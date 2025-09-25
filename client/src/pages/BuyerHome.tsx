@@ -593,7 +593,7 @@ export function BuyerHome() {
                       <div className="relative">
                         <div className="w-full h-32 bg-gray-100 rounded-t-xl overflow-hidden">
                           {typeof product.image === "string" &&
-                          product.image.startsWith("/") ? (
+                          (product.image.startsWith("/") || product.image.startsWith("http")) ? (
                             <img
                               src={product.image}
                               alt={product.name}
@@ -678,7 +678,7 @@ export function BuyerHome() {
                   <div className="relative">
                     <div className="w-full h-32 bg-gray-100 rounded-t-xl overflow-hidden">
                       {typeof product.image === "string" &&
-                      product.image.startsWith("/") ? (
+                      (product.image.startsWith("/") || product.image.startsWith("http")) ? (
                         <img
                           src={product.image}
                           alt={product.name}
@@ -750,7 +750,7 @@ export function BuyerHome() {
                 >
                   <div className="w-full h-32 bg-gray-100 rounded-t-xl overflow-hidden">
                     {typeof product.image === "string" &&
-                    product.image.startsWith("/") ? (
+                    (product.image.startsWith("/") || product.image.startsWith("http")) ? (
                       <img
                         src={product.image}
                         alt={product.name}
@@ -915,7 +915,7 @@ export function BuyerHome() {
                   <div className="relative">
                     <div className="w-full h-48 bg-gray-100 rounded-t-xl overflow-hidden">
                       {typeof product.image === "string" &&
-                      product.image.startsWith("/") ? (
+                      (product.image.startsWith("/") || product.image.startsWith("http")) ? (
                         <img
                           src={product.image}
                           alt={product.name}
@@ -987,7 +987,7 @@ export function BuyerHome() {
                 >
                   <div className="w-full h-48 bg-gray-100 rounded-t-xl overflow-hidden">
                     {typeof product.image === "string" &&
-                    product.image.startsWith("/") ? (
+                    (product.image.startsWith("/") || product.image.startsWith("http")) ? (
                       <img
                         src={product.image}
                         alt={product.name}
