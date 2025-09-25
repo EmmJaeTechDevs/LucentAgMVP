@@ -16,12 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import TomatoesImage from "@assets/image 15.png";
-import SweetPotatoImage from "@assets/Frame 8.png";
-import CabbageImage from "@assets/Frame 9.png";
-import PlantainImage from "@assets/image 13_1756529531399.png";
-import GroundnutsImage from "@assets/image 17.png";
-import GreenBeansImage from "@assets/image 2_1756522296288.jpg";
+import PlaceholderImage from "@assets/stock_images/agricultural_plant_c_660884ee.jpg";
 import { ProductDetailsModal } from "@/components/ProductDetailsModal";
 import { HarvestingSoonModal } from "@/components/HarvestingSoonModal";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
@@ -55,17 +50,8 @@ export function BuyerHome() {
     // Get plant name from the API response Plant object, fallback to plantId-based name
     const plantName = crop.plant?.name || crop.plantId?.replace('plant-', '').replace('-', ' ') || 'Unknown Crop';
     
-    // Map plantId to images (keeping image mapping for now)
-    const plantImageMapping: { [key: string]: any } = {
-      'plant-beans': GreenBeansImage,
-      'plant-yam': SweetPotatoImage,
-      'plant-tomatoes': TomatoesImage,
-      'plant-cabbage': CabbageImage,
-      'plant-groundnuts': GroundnutsImage,
-      'plant-plantain': PlantainImage,
-    };
-
-    const plantImage = plantImageMapping[crop.plantId] || TomatoesImage;
+    // Use plant imageUrl from API response, fallback to placeholder
+    const plantImage = crop.plant?.imageUrl || PlaceholderImage;
     
     // Calculate stock left message
     const stockLeft = crop.availableQuantity < crop.totalQuantity 

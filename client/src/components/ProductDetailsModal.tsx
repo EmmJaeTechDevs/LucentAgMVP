@@ -35,8 +35,11 @@ export function ProductDetailsModal({ product, isOpen, onClose, onAddToCart }: P
   };
 
   const getImageSrc = () => {
-    if (typeof product.image === 'string' && product.image.startsWith('/')) {
-      return product.image;
+    if (typeof product.image === 'string') {
+      // Handle URLs or relative paths
+      if (product.image.startsWith('http') || product.image.startsWith('/')) {
+        return product.image;
+      }
     }
     return null;
   };
