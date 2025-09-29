@@ -38,7 +38,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
     homeStreet: "",
     homeBusStop: "",
     homeAdditionalDesc: "",
-    homeCountry: "",
+    homeCountry: "Nigeria",
     homeState: "",
     homeLocalGov: "",
     homePostcode: "",

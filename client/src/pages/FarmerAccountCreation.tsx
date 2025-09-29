@@ -47,7 +47,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
     homeStreet: "",
     homeBusStop: "",
     homeAdditionalDesc: "",
-    homeCountry: "",
+    homeCountry: "Nigeria",
     homeState: "",
     homeLocalGov: "",
     homePostcode: "",
@@ -56,7 +56,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
     farmStreet: "",
     farmBusStop: "",
     farmAdditionalDesc: "",
-    farmCountry: "",
+    farmCountry: "Nigeria",
     farmState: "",
     farmLocalGov: "",
     farmPostcode: ""
@@ -423,7 +423,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Farm Street</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Farm Street *</label>
                 <input
                   type="text"
                   value={formData.farmStreet}
@@ -435,7 +435,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Farm Bus Stop</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Farm Bus Stop *</label>
               <input
                 type="text"
                 value={formData.farmBusStop}
@@ -457,7 +457,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Farm Country</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Farm Country *</label>
                 <select
                   value={formData.farmCountry}
                   onChange={(e) => handleInputChange("farmCountry", e.target.value)}
@@ -470,7 +470,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Farm State</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Farm State *</label>
                 <input
                   type="text"
                   value={formData.farmState}
@@ -483,7 +483,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
 
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Farm Local Government</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Farm Local Government *</label>
                 <input
                   type="text"
                   value={formData.farmLocalGov}
