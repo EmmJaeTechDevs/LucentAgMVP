@@ -7,6 +7,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // All cart functionality has been moved to localStorage in the frontend
   // No cart API routes needed since cart data is stored locally
 
+  // Buyer Registration Endpoint
+  app.post('/api/auth/register-buyer', async (req, res) => {
+    try {
+      console.log('Buyer registration request received:', req.body);
+      
+      // Extract and validate required fields
+      const {
+        firstName,
+        lastName,
+        phone,
+        email,
+        password,
+        homeHouseNumber,
+        homeStreet,
+        homeBusStop,
+        homeAdditionalDesc,
+        homeCountry,
+        homeState,
+        homeLocalGov,
+        homePostcode
+      } = req.body;
+      
+      // Validate required fields
+      const requiredFields = {
+        firstName, lastName, phone, email, password,
+        homeHouseNumber, homeStreet, homeBusStop, homeCountry, homeState, homeLocalGov
+      };
+      
+      for (const [field, value] of Object.entries(requiredFields)) {
+        if (!value || value.toString().trim() === '') {
+          return res.status(400).json({ error: `${field} is required` });
+        }
+      }
+      
+      // Forward request to external API
+      const response = await fetch(`${BaseUrl}/api/auth/register-buyer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(req.body)
+      });
+      
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('External API error:', error);
+        return res.status(response.status).json({ error: 'Registration failed' });
+      }
+      
+      const result = await response.json();
+      console.log('Buyer registration successful:', result);
+      res.json(result);
+    } catch (error) {
+      console.error('Buyer registration error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Farmer Registration Endpoint
+  app.post('/api/auth/register-farmer', async (req, res) => {
+    try {
+      console.log('Farmer registration request received:', req.body);
+      
+      // Extract and validate required fields
+      const {
+        firstName,
+        lastName,
+        phone,
+        email,
+        password,
+        homeHouseNumber,
+        homeStreet,
+        homeBusStop,
+        homeAdditionalDesc,
+        homeCountry,
+        homeState,
+        homeLocalGov,
+        homePostcode,
+        farmHouseNumber,
+        farmStreet,
+        farmBusStop,
+        farmAdditionalDesc,
+        farmCountry,
+        farmState,
+        farmLocalGov,
+        farmPostcode
+      } = req.body;
+      
+      // Validate required fields
+      const requiredFields = {
+        firstName, lastName, phone, email, password,
+        homeHouseNumber, homeStreet, homeBusStop, homeCountry, homeState, homeLocalGov,
+        farmHouseNumber, farmStreet, farmBusStop, farmCountry, farmState, farmLocalGov
+      };
+      
+      for (const [field, value] of Object.entries(requiredFields)) {
+        if (!value || value.toString().trim() === '') {
+          return res.status(400).json({ error: `${field} is required` });
+        }
+      }
+      
+      // Forward request to external API
+      const response = await fetch(`${BaseUrl}/api/auth/register-farmer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(req.body)
+      });
+      
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('External API error:', error);
+        return res.status(response.status).json({ error: 'Registration failed' });
+      }
+      
+      const result = await response.json();
+      console.log('Farmer registration successful:', result);
+      res.json(result);
+    } catch (error) {
+      console.error('Farmer registration error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Order placement endpoint - handles external API calls with dynamic buyer tokens
   app.post('/api/orders', async (req, res) => {
     try {
