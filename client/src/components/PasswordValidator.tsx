@@ -18,7 +18,7 @@ export function PasswordValidator({
   username = "",
   className = "",
 }: PasswordValidatorProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const validatePassword = (pwd: string, user: string): PasswordRule[] => {
     return [

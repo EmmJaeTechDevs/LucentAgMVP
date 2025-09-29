@@ -246,8 +246,9 @@ export const BuyerAccountCreation = (): JSX.Element => {
         background: "linear-gradient(135deg, #e8f5e8 0%, #f1f8e9 100%)",
         padding: "20px",
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start", // Changed from center to flex-start to prevent keyboard issues
         justifyContent: "center",
+        paddingBottom: "100px", // Extra padding for mobile keyboard
       }}
     >
       <div
@@ -258,6 +259,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
           borderRadius: "20px",
           boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
           padding: "40px",
+          marginTop: "20px", // Add margin top for better mobile positioning
         }}
       >
         {/* HEADER */}
