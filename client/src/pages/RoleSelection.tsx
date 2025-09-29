@@ -12,7 +12,7 @@ export const RoleSelection = (): JSX.Element => {
   const { isLoading } = useLoading({ minimumLoadTime: 600 });
 
   if (isLoading) {
-    return <LoadingSpinner fullScreen message="Loading role selection..." />;
+    return <LoadingSpinner fullScreen />;
   }
 
   const roles = [

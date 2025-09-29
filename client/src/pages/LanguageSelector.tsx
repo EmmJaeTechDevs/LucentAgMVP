@@ -12,7 +12,7 @@ export const LanguageSelector = (): JSX.Element => {
   const { isLoading } = useLoading({ minimumLoadTime: 600 });
 
   if (isLoading) {
-    return <LoadingSpinner fullScreen message="Loading language options..." />;
+    return <LoadingSpinner fullScreen />;
   }
 
   const languages = [
