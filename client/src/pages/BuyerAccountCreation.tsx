@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { PasswordValidator, validatePasswordStrength } from "@/components/PasswordValidator";
 import { BaseUrl } from "../../../Baseconfig";
 
@@ -699,7 +699,14 @@ export const BuyerAccountCreation = (): JSX.Element => {
               transition: "background-color 0.3s",
             }}
           >
-            {isSubmitting ? "Creating Account..." : "CREATE BUYER ACCOUNT"}
+            {isSubmitting ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Creating Account...</span>
+              </div>
+            ) : (
+              "CREATE BUYER ACCOUNT"
+            )}
           </button>
 
           {/* LOGIN LINK */}
