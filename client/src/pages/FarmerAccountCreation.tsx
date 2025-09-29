@@ -6,6 +6,15 @@ import { SessionCrypto } from "@/utils/sessionCrypto";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { PasswordValidator, validatePasswordStrength } from "@/components/PasswordValidator";
 
+// Nigerian States
+const NIGERIAN_STATES = [
+  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", 
+  "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", 
+  "FCT", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", 
+  "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", 
+  "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"
+];
+
 interface FormData {
   firstName: string;
   lastName: string;
@@ -374,13 +383,17 @@ export const FarmerAccountCreation = (): JSX.Element => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Home State *</label>
-                <input
-                  type="text"
+                <select
                   value={formData.homeState}
                   onChange={(e) => handleInputChange("homeState", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                   required
-                />
+                >
+                  <option value="">Select State</option>
+                  {NIGERIAN_STATES.map(state => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -471,13 +484,17 @@ export const FarmerAccountCreation = (): JSX.Element => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Farm State *</label>
-                <input
-                  type="text"
+                <select
                   value={formData.farmState}
                   onChange={(e) => handleInputChange("farmState", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                   required
-                />
+                >
+                  <option value="">Select State</option>
+                  {NIGERIAN_STATES.map(state => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
               </div>
             </div>
 

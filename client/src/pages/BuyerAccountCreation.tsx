@@ -25,6 +25,15 @@ interface BuyerFormData {
   homePostcode: string;
 }
 
+// Nigerian States
+const NIGERIAN_STATES = [
+  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", 
+  "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", 
+  "FCT", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", 
+  "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", 
+  "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"
+];
+
 export const BuyerAccountCreation = (): JSX.Element => {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
@@ -664,8 +673,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
                 >
                   State *
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.homeState}
                   onChange={(e) =>
                     handleInputChange("homeState", e.target.value)
@@ -677,9 +685,13 @@ export const BuyerAccountCreation = (): JSX.Element => {
                     borderRadius: "8px",
                     fontSize: "16px",
                   }}
-                  placeholder="Lagos"
                   required
-                />
+                >
+                  <option value="">Select State</option>
+                  {NIGERIAN_STATES.map(state => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
