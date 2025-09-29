@@ -63,16 +63,65 @@ export const FarmerAccountCreation = (): JSX.Element => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; phone?: string }>({});
+
+  // Validation functions
+  const validateEmail = (email: string): string | undefined => {
+    if (!email.trim()) {
+      return "Email is required";
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    return undefined;
+  };
+
+  const validatePhone = (phone: string): string | undefined => {
+    if (!phone.trim()) {
+      return "Phone number is required";
+    }
+    // Nigerian phone number validation - supports formats: +234xxxxxxxxx, 08xxxxxxxxx, 234xxxxxxxxx
+    const phoneRegex = /^(\+234|234|0)(70|80|81|90|91|80|81|70|71|80|81|90|91)\d{8}$/;
+    if (!phoneRegex.test(phone.replace(/\s/g, ""))) {
+      return "Please enter a valid Nigerian phone number (e.g., +234801234567 or 08012345678)";
+    }
+    return undefined;
+  };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+
+    // Clear validation errors when user starts typing and validate in real-time
+    if (field === 'email') {
+      const emailError = validateEmail(value);
+      setErrors(prev => ({ ...prev, email: emailError }));
+    } else if (field === 'phone') {
+      const phoneError = validatePhone(value);
+      setErrors(prev => ({ ...prev, phone: phoneError }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate email and phone before submitting
+    const emailError = validateEmail(formData.email);
+    const phoneError = validatePhone(formData.phone);
+    
+    setErrors({ email: emailError, phone: phoneError });
+    
+    if (emailError || phoneError) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Please fix the errors in the form before submitting.",
+      });
+      return;
+    }
     
     // Validate password strength before submitting
     if (!validatePasswordStrength(formData.password, formData.email || formData.firstName)) {
@@ -196,25 +245,41 @@ export const FarmerAccountCreation = (): JSX.Element => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Phone *</label>
               <input
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 ${
+                  errors.phone ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="+234801234567 or 08012345678"
                 required
               />
+              {errors.phone && (
+                <div className="text-red-500 text-sm mt-1">
+                  {errors.phone}
+                </div>
+              )}
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 ${
+                  errors.email ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="your@email.com"
                 required
               />
+              {errors.email && (
+                <div className="text-red-500 text-sm mt-1">
+                  {errors.email}
+                </div>
+              )}
             </div>
 
             <div className="mb-4">

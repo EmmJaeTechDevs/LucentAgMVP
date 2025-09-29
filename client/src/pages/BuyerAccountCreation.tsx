@@ -45,17 +45,66 @@ export const BuyerAccountCreation = (): JSX.Element => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; phone?: string }>({});
   const { toast } = useToast();
+
+  // Validation functions
+  const validateEmail = (email: string): string | undefined => {
+    if (!email.trim()) {
+      return "Email is required";
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    return undefined;
+  };
+
+  const validatePhone = (phone: string): string | undefined => {
+    if (!phone.trim()) {
+      return "Phone number is required";
+    }
+    // Nigerian phone number validation - supports formats: +234xxxxxxxxx, 08xxxxxxxxx, 234xxxxxxxxx
+    const phoneRegex = /^(\+234|234|0)(70|80|81|90|91|80|81|70|71|80|81|90|91)\d{8}$/;
+    if (!phoneRegex.test(phone.replace(/\s/g, ""))) {
+      return "Please enter a valid Nigerian phone number (e.g., +234801234567 or 08012345678)";
+    }
+    return undefined;
+  };
 
   const handleInputChange = (field: keyof BuyerFormData, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
+
+    // Clear validation errors when user starts typing and validate in real-time
+    if (field === 'email') {
+      const emailError = validateEmail(value);
+      setErrors(prev => ({ ...prev, email: emailError }));
+    } else if (field === 'phone') {
+      const phoneError = validatePhone(value);
+      setErrors(prev => ({ ...prev, phone: phoneError }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate email and phone before submitting
+    const emailError = validateEmail(formData.email);
+    const phoneError = validatePhone(formData.phone);
+    
+    setErrors({ email: emailError, phone: phoneError });
+    
+    if (emailError || phoneError) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Please fix the errors in the form before submitting.",
+      });
+      return;
+    }
     
     // Validate password strength before submitting
     if (!validatePasswordStrength(formData.password, formData.email || formData.firstName)) {
@@ -318,13 +367,22 @@ export const BuyerAccountCreation = (): JSX.Element => {
                 style={{
                   width: "100%",
                   padding: "12px",
-                  border: "2px solid #ddd",
+                  border: errors.phone ? "2px solid #ef4444" : "2px solid #ddd",
                   borderRadius: "8px",
                   fontSize: "16px",
                 }}
-                placeholder="+2348123456789"
+                placeholder="+234801234567 or 08012345678"
                 required
               />
+              {errors.phone && (
+                <div style={{ 
+                  color: "#ef4444", 
+                  fontSize: "14px", 
+                  marginTop: "5px" 
+                }}>
+                  {errors.phone}
+                </div>
+              )}
             </div>
 
             <div style={{ marginBottom: "15px" }}>
@@ -345,13 +403,22 @@ export const BuyerAccountCreation = (): JSX.Element => {
                 style={{
                   width: "100%",
                   padding: "12px",
-                  border: "2px solid #ddd",
+                  border: errors.email ? "2px solid #ef4444" : "2px solid #ddd",
                   borderRadius: "8px",
                   fontSize: "16px",
                 }}
                 placeholder="your@email.com"
                 required
               />
+              {errors.email && (
+                <div style={{ 
+                  color: "#ef4444", 
+                  fontSize: "14px", 
+                  marginTop: "5px" 
+                }}>
+                  {errors.email}
+                </div>
+              )}
             </div>
 
             <div style={{ marginBottom: "15px" }}>
