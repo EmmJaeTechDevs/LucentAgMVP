@@ -21,6 +21,7 @@ import { ProductDetailsModal } from "@/components/ProductDetailsModal";
 import { HarvestingSoonModal } from "@/components/HarvestingSoonModal";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { BaseUrl } from "../../../Baseconfig";
+import leafLogo from "@assets/entypo_leaf_1756517515112.png";
 
 export function BuyerHome() {
   const [, setLocation] = useLocation();
@@ -469,21 +470,32 @@ export function BuyerHome() {
         <div className="px-6 pt-16 pb-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Hello {userLastName}!</h1>
-              <p className="text-gray-600 text-sm">
-                Ready for something fresh today?
-              </p>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setLocation("/buyer-home")}
+                className="flex-shrink-0"
+                data-testid="button-logo"
+              >
+                <img 
+                  src={leafLogo} 
+                  alt="Logo" 
+                  className="w-10 h-10 object-contain"
+                />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Hello {userLastName}!</h1>
+                <p className="text-gray-600 text-sm">
+                  Ready for something fresh today?
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
-              <HamburgerMenu userType="buyer" />
               <button
                 onClick={handleProfileClick}
-                className="flex items-center gap-2 px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 font-medium rounded-lg transition-all duration-200 hover:scale-105"
+                className="p-3 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-all duration-200 hover:scale-105"
                 data-testid="button-profile"
               >
-                <User className="w-4 h-4" />
-                <span className="text-sm font-semibold">Profile</span>
+                <User className="w-5 h-5" />
               </button>
               <button
                 onClick={handleCartClick}
@@ -497,6 +509,7 @@ export function BuyerHome() {
                   </span>
                 )}
               </button>
+              <HamburgerMenu userType="buyer" />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button
@@ -796,21 +809,32 @@ export function BuyerHome() {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-10">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900">Hello {userLastName}!</h1>
-              <p className="text-gray-600 text-xl">
-                Ready for something fresh today?
-              </p>
+            <div className="flex items-center gap-6">
+              <button
+                onClick={() => setLocation("/buyer-home")}
+                className="flex-shrink-0"
+                data-testid="button-logo-desktop"
+              >
+                <img 
+                  src={leafLogo} 
+                  alt="Logo" 
+                  className="w-14 h-14 object-contain"
+                />
+              </button>
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900">Hello {userLastName}!</h1>
+                <p className="text-gray-600 text-xl">
+                  Ready for something fresh today?
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-4">
-              <HamburgerMenu userType="buyer" />
               <button
                 onClick={handleProfileClick}
-                className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+                className="p-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
                 data-testid="button-profile-desktop"
               >
                 <User className="w-6 h-6" />
-                <span className="text-lg">My Profile</span>
               </button>
               <button
                 onClick={handleCartClick}
@@ -824,6 +848,7 @@ export function BuyerHome() {
                   </span>
                 )}
               </button>
+              <HamburgerMenu userType="buyer" />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button
