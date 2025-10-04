@@ -63,7 +63,7 @@ export function Cart() {
       </div>
 
       {/* Cart Items */}
-      <div className="p-6 pb-40">
+      <div className="p-6 pb-40 md:pb-6">
         {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
@@ -163,7 +163,7 @@ export function Cart() {
 
       {/* Proceed to Checkout Button */}
       {cartItems.length > 0 && !isLoading && (
-        <div className="fixed bottom-0 left-0 right-0 p-6 bg-white border-t border-gray-200">
+        <div className="fixed md:static bottom-0 left-0 right-0 p-6 bg-white border-t border-gray-200 md:max-w-4xl md:mx-auto md:mt-6">
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <span className="text-gray-600">Subtotal ({cartItems.reduce((total, item) => total + item.quantity, 0)} items)</span>
@@ -172,8 +172,8 @@ export function Cart() {
             <p className="text-sm text-gray-500">Taxes and shipping calculated at checkout</p>
           </div>
           
-          <div className="space-y-3">
-            <Link href="/checkout">
+          <div className="space-y-3 md:flex md:gap-3 md:space-y-0">
+            <Link href="/checkout" className="md:flex-1">
               <button
                 className="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-colors disabled:opacity-50"
                 data-testid="button-proceed-checkout"
@@ -186,7 +186,7 @@ export function Cart() {
             <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <AlertDialogTrigger asChild>
                 <button
-                  className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
+                  className="w-full md:w-auto md:px-8 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
                   data-testid="button-clear-cart"
                   disabled={isLoading}
                 >

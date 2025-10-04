@@ -150,7 +150,7 @@ export function Checkout() {
       </div>
 
       {/* Content */}
-      <div className="p-4 sm:p-6 pb-32">
+      <div className="p-4 sm:p-6 pb-32 md:pb-6 md:max-w-4xl md:mx-auto">
         {/* Empty Cart State */}
         {hasFetched && !isLoading && cartItems.length === 0 && (
           <div className="text-center py-12">
@@ -324,7 +324,7 @@ export function Checkout() {
 
       {/* Place Order Button */}
       {hasFetched && !isLoading && cartItems.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-white border-t border-gray-200 max-w-md mx-auto sm:max-w-none">
+        <div className="fixed md:static bottom-0 left-0 right-0 p-4 sm:p-6 bg-white border-t border-gray-200 max-w-md mx-auto sm:max-w-none md:max-w-4xl md:mt-6">
           <button
             onClick={handlePlaceOrder}
             className="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-colors disabled:opacity-50"
