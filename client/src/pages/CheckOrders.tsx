@@ -241,7 +241,7 @@ export function CheckOrders() {
 
   const orders = orderResponse?.orders || [];
   const filteredOrders = activeTab === "closed" 
-    ? orders.filter(order => order.status === "cancelled")
+    ? [] // Closed tab logic to be defined by user
     : orders.filter(order => order.status === activeTab);
   
   const orderCounts = {
@@ -249,13 +249,14 @@ export function CheckOrders() {
     confirmed: orders.filter(o => o.status === "confirmed").length,
     delivered: orders.filter(o => o.status === "delivered").length,
     cancelled: orders.filter(o => o.status === "cancelled").length,
-    closed: orders.filter(o => o.status === "cancelled").length,
+    closed: 0, // To be defined
   };
 
   const filterTabs = [
     { key: "pending" as const, label: "Pending", count: orderCounts.pending },
     { key: "confirmed" as const, label: "Confirmed", count: orderCounts.confirmed },
     { key: "delivered" as const, label: "Delivered", count: orderCounts.delivered },
+    { key: "cancelled" as const, label: "Cancelled", count: orderCounts.cancelled },
     { key: "closed" as const, label: "Closed", count: orderCounts.closed },
   ];
 
