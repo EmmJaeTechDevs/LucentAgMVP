@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Package, Clock, CheckCircle, XCircle, MapPin, Phone, User, Calendar } from "lucide-react";
+import { ArrowLeft, Package, Clock, CheckCircle, XCircle, MapPin, Phone, User, Calendar, X } from "lucide-react";
 import { Link } from "wouter";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { SessionCrypto } from "@/utils/sessionCrypto";
@@ -80,6 +80,8 @@ export function BuyerOrders() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<"all" | "pending" | "confirmed" | "delivered" | "cancelled">("all");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Function to get buyer token from session storage
   const getBuyerToken = (): string | null => {
@@ -168,6 +170,19 @@ export function BuyerOrders() {
       hour: "2-digit",
       minute: "2-digit"
     });
+  };
+
+  const handleOrderClick = (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+      setSelectedOrder(order);
+      setIsModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedOrder(null);
   };
 
   const orders = orderResponse?.orders || [];
@@ -277,9 +292,9 @@ export function BuyerOrders() {
           </div>
         )}
 
-        {/* Orders List */}
+        {/* Mobile Orders List */}
         {!isLoading && !error && filteredOrders.length > 0 && (
-          <div className="space-y-6">
+          <div className="space-y-6 md:hidden">
             {filteredOrders.map((order) => (
               <div
                 key={order.id}
@@ -411,6 +426,71 @@ export function BuyerOrders() {
           </div>
         )}
 
+        {/* Desktop Orders Table */}
+        {!isLoading && !error && filteredOrders.length > 0 && (
+          <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                    <th className="text-left py-4 px-4 text-gray-600 dark:text-gray-400 font-semibold">Date Ordered</th>
+                    <th className="text-left py-4 px-4 text-gray-600 dark:text-gray-400 font-semibold">Crop Name</th>
+                    <th className="text-left py-4 px-4 text-gray-600 dark:text-gray-400 font-semibold">Farmer</th>
+                    <th className="text-left py-4 px-4 text-gray-600 dark:text-gray-400 font-semibold">Quantity</th>
+                    <th className="text-left py-4 px-4 text-gray-600 dark:text-gray-400 font-semibold">Status</th>
+                    <th className="text-right py-4 px-4 text-gray-600 dark:text-gray-400 font-semibold">Total Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredOrders.map((order) => (
+                    <tr
+                      key={order.id}
+                      onClick={() => handleOrderClick(order.id)}
+                      className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                      data-testid={`order-${order.id}-desktop`}
+                    >
+                      <td className="py-4 px-4 text-gray-900 dark:text-gray-100">
+                        {new Date(order.orderDate).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric"
+                        })}
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={order.crop.plant.imageUrl}
+                            alt={order.crop.plant.name}
+                            className="w-10 h-10 object-cover rounded-lg"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=400&auto=format&fit=crop';
+                            }}
+                          />
+                          <span className="font-medium text-gray-900 dark:text-gray-100">{order.crop.plant.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-gray-100">
+                        {order.farmer.firstName} {order.farmer.lastName}
+                      </td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-gray-100">
+                        {order.quantityOrdered} {order.crop.unit}
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-right font-bold text-green-600 dark:text-green-400">
+                        ₦{order.total.toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {/* Pagination Info */}
         {orderResponse && orderResponse.totalPages > 1 && (
           <div className="mt-6 text-center">
@@ -421,6 +501,137 @@ export function BuyerOrders() {
           </div>
         )}
       </div>
+
+      {/* Order Details Modal */}
+      {isModalOpen && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Order Details</h2>
+                <button
+                  onClick={closeModal}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  data-testid="button-close-modal"
+                >
+                  <X className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Crop Information */}
+                <div className="flex items-start gap-4">
+                  <img
+                    src={selectedOrder.crop.plant.imageUrl}
+                    alt={selectedOrder.crop.plant.name}
+                    className="w-24 h-24 object-cover rounded-xl"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=400&auto=format&fit=crop';
+                    }}
+                  />
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                      {selectedOrder.crop.plant.name}
+                    </h3>
+                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.status)}`}>
+                      {getStatusIcon(selectedOrder.status)}
+                      {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Summary */}
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">Order Summary</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Order ID:</span>
+                      <span className="text-gray-900 dark:text-gray-100 font-medium">{selectedOrder.id.slice(0, 12)}...</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Order Date:</span>
+                      <span className="text-gray-900 dark:text-gray-100 font-medium">{formatDate(selectedOrder.orderDate)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Quantity:</span>
+                      <span className="text-gray-900 dark:text-gray-100 font-medium">{selectedOrder.quantityOrdered} {selectedOrder.crop.unit}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Price per unit:</span>
+                      <span className="text-gray-900 dark:text-gray-100 font-medium">₦{selectedOrder.pricePerUnit.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
+                      <span className="text-gray-900 dark:text-gray-100 font-medium">₦{selectedOrder.subtotal.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Delivery Fee:</span>
+                      <span className="text-gray-900 dark:text-gray-100 font-medium">
+                        {selectedOrder.deliveryFee === 0 ? 'Free' : `₦${selectedOrder.deliveryFee.toLocaleString()}`}
+                      </span>
+                    </div>
+                    <div className="border-t border-gray-200 dark:border-gray-600 pt-2 mt-2">
+                      <div className="flex justify-between">
+                        <span className="font-semibold text-gray-900 dark:text-gray-100">Total:</span>
+                        <span className="font-bold text-green-600 dark:text-green-400 text-lg">₦{selectedOrder.total.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Delivery Information */}
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                    <MapPin className="w-5 h-5" />
+                    Delivery Information
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <p className="text-gray-900 dark:text-gray-100">{selectedOrder.deliveryAddress}</p>
+                    <p className="text-gray-600 dark:text-gray-400">{selectedOrder.deliveryLga}, {selectedOrder.deliveryState}</p>
+                    {selectedOrder.deliveryNote && (
+                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                        <p className="text-gray-600 dark:text-gray-400">
+                          <strong>Note:</strong> {selectedOrder.deliveryNote}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Farmer Information */}
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">Farmer Details</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                      <span className="text-gray-900 dark:text-gray-100">
+                        {selectedOrder.farmer.firstName} {selectedOrder.farmer.lastName}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                      <span className="text-gray-900 dark:text-gray-100">{selectedOrder.farmer.phone}</span>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                      <p className="text-gray-600 dark:text-gray-400">
+                        <strong>Farm Location:</strong> {selectedOrder.crop.state}, {selectedOrder.crop.lga}
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400 mt-1">
+                        <strong>Description:</strong> {selectedOrder.crop.description}
+                      </p>
+                      {selectedOrder.deliveredAt && (
+                        <p className="text-green-600 dark:text-green-400 mt-2">
+                          <strong>Delivered:</strong> {formatDate(selectedOrder.deliveredAt)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

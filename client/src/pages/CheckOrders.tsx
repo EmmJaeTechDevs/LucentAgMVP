@@ -489,9 +489,9 @@ export function CheckOrders() {
               </div>
             )}
 
-            {/* Orders list */}
+            {/* Orders Table */}
             {!isLoading && !error && (
-              <div className="space-y-6">
+              <div>
                 {filteredOrders.length === 0 ? (
                   <div className="text-center py-16">
                     <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -502,77 +502,65 @@ export function CheckOrders() {
                     </p>
                   </div>
                 ) : (
-                  filteredOrders.map((order) => (
-                    <button
-                      key={order.id}
-                      onClick={() => handleOrderClick(order.id)}
-                      className="w-full bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-6 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all text-left hover:scale-[1.01]"
-                      data-testid={`order-${order.id}-desktop`}
-                    >
-                      <div className="flex gap-6">
-                        {/* Crop Image */}
-                        <div className="relative">
-                          <img
-                            src={order.crop.plant.imageUrl}
-                            alt={order.crop.plant.name}
-                            className="w-20 h-20 object-cover rounded-xl"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=400&auto=format&fit=crop';
-                            }}
-                          />
-                          <div className={`absolute -top-2 -right-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                            {order.status}
-                          </div>
-                        </div>
-
-                        {/* Order Details */}
-                        <div className="flex-1 space-y-3">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-bold text-xl text-gray-900 dark:text-gray-100 mb-1">
-                                {order.crop.plant.name}
-                              </h3>
-                              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                                <User className="w-5 h-5" />
-                                <span className="text-lg">{order.buyer.firstName} {order.buyer.lastName}</span>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-200 dark:border-gray-700">
+                          <th className="text-left py-4 px-4 text-gray-600 dark:text-gray-400 font-semibold">Date Ordered</th>
+                          <th className="text-left py-4 px-4 text-gray-600 dark:text-gray-400 font-semibold">Crop Name</th>
+                          <th className="text-left py-4 px-4 text-gray-600 dark:text-gray-400 font-semibold">Buyer</th>
+                          <th className="text-left py-4 px-4 text-gray-600 dark:text-gray-400 font-semibold">Quantity</th>
+                          <th className="text-left py-4 px-4 text-gray-600 dark:text-gray-400 font-semibold">Status</th>
+                          <th className="text-right py-4 px-4 text-gray-600 dark:text-gray-400 font-semibold">Total Price</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredOrders.map((order) => (
+                          <tr
+                            key={order.id}
+                            onClick={() => handleOrderClick(order.id)}
+                            className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                            data-testid={`order-${order.id}-desktop`}
+                          >
+                            <td className="py-4 px-4 text-gray-900 dark:text-gray-100">
+                              {new Date(order.orderDate).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric"
+                              })}
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="flex items-center gap-3">
+                                <img
+                                  src={order.crop.plant.imageUrl}
+                                  alt={order.crop.plant.name}
+                                  className="w-10 h-10 object-cover rounded-lg"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=400&auto=format&fit=crop';
+                                  }}
+                                />
+                                <span className="font-medium text-gray-900 dark:text-gray-100">{order.crop.plant.name}</span>
                               </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                                ₦{order.total.toLocaleString()}
-                              </p>
-                              <p className="text-gray-600 dark:text-gray-400">
-                                {order.quantityOrdered} {order.crop.unit}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-6 text-sm">
-                            <div className="flex items-start gap-2">
-                              <MapPin className="w-5 h-5 text-gray-500 dark:text-gray-400 mt-0.5" />
-                              <div>
-                                <p className="text-gray-900 dark:text-gray-100 font-medium">{order.deliveryAddress}</p>
-                                <p className="text-gray-600 dark:text-gray-400">{order.deliveryLga}, {order.deliveryState}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                              <span className="text-gray-600 dark:text-gray-400">
-                                Ordered {formatDate(order.orderDate)}
+                            </td>
+                            <td className="py-4 px-4 text-gray-900 dark:text-gray-100">
+                              {order.buyer.firstName} {order.buyer.lastName}
+                            </td>
+                            <td className="py-4 px-4 text-gray-900 dark:text-gray-100">
+                              {order.quantityOrdered} {order.crop.unit}
+                            </td>
+                            <td className="py-4 px-4">
+                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                               </span>
-                            </div>
-                          </div>
-
-                          {order.buyer.phone && (
-                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                              <Phone className="w-4 h-4" />
-                              <span>{order.buyer.phone}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  ))
+                            </td>
+                            <td className="py-4 px-4 text-right font-bold text-green-600 dark:text-green-400">
+                              ₦{order.total.toLocaleString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </div>
             )}
