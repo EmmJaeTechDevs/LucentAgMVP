@@ -24,7 +24,8 @@ import {
   Settings, 
   User, 
   Headphones,
-  LogOut 
+  LogOut,
+  Home
 } from "lucide-react";
 
 export function FarmerDashboard() {
@@ -36,8 +37,7 @@ export function FarmerDashboard() {
   useSessionValidation("farmer");
 
   const handleAddNewCrop = () => {
-    // Navigate to add crop page or open modal
-    console.log("Add new crop clicked");
+    setLocation("/add-new-crop");
   };
 
   const handleViewCrops = () => {
@@ -105,7 +105,7 @@ export function FarmerDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Mobile Layout */}
-      <div className="block md:hidden flex-1 px-6 pt-16 pb-8">
+      <div className="block md:hidden flex-1 px-6 pt-16 pb-24">
         <div className="max-w-sm mx-auto">
           {/* Greeting */}
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -249,6 +249,58 @@ export function FarmerDashboard() {
               </AlertDialogContent>
             </AlertDialog>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="block md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+        <div className="grid grid-cols-5 h-20">
+          <button
+            onClick={() => setLocation("/farmer-dashboard")}
+            className="flex flex-col items-center justify-center gap-1 text-green-600 font-medium"
+            data-testid="nav-home"
+          >
+            <Home className="w-6 h-6" />
+            <span className="text-xs">Home</span>
+          </button>
+          
+          <button
+            onClick={handleViewCrops}
+            className="flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-green-600 transition-colors"
+            data-testid="nav-crops"
+          >
+            <Package className="w-6 h-6" />
+            <span className="text-xs">Crops</span>
+          </button>
+          
+          <button
+            onClick={handleAddNewCrop}
+            className="flex flex-col items-center justify-center gap-1 -mt-4"
+            data-testid="nav-add-crop"
+          >
+            <div className="bg-green-600 rounded-full p-3 shadow-lg">
+              <Plus className="w-7 h-7 text-white" />
+            </div>
+            <span className="text-xs text-gray-600 mt-1">Add</span>
+          </button>
+          
+          <button
+            onClick={handleCheckOrders}
+            className="flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-green-600 transition-colors"
+            data-testid="nav-orders"
+          >
+            <ShoppingCart className="w-6 h-6" />
+            <span className="text-xs">Orders</span>
+          </button>
+          
+          <button
+            onClick={handleEditProfile}
+            className="flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-green-600 transition-colors"
+            data-testid="nav-profile"
+          >
+            <User className="w-6 h-6" />
+            <span className="text-xs">Profile</span>
+          </button>
         </div>
       </div>
 
