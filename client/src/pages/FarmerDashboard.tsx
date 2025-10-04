@@ -108,23 +108,24 @@ export function FarmerDashboard() {
       {/* Mobile Layout */}
       <div className="block md:hidden flex-1 px-6 pt-16 pb-24">
         <div className="max-w-sm mx-auto">
-          {/* Logo */}
-          <button
-            onClick={() => setLocation("/farmer-dashboard")}
-            className="mb-6"
-            data-testid="button-logo-mobile"
-          >
-            <img 
-              src={lucentLogo} 
-              alt="Lucent Ag Logo" 
-              className="h-12 w-auto object-contain"
-            />
-          </button>
-          
-          {/* Greeting */}
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {getGreeting()}, {userName}!
-          </h1>
+          {/* Logo and Greeting */}
+          <div className="flex items-center gap-4 mb-2">
+            <button
+              onClick={() => setLocation("/farmer-dashboard")}
+              className="flex-shrink-0"
+              data-testid="button-logo-mobile"
+            >
+              <img 
+                src={lucentLogo} 
+                alt="Lucent Ag Logo" 
+                className="h-12 w-auto object-contain"
+              />
+            </button>
+            
+            <h1 className="text-2xl font-bold text-gray-900">
+              {getGreeting()}, {userName}!
+            </h1>
+          </div>
           
           <p className="text-gray-600 text-base mb-8">
             Start your day by adding your produce!
@@ -321,24 +322,25 @@ export function FarmerDashboard() {
       {/* Desktop Layout */}
       <div className="hidden md:flex min-h-screen p-8">
         <div className="w-full max-w-4xl mx-auto">
-          {/* Logo */}
-          <button
-            onClick={() => setLocation("/farmer-dashboard")}
-            className="mb-8"
-            data-testid="button-logo-desktop"
-          >
-            <img 
-              src={lucentLogo} 
-              alt="Lucent Ag Logo" 
-              className="h-16 w-auto object-contain"
-            />
-          </button>
-          
-          {/* Header */}
+          {/* Header with Logo and Greeting */}
           <div className="mb-12">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">
-              {getGreeting()}, {userName}!
-            </h1>
+            <div className="flex items-center gap-6 mb-4">
+              <button
+                onClick={() => setLocation("/farmer-dashboard")}
+                className="flex-shrink-0"
+                data-testid="button-logo-desktop"
+              >
+                <img 
+                  src={lucentLogo} 
+                  alt="Lucent Ag Logo" 
+                  className="h-16 w-auto object-contain"
+                />
+              </button>
+              
+              <h1 className="text-5xl font-bold text-gray-900">
+                {getGreeting()}, {userName}!
+              </h1>
+            </div>
             
             <p className="text-gray-600 text-xl">
               Start your day by adding your produce!
