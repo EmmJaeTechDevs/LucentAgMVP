@@ -470,25 +470,17 @@ export function BuyerHome() {
         <div className="px-6 pt-16 pb-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setLocation("/buyer-home")}
-                className="flex-shrink-0"
-                data-testid="button-logo"
-              >
-                <img 
-                  src={lucentLogo} 
-                  alt="Lucent Ag Logo" 
-                  className="h-12 w-auto object-contain"
-                />
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Hello {userLastName}!</h1>
-                <p className="text-gray-600 text-sm">
-                  Ready for something fresh today?
-                </p>
-              </div>
-            </div>
+            <button
+              onClick={() => setLocation("/buyer-home")}
+              className="flex-shrink-0"
+              data-testid="button-logo"
+            >
+              <img 
+                src={lucentLogo} 
+                alt="Lucent Ag Logo" 
+                className="h-12 w-auto object-contain"
+              />
+            </button>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleProfileClick}
@@ -535,6 +527,14 @@ export function BuyerHome() {
                 </AlertDialogContent>
               </AlertDialog>
             </div>
+          </div>
+
+          {/* Greeting Section */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">Hello {userLastName}!</h1>
+            <p className="text-gray-600 text-sm">
+              Ready for something fresh today?
+            </p>
           </div>
 
           {/* Search Bar */}
