@@ -1,16 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Menu, X, Settings, Package, Users, LogOut } from "lucide-react";
-import { Link, useLocation } from "wouter";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Menu, X, Settings, Package, Users } from "lucide-react";
+import { Link } from "wouter";
 
 interface HamburgerMenuProps {
   userType?: "buyer" | "farmer";
@@ -18,8 +8,6 @@ interface HamburgerMenuProps {
 
 export function HamburgerMenu({ userType = "buyer" }: HamburgerMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
-  const [, setLocation] = useLocation();
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -46,20 +34,6 @@ export function HamburgerMenu({ userType = "buyer" }: HamburgerMenuProps) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
-
-  const handleLogout = () => {
-    try {
-      // Clear session storage and localStorage
-      sessionStorage.clear();
-      localStorage.clear();
-      
-      // Navigate to logged out page
-      setLocation("/logged-out");
-    } catch (error) {
-      console.error("Error during logout:", error);
-      setLocation("/logged-out");
-    }
-  };
 
   const menuItems = userType === "buyer" ? [
     {
@@ -144,48 +118,10 @@ export function HamburgerMenu({ userType = "buyer" }: HamburgerMenuProps) {
                   </div>
                 </Link>
               ))}
-
-              {/* Separator */}
-              <div className="my-2 border-t border-gray-200 dark:border-gray-600"></div>
-
-              {/* Logout Button */}
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  setIsLogoutDialogOpen(true);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-600 dark:text-red-400"
-                data-testid="menu-logout"
-              >
-                <LogOut className="w-5 h-5" />
-                <span className="font-medium">Logout</span>
-              </button>
             </div>
           </div>
         )}
       </div>
-
-      {/* Logout Confirmation Dialog */}
-      <AlertDialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Logout Confirmation</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to logout? You'll need to sign in again to access your account.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel data-testid="logout-cancel">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-700"
-              data-testid="logout-confirm"
-            >
-              Logout
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Search, ShoppingCart, User, LogOut } from "lucide-react";
+import { Search, ShoppingCart, User, LogOut, Settings, Package, Users, Home } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
@@ -467,7 +467,7 @@ export function BuyerHome() {
     <div className="min-h-screen bg-gray-50">
       {/* Mobile Layout */}
       <div className="block md:hidden">
-        <div className="px-6 pt-16 pb-8">
+        <div className="px-6 pt-16 pb-24">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <button
@@ -501,7 +501,6 @@ export function BuyerHome() {
                   </span>
                 )}
               </button>
-              <HamburgerMenu userType="buyer" />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button
@@ -801,6 +800,47 @@ export function BuyerHome() {
           </div>
             </>
           )}
+        </div>
+
+        {/* Mobile Bottom Navigation Tray */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+          <div className="grid grid-cols-4 h-20">
+            <button
+              onClick={() => setLocation("/buyer-home")}
+              className="flex flex-col items-center justify-center gap-1 text-green-600 font-medium"
+              data-testid="nav-home"
+            >
+              <Home className="w-6 h-6" />
+              <span className="text-xs">Home</span>
+            </button>
+            
+            <button
+              onClick={() => setLocation("/buyer-profile")}
+              className="flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-green-600 transition-colors"
+              data-testid="nav-settings"
+            >
+              <Settings className="w-6 h-6" />
+              <span className="text-xs">Settings</span>
+            </button>
+            
+            <button
+              onClick={() => setLocation("/buyer-orders")}
+              className="flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-green-600 transition-colors"
+              data-testid="nav-orders"
+            >
+              <Package className="w-6 h-6" />
+              <span className="text-xs">My Orders</span>
+            </button>
+            
+            <button
+              onClick={() => setLocation("/communities")}
+              className="flex flex-col items-center justify-center gap-1 text-gray-600 hover:text-green-600 transition-colors"
+              data-testid="nav-communities"
+            >
+              <Users className="w-6 h-6" />
+              <span className="text-xs">Communities</span>
+            </button>
+          </div>
         </div>
       </div>
 
