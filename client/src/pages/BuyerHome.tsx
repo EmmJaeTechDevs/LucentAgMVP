@@ -21,7 +21,7 @@ import { ProductDetailsModal } from "@/components/ProductDetailsModal";
 import { HarvestingSoonModal } from "@/components/HarvestingSoonModal";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { BaseUrl } from "../../../Baseconfig";
-import leafLogo from "@assets/entypo_leaf_1756517515112.png";
+import lucentLogo from "@assets/image 20_1759571692580.png";
 
 export function BuyerHome() {
   const [, setLocation] = useLocation();
@@ -477,9 +477,9 @@ export function BuyerHome() {
                 data-testid="button-logo"
               >
                 <img 
-                  src={leafLogo} 
-                  alt="Logo" 
-                  className="w-10 h-10 object-contain"
+                  src={lucentLogo} 
+                  alt="Lucent Ag Logo" 
+                  className="h-12 w-auto object-contain"
                 />
               </button>
               <div>
@@ -816,9 +816,9 @@ export function BuyerHome() {
                 data-testid="button-logo-desktop"
               >
                 <img 
-                  src={leafLogo} 
-                  alt="Logo" 
-                  className="w-14 h-14 object-contain"
+                  src={lucentLogo} 
+                  alt="Lucent Ag Logo" 
+                  className="h-16 w-auto object-contain"
                 />
               </button>
               <div>
