@@ -241,7 +241,7 @@ export function CheckOrders() {
 
   const orders = orderResponse?.orders || [];
   const filteredOrders = activeTab === "closed" 
-    ? orders.filter(order => order.status === "delivered" || order.status === "cancelled")
+    ? orders.filter(order => order.status === "cancelled")
     : orders.filter(order => order.status === activeTab);
   
   const orderCounts = {
@@ -249,12 +249,13 @@ export function CheckOrders() {
     confirmed: orders.filter(o => o.status === "confirmed").length,
     delivered: orders.filter(o => o.status === "delivered").length,
     cancelled: orders.filter(o => o.status === "cancelled").length,
-    closed: orders.filter(o => o.status === "delivered" || o.status === "cancelled").length,
+    closed: orders.filter(o => o.status === "cancelled").length,
   };
 
   const filterTabs = [
     { key: "pending" as const, label: "Pending", count: orderCounts.pending },
     { key: "confirmed" as const, label: "Confirmed", count: orderCounts.confirmed },
+    { key: "delivered" as const, label: "Delivered", count: orderCounts.delivered },
     { key: "closed" as const, label: "Closed", count: orderCounts.closed },
   ];
 
