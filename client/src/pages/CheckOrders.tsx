@@ -72,7 +72,7 @@ interface FarmerOrder {
 
 export function CheckOrders() {
   const [, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState<"pending" | "confirmed" | "delivered" | "cancelled">("pending");
+  const [activeTab, setActiveTab] = useState<"pending" | "confirmed" | "delivered" | "cancelled" | "closed">("pending");
   const [orderResponse, setOrderResponse] = useState<FarmerOrderResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -240,20 +240,22 @@ export function CheckOrders() {
   };
 
   const orders = orderResponse?.orders || [];
-  const filteredOrders = orders.filter(order => order.status === activeTab);
+  const filteredOrders = activeTab === "closed" 
+    ? orders.filter(order => order.status === "delivered" || order.status === "cancelled")
+    : orders.filter(order => order.status === activeTab);
   
   const orderCounts = {
     pending: orders.filter(o => o.status === "pending").length,
     confirmed: orders.filter(o => o.status === "confirmed").length,
     delivered: orders.filter(o => o.status === "delivered").length,
     cancelled: orders.filter(o => o.status === "cancelled").length,
+    closed: orders.filter(o => o.status === "delivered" || o.status === "cancelled").length,
   };
 
   const filterTabs = [
     { key: "pending" as const, label: "Pending", count: orderCounts.pending },
     { key: "confirmed" as const, label: "Confirmed", count: orderCounts.confirmed },
-    { key: "delivered" as const, label: "Delivered", count: orderCounts.delivered },
-    { key: "cancelled" as const, label: "Cancelled", count: orderCounts.cancelled },
+    { key: "closed" as const, label: "Closed", count: orderCounts.closed },
   ];
 
   return (
