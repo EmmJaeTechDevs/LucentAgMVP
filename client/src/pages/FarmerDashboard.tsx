@@ -27,6 +27,7 @@ import {
   LogOut,
   Home
 } from "lucide-react";
+import lucentLogo from "@assets/image 20_1759571692580.png";
 
 export function FarmerDashboard() {
   const [, setLocation] = useLocation();
@@ -107,6 +108,19 @@ export function FarmerDashboard() {
       {/* Mobile Layout */}
       <div className="block md:hidden flex-1 px-6 pt-16 pb-24">
         <div className="max-w-sm mx-auto">
+          {/* Logo */}
+          <button
+            onClick={() => setLocation("/farmer-dashboard")}
+            className="mb-6"
+            data-testid="button-logo-mobile"
+          >
+            <img 
+              src={lucentLogo} 
+              alt="Lucent Ag Logo" 
+              className="h-12 w-auto object-contain"
+            />
+          </button>
+          
           {/* Greeting */}
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             {getGreeting()}, {userName}!
@@ -307,6 +321,19 @@ export function FarmerDashboard() {
       {/* Desktop Layout */}
       <div className="hidden md:flex min-h-screen p-8">
         <div className="w-full max-w-4xl mx-auto">
+          {/* Logo */}
+          <button
+            onClick={() => setLocation("/farmer-dashboard")}
+            className="mb-8"
+            data-testid="button-logo-desktop"
+          >
+            <img 
+              src={lucentLogo} 
+              alt="Lucent Ag Logo" 
+              className="h-16 w-auto object-contain"
+            />
+          </button>
+          
           {/* Header */}
           <div className="mb-12">
             <h1 className="text-5xl font-bold text-gray-900 mb-4">
