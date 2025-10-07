@@ -294,135 +294,51 @@ export function BuyerOrders() {
 
         {/* Mobile Orders List */}
         {!isLoading && !error && filteredOrders.length > 0 && (
-          <div className="space-y-6 md:hidden">
-            {filteredOrders.map((order) => (
-              <div
-                key={order.id}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
-                data-testid={`order-${order.id}`}
-              >
-                {/* Order Header with Crop Image */}
-                <div className="p-4">
-                  <div className="flex gap-4 mb-4">
-                    <div className="relative">
-                      <img
-                        src={order.crop.plant.imageUrl}
-                        alt={order.crop.plant.name}
-                        className="w-16 h-16 object-cover rounded-lg"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=400&auto=format&fit=crop';
-                        }}
-                      />
-                      <div className={`absolute -top-1 -right-1 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                        {getStatusIcon(order.status)}
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                      </div>
-                    </div>
-                    
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 mb-1">
-                        {order.crop.plant.name}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-1">
-                        <User className="w-4 h-4" />
-                        <span>{order.farmer.firstName} {order.farmer.lastName}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>{formatDate(order.orderDate)}</span>
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-500">
-                        Order #{order.id.slice(0, 8)}...
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Order Details Grid */}
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-400">Quantity:</span>
-                        <span className="text-gray-900 dark:text-gray-100 font-medium">
-                          {order.quantityOrdered} {order.crop.unit}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-400">Price per unit:</span>
-                        <span className="text-gray-900 dark:text-gray-100 font-medium">
-                          ₦{order.pricePerUnit.toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
-                        <span className="text-gray-900 dark:text-gray-100 font-medium">
-                          ₦{order.subtotal.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-400">Delivery:</span>
-                        <span className="text-gray-900 dark:text-gray-100 font-medium">
-                          {order.deliveryFee === 0 ? 'Free' : `₦${order.deliveryFee.toLocaleString()}`}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Total */}
-                  <div className="flex justify-between items-center py-2 border-t border-gray-200 dark:border-gray-700">
-                    <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">Total:</span>
-                    <span className="text-lg font-bold text-green-600 dark:text-green-400">
-                      ₦{order.total.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Delivery Information */}
-                <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-3">
-                  <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    Delivery Information
-                  </h4>
-                  <div className="space-y-1 text-sm">
-                    <p className="text-gray-900 dark:text-gray-100">
-                      {order.deliveryAddress}
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      {order.deliveryLga}, {order.deliveryState}
-                    </p>
-                    {order.deliveryNote && (
-                      <div className="flex items-start gap-2 mt-2">
-                        <Phone className="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5" />
-                        <p className="text-gray-600 dark:text-gray-400">
-                          Note: {order.deliveryNote}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Farm Information */}
-                <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-                  <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
-                    Farm Details
-                  </h4>
-                  <div className="text-sm space-y-1">
-                    <p className="text-gray-600 dark:text-gray-400">
-                      <strong>Location:</strong> {order.crop.state}, {order.crop.lga}
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      <strong>Description:</strong> {order.crop.description}
-                    </p>
-                    {order.deliveredAt && (
-                      <p className="text-green-600 dark:text-green-400">
-                        <strong>Delivered:</strong> {formatDate(order.deliveredAt)}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="md:hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                    <th className="text-left py-3 px-3 text-gray-600 dark:text-gray-400 font-semibold text-xs">Date</th>
+                    <th className="text-left py-3 px-3 text-gray-600 dark:text-gray-400 font-semibold text-xs">Crop Name</th>
+                    <th className="text-right py-3 px-3 text-gray-600 dark:text-gray-400 font-semibold text-xs">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredOrders.map((order) => (
+                    <tr
+                      key={order.id}
+                      onClick={() => handleOrderClick(order.id)}
+                      className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                      data-testid={`order-${order.id}`}
+                    >
+                      <td className="py-3 px-3 text-gray-900 dark:text-gray-100 text-sm">
+                        {new Date(order.orderDate).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric"
+                        })}
+                      </td>
+                      <td className="py-3 px-3">
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={order.crop.plant.imageUrl}
+                            alt={order.crop.plant.name}
+                            className="w-8 h-8 object-cover rounded-lg"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=400&auto=format&fit=crop';
+                            }}
+                          />
+                          <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">{order.crop.plant.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-3 text-right font-bold text-green-600 dark:text-green-400 text-sm">
+                        ₦{order.total.toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
