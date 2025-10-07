@@ -118,7 +118,7 @@ export function FarmerDashboard() {
               <img 
                 src={lucentLogo} 
                 alt="Lucent Ag Logo" 
-                className="h-12 w-auto object-contain"
+                className="h-20 w-auto object-contain"
               />
             </button>
             
@@ -333,7 +333,7 @@ export function FarmerDashboard() {
                 <img 
                   src={lucentLogo} 
                   alt="Lucent Ag Logo" 
-                  className="h-16 w-auto object-contain"
+                  className="h-24 w-auto object-contain"
                 />
               </button>
               
