@@ -341,7 +341,7 @@ export function CheckOrders() {
 
           {/* Orders list */}
           {!isLoading && !error && (
-            <div className="space-y-4">
+            <div>
               {filteredOrders.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -352,63 +352,52 @@ export function CheckOrders() {
                   </p>
                 </div>
               ) : (
-                filteredOrders.map((order) => (
-                  <button
-                    key={order.id}
-                    onClick={() => handleOrderClick(order.id)}
-                    className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all text-left"
-                    data-testid={`order-${order.id}`}
-                  >
-                    <div className="space-y-3">
-                      {/* Order Header */}
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 mb-1">
-                            {order.crop.plant.name}
-                          </h3>
-                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                            <User className="w-4 h-4" />
-                            <span>{order.buyer.firstName} {order.buyer.lastName}</span>
-                          </div>
-                        </div>
-                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </div>
-                      </div>
-
-                      {/* Order Details */}
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-gray-600 dark:text-gray-400">Quantity:</span>
-                          <p className="font-medium text-gray-900 dark:text-gray-100">
-                            {order.quantityOrdered} {order.crop.unit}
-                          </p>
-                        </div>
-                        <div>
-                          <span className="text-gray-600 dark:text-gray-400">Total:</span>
-                          <p className="font-medium text-green-600 dark:text-green-400">
-                            ₦{order.total.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Delivery Info */}
-                      <div className="flex items-start gap-2 text-sm">
-                        <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5" />
-                        <div className="flex-1">
-                          <p className="text-gray-900 dark:text-gray-100">{order.deliveryAddress}</p>
-                          <p className="text-gray-600 dark:text-gray-400">{order.deliveryLga}, {order.deliveryState}</p>
-                        </div>
-                      </div>
-
-                      {/* Order Date */}
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <Calendar className="w-4 h-4" />
-                        <span>Ordered {formatDate(order.orderDate)}</span>
-                      </div>
-                    </div>
-                  </button>
-                ))
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                          <th className="text-left py-3 px-3 text-gray-600 dark:text-gray-400 font-semibold text-xs">Date</th>
+                          <th className="text-left py-3 px-3 text-gray-600 dark:text-gray-400 font-semibold text-xs">Crop Name</th>
+                          <th className="text-right py-3 px-3 text-gray-600 dark:text-gray-400 font-semibold text-xs">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredOrders.map((order) => (
+                          <tr
+                            key={order.id}
+                            onClick={() => handleOrderClick(order.id)}
+                            className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                            data-testid={`order-${order.id}`}
+                          >
+                            <td className="py-3 px-3 text-gray-900 dark:text-gray-100 text-sm">
+                              {new Date(order.orderDate).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric"
+                              })}
+                            </td>
+                            <td className="py-3 px-3">
+                              <div className="flex items-center gap-2">
+                                <img
+                                  src={order.crop.plant.imageUrl}
+                                  alt={order.crop.plant.name}
+                                  className="w-8 h-8 object-cover rounded-lg"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=400&auto=format&fit=crop';
+                                  }}
+                                />
+                                <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">{order.crop.plant.name}</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 text-right font-bold text-green-600 dark:text-green-400 text-sm">
+                              ₦{order.total.toLocaleString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               )}
             </div>
           )}
