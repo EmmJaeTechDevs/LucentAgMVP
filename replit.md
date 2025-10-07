@@ -8,6 +8,16 @@ This is a full-stack web application built with React (Vite) frontend and Expres
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### October 7, 2025
+- **Step-by-Step Onboarding Questionnaire**: Implemented a step-by-step questionnaire during farmer registration for crop preferences
+  - Questions appear one at a time with progress indicator
+  - Next button navigates between questions
+  - Skip button appears after answering 3 questions
+  - Skip shows popup notification that preferences can be completed in Settings
+  - Seamless navigation to farmer dashboard after skip or completion
+
 ## System Architecture
 
 ### Frontend Architecture
