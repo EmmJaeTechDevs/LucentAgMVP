@@ -1,10 +1,19 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Leaf, Check } from "lucide-react";
+import { Leaf, Check, ChevronRight, SkipForward } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 import { BaseUrl } from "../../../Baseconfig";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface QuestionOption {
   label: string;
@@ -55,6 +64,12 @@ interface BulkAnswersResponse {
   results: SubmissionResult[];
 }
 
+// Extended question interface to include plant context
+interface QuestionWithContext extends Question {
+  plantId: string;
+  plantName: string;
+}
+
 export function CropProcessing() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -67,6 +82,12 @@ export function CropProcessing() {
   const [customAnswers, setCustomAnswers] = useState<{
     [plantId: string]: { [questionId: string]: string };
   }>({});
+  
+  // Step-by-step questionnaire states
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answeredQuestionsCount, setAnsweredQuestionsCount] = useState(0);
+  const [showSkipDialog, setShowSkipDialog] = useState(false);
+  const [allQuestions, setAllQuestions] = useState<QuestionWithContext[]>([]);
 
   // Load questions data from sessionStorage on component mount
   useEffect(() => {
@@ -95,6 +116,21 @@ export function CropProcessing() {
             });
 
             setPlantQuestions(parsedData.questions);
+            
+            // Flatten all questions from all plants into a single array with plant context
+            const flattenedQuestions: QuestionWithContext[] = [];
+            parsedData.questions.forEach((plant) => {
+              plant.questions.forEach((question) => {
+                flattenedQuestions.push({
+                  ...question,
+                  plantId: plant.plantId,
+                  plantName: plant.plantName
+                });
+              });
+            });
+            
+            console.log(`📋 Total questions flattened: ${flattenedQuestions.length}`);
+            setAllQuestions(flattenedQuestions);
           } else {
             console.error("❌ Invalid questions data structure:", parsedData);
             setPlantQuestions([]);
@@ -128,7 +164,10 @@ export function CropProcessing() {
       answer,
     );
 
-    // Update crop-specific answers only (removed global userAnswers)
+    const wasAnswered = !!cropAnswers[plantId]?.[questionId];
+    const isNowAnswered = Array.isArray(answer) ? answer.length > 0 : !!answer;
+
+    // Update crop-specific answers only
     setCropAnswers((prev) => ({
       ...prev,
       [plantId]: {
@@ -136,6 +175,43 @@ export function CropProcessing() {
         [questionId]: answer,
       },
     }));
+
+    // Update answered count
+    if (!wasAnswered && isNowAnswered) {
+      setAnsweredQuestionsCount(prev => prev + 1);
+    } else if (wasAnswered && !isNowAnswered) {
+      setAnsweredQuestionsCount(prev => Math.max(0, prev - 1));
+    }
+  };
+  
+  // Handle Next button - move to next question
+  const handleNext = () => {
+    if (currentQuestionIndex < allQuestions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    } else {
+      // Last question - save answers and go to dashboard
+      handleSave();
+    }
+  };
+  
+  // Handle Skip button - show dialog then go to dashboard
+  const handleSkip = () => {
+    setShowSkipDialog(true);
+  };
+  
+  // Navigate to dashboard after skip confirmation
+  const proceedToDashboard = () => {
+    setShowSkipDialog(false);
+    
+    toast({
+      title: "You can complete your preferences anytime!",
+      description: "Visit Settings to finish answering crop questions.",
+    });
+    
+    // Navigate to dashboard
+    setTimeout(() => {
+      setLocation("/farmer-dashboard");
+    }, 500);
   };
 
   const handleCheckboxChange = (
@@ -370,7 +446,7 @@ export function CropProcessing() {
     );
   }
 
-  if (plantQuestions.length === 0) {
+  if (plantQuestions.length === 0 || allQuestions.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -394,517 +470,259 @@ export function CropProcessing() {
     );
   }
 
+  // Get current question
+  const currentQuestion = allQuestions[currentQuestionIndex];
+  const isLastQuestion = currentQuestionIndex === allQuestions.length - 1;
+  const canShowSkip = answeredQuestionsCount >= 3;
+
+  // Helper function to render question input based on type
+  const renderQuestionInput = (question: QuestionWithContext) => {
+    const plantId = question.plantId;
+    const questionId = question.id;
+
+    switch (question.questionType) {
+      case "text":
+        return (
+          <input
+            type="text"
+            value={(cropAnswers[plantId]?.[questionId] as string) || ""}
+            onChange={(e) => handleAnswerChange(plantId, questionId, e.target.value)}
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-base"
+            placeholder="Enter your answer..."
+            data-testid={`input-${questionId}`}
+          />
+        );
+
+      case "boolean":
+        return (
+          <div className="flex gap-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="radio"
+                name={`${plantId}-${questionId}`}
+                value="yes"
+                checked={cropAnswers[plantId]?.[questionId] === "yes"}
+                onChange={(e) => handleAnswerChange(plantId, questionId, e.target.value)}
+                className="w-5 h-5 text-green-600 focus:ring-green-500"
+                data-testid={`radio-${questionId}-yes`}
+              />
+              <span className="text-base text-gray-700">Yes</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="radio"
+                name={`${plantId}-${questionId}`}
+                value="no"
+                checked={cropAnswers[plantId]?.[questionId] === "no"}
+                onChange={(e) => handleAnswerChange(plantId, questionId, e.target.value)}
+                className="w-5 h-5 text-green-600 focus:ring-green-500"
+                data-testid={`radio-${questionId}-no`}
+              />
+              <span className="text-base text-gray-700">No</span>
+            </label>
+          </div>
+        );
+
+      case "number":
+        return (
+          <input
+            type="number"
+            value={(cropAnswers[plantId]?.[questionId] as string) || ""}
+            onChange={(e) => handleAnswerChange(plantId, questionId, e.target.value)}
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-base"
+            placeholder="Enter a number..."
+            data-testid={`number-${questionId}`}
+          />
+        );
+
+      case "textarea":
+        return (
+          <textarea
+            value={(cropAnswers[plantId]?.[questionId] as string) || ""}
+            onChange={(e) => handleAnswerChange(plantId, questionId, e.target.value)}
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-base"
+            rows={4}
+            placeholder="Enter your detailed answer..."
+            data-testid={`textarea-${questionId}`}
+          />
+        );
+
+      case "checkbox":
+      case "multiple_choice":
+        if (!question.options) return null;
+        return (
+          <div className="space-y-3">
+            <div className="text-sm font-medium text-gray-700 mb-3">
+              Select all that apply:
+            </div>
+            {question.options.map((option) => {
+              const selectedOptions = (cropAnswers[plantId]?.[questionId] as string[]) || [];
+              const isChecked = selectedOptions.includes(option.value);
+
+              return (
+                <label key={option.value} className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={(e) => handleCheckboxChange(plantId, questionId, option.value, e.target.checked)}
+                    className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
+                    data-testid={`checkbox-${questionId}-${option.value}`}
+                  />
+                  <span className="text-base text-gray-900">{option.label}</span>
+                </label>
+              );
+            })}
+            {(cropAnswers[plantId]?.[questionId] as string[])?.includes("Other") && (
+              <input
+                type="text"
+                value={customAnswers[plantId]?.[questionId] || ""}
+                onChange={(e) => handleCustomAnswerChange(plantId, questionId, e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-base"
+                placeholder="Please specify..."
+                data-testid={`custom-${questionId}`}
+              />
+            )}
+          </div>
+        );
+
+      case "radio":
+        if (!question.options) return null;
+        return (
+          <div className="space-y-3">
+            {question.options.map((option) => (
+              <label key={option.value} className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name={`${plantId}-${questionId}`}
+                  value={option.value}
+                  checked={cropAnswers[plantId]?.[questionId] === option.value}
+                  onChange={() => handleRadioChange(plantId, questionId, option.value)}
+                  className="w-5 h-5 text-green-600 focus:ring-green-500"
+                  data-testid={`radio-${questionId}-${option.value}`}
+                />
+                <span className="text-base text-gray-900">{option.label}</span>
+              </label>
+            ))}
+            {cropAnswers[plantId]?.[questionId] === "Other" && (
+              <input
+                type="text"
+                value={customAnswers[plantId]?.[questionId] || ""}
+                onChange={(e) => handleCustomAnswerChange(plantId, questionId, e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-base"
+                placeholder="Please specify..."
+                data-testid={`custom-${questionId}`}
+              />
+            )}
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Mobile Layout */}
-      <div className="block md:hidden flex-1 px-6 pt-20 pb-8">
-        <div className="max-w-sm mx-auto">
-          {/* Plant icon */}
-          <div className="mb-8 text-center">
-            <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-              <Leaf className="w-8 h-8 text-green-600" />
-            </div>
+      {/* Progress indicator */}
+      <div className="bg-white border-b border-gray-200 py-4 px-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-600">
+              Question {currentQuestionIndex + 1} of {allQuestions.length}
+            </span>
+            <span className="text-sm font-medium text-green-600">
+              {answeredQuestionsCount} answered
+            </span>
           </div>
-
-          <h1 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-            Tell us about your crops
-          </h1>
-
-          <p className="text-gray-600 text-base leading-relaxed mb-8 text-center">
-            Answer a few questions about your selected crops to help us serve
-            you better.
-          </p>
-
-          {/* Questions sections for each plant */}
-          <div className="space-y-8 mb-8">
-            {plantQuestions.map((plant) => (
-              <div key={plant.plantId} className="space-y-4">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Questions for {plant.plantName}
-                </h2>
-
-                <div className="space-y-4">
-                  {plant.questions.map((question) => (
-                    <div
-                      key={question.id}
-                      className="space-y-2"
-                      data-testid={`question-${question.id}`}
-                    >
-                      <label className="block">
-                        <span className="text-sm font-medium text-gray-900">
-                          {question.question}
-                          {question.isRequired && (
-                            <span className="text-red-500 ml-1">*</span>
-                          )}
-                        </span>
-                        <span className="text-xs text-gray-500 block mt-1">
-                          Category: {question.category} | Type:{" "}
-                          {question.questionType}
-                        </span>
-
-                        {question.questionType === "text" && (
-                          <input
-                            type="text"
-                            value={(cropAnswers[plant.plantId]?.[question.id] as string) || ""}
-                            onChange={(e) =>
-                              handleAnswerChange(
-                                plant.plantId,
-                                question.id,
-                                e.target.value,
-                              )
-                            }
-                            className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            placeholder="Enter your answer..."
-                            data-testid={`input-${question.id}`}
-                          />
-                        )}
-
-                        {question.questionType === "boolean" && (
-                          <div className="mt-2 flex gap-4">
-                            <label className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                name={`${plant.plantId}-${question.id}`}
-                                value="yes"
-                                checked={cropAnswers[plant.plantId]?.[question.id] === "yes"}
-                                onChange={(e) =>
-                                  handleAnswerChange(
-                                    plant.plantId,
-                                    question.id,
-                                    e.target.value,
-                                  )
-                                }
-                                className="text-green-600 focus:ring-green-500"
-                                data-testid={`radio-${question.id}-yes`}
-                              />
-                              <span className="text-sm text-gray-700">Yes</span>
-                            </label>
-                            <label className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                name={`${plant.plantId}-${question.id}`}
-                                value="no"
-                                checked={cropAnswers[plant.plantId]?.[question.id] === "no"}
-                                onChange={(e) =>
-                                  handleAnswerChange(
-                                    plant.plantId,
-                                    question.id,
-                                    e.target.value,
-                                  )
-                                }
-                                className="text-green-600 focus:ring-green-500"
-                                data-testid={`radio-${question.id}-no`}
-                              />
-                              <span className="text-sm text-gray-700">No</span>
-                            </label>
-                          </div>
-                        )}
-
-                        {question.questionType === "number" && (
-                          <input
-                            type="number"
-                            value={(cropAnswers[plant.plantId]?.[question.id] as string) || ""}
-                            onChange={(e) =>
-                              handleAnswerChange(
-                                plant.plantId,
-                                question.id,
-                                e.target.value,
-                              )
-                            }
-                            className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            placeholder="Enter a number..."
-                            data-testid={`number-${question.id}`}
-                          />
-                        )}
-
-                        {question.questionType === "textarea" && (
-                          <textarea
-                            value={(cropAnswers[plant.plantId]?.[question.id] as string) || ""}
-                            onChange={(e) =>
-                              handleAnswerChange(
-                                plant.plantId,
-                                question.id,
-                                e.target.value,
-                              )
-                            }
-                            className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            rows={3}
-                            placeholder="Enter your detailed answer..."
-                            data-testid={`textarea-${question.id}`}
-                          />
-                        )}
-
-                        {question.questionType === "checkbox" &&
-                          question.options && (
-                            <div className="mt-3 space-y-2">
-                              <div className="text-sm font-medium text-gray-700 mb-2">
-                                Select all that apply:
-                              </div>
-                              {question.options.map((option) => {
-                                const selectedOptions =
-                                  (cropAnswers[plant.plantId]?.[question.id] as string[]) || [];
-                                const isChecked = selectedOptions.includes(
-                                  option.value,
-                                );
-
-                                return (
-                                  <label
-                                    key={option.value}
-                                    className="flex items-center gap-3 cursor-pointer"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={isChecked}
-                                      onChange={(e) =>
-                                        handleCheckboxChange(
-                                          plant.plantId,
-                                          question.id,
-                                          option.value,
-                                          e.target.checked,
-                                        )
-                                      }
-                                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
-                                      data-testid={`checkbox-${question.id}-${option.value}`}
-                                    />
-                                    <span className="text-sm text-gray-900">
-                                      {option.label}
-                                    </span>
-                                  </label>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                        {question.questionType === "multiple_choice" &&
-                          question.options && (
-                            <div className="mt-3 space-y-2">
-                              <div className="text-sm font-medium text-gray-700 mb-2">
-                                Select all that apply:
-                              </div>
-                              {question.options.map((option) => {
-                                const selectedOptions =
-                                  (cropAnswers[plant.plantId]?.[question.id] as string[]) || [];
-                                const isChecked = selectedOptions.includes(
-                                  option.value,
-                                );
-
-                                return (
-                                  <label
-                                    key={option.value}
-                                    className="flex items-center gap-3 cursor-pointer"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={isChecked}
-                                      onChange={(e) =>
-                                        handleCheckboxChange(
-                                          plant.plantId,
-                                          question.id,
-                                          option.value,
-                                          e.target.checked,
-                                        )
-                                      }
-                                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
-                                      data-testid={`checkbox-${question.id}-${option.value}`}
-                                    />
-                                    <span className="text-sm text-gray-900">
-                                      {option.label}
-                                    </span>
-                                  </label>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                        {/* Custom Answer Field */}
-                        <div className="mt-4">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Additional Comments (Optional)
-                          </label>
-                          <textarea
-                            value={customAnswers[plant.plantId]?.[question.id] || ""}
-                            onChange={(e) => handleCustomAnswerChange(plant.plantId, question.id, e.target.value)}
-                            placeholder="Add any additional details or comments..."
-                            rows={2}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none text-sm"
-                            data-testid={`custom-answer-${question.id}`}
-                          />
-                        </div>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-green-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${((currentQuestionIndex + 1) / allQuestions.length) * 100}%` }}
+            ></div>
           </div>
-
-          {/* Save button */}
-          <Button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            data-testid="button-save"
-          >
-            {isSaving ? "Submitting Answers..." : "Save Answers"}
-          </Button>
         </div>
       </div>
 
-      {/* Desktop Layout */}
-      <div className="hidden md:flex min-h-screen items-center justify-center p-8">
-        <div className="bg-white rounded-3xl shadow-xl p-12 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-          {/* Plant icon */}
-          <div className="mb-10 text-center">
-            <div className="w-20 h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-              <Leaf className="w-10 h-10 text-green-600" />
+      {/* Main Content */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="max-w-2xl w-full">
+          {/* Plant name badge */}
+          <div className="mb-6 text-center">
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+              <Leaf className="w-4 h-4" />
+              {currentQuestion.plantName}
+            </span>
+          </div>
+
+          {/* Question */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {currentQuestion.question}
+              {currentQuestion.isRequired && (
+                <span className="text-red-500 ml-1">*</span>
+              )}
+            </h2>
+            <p className="text-sm text-gray-500 mb-6">
+              Category: {currentQuestion.category}
+            </p>
+
+            {/* Question input */}
+            <div className="mt-6">
+              {renderQuestionInput(currentQuestion)}
             </div>
           </div>
 
-          <h1 className="text-4xl font-bold text-gray-900 mb-6 text-center">
-            Tell us about your crops
-          </h1>
-
-          <p className="text-gray-600 text-lg leading-relaxed mb-12 text-center max-w-md mx-auto">
-            Answer a few questions about your selected crops to help us serve
-            you better.
-          </p>
-
-          {/* Questions sections for each plant */}
-          <div className="space-y-12 mb-12">
-            {plantQuestions.map((plant) => (
-              <div key={plant.plantId} className="space-y-6">
-                <h2 className="text-2xl font-semibold text-gray-900 border-b border-gray-200 pb-3">
-                  Questions for {plant.plantName}
-                </h2>
-
-                <div className="space-y-6">
-                  {plant.questions.map((question) => (
-                    <div
-                      key={question.id}
-                      className="space-y-3 p-4 bg-gray-50 rounded-lg"
-                      data-testid={`question-${question.id}-desktop`}
-                    >
-                      <label className="block">
-                        <span className="text-lg font-medium text-gray-900">
-                          {question.question}
-                          {question.isRequired && (
-                            <span className="text-red-500 ml-1">*</span>
-                          )}
-                        </span>
-                        <span className="text-sm text-gray-500 block mt-1">
-                          Category: {question.category} | Type:{" "}
-                          {question.questionType}
-                        </span>
-
-                        {question.questionType === "text" && (
-                          <input
-                            type="text"
-                            value={(cropAnswers[plant.plantId]?.[question.id] as string) || ""}
-                            onChange={(e) =>
-                              handleAnswerChange(
-                                plant.plantId,
-                                question.id,
-                                e.target.value,
-                              )
-                            }
-                            className="mt-3 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
-                            placeholder="Enter your answer..."
-                            data-testid={`input-${question.id}-desktop`}
-                          />
-                        )}
-
-                        {question.questionType === "boolean" && (
-                          <div className="mt-3 flex gap-6">
-                            <label className="flex items-center gap-3">
-                              <input
-                                type="radio"
-                                name={`${plant.plantId}-${question.id}`}
-                                value="yes"
-                                checked={cropAnswers[plant.plantId]?.[question.id] === "yes"}
-                                onChange={(e) =>
-                                  handleAnswerChange(
-                                    plant.plantId,
-                                    question.id,
-                                    e.target.value,
-                                  )
-                                }
-                                className="w-4 h-4 text-green-600 focus:ring-green-500"
-                                data-testid={`radio-${question.id}-yes-desktop`}
-                              />
-                              <span className="text-lg text-gray-700">Yes</span>
-                            </label>
-                            <label className="flex items-center gap-3">
-                              <input
-                                type="radio"
-                                name={`${plant.plantId}-${question.id}`}
-                                value="no"
-                                checked={cropAnswers[plant.plantId]?.[question.id] === "no"}
-                                onChange={(e) =>
-                                  handleAnswerChange(
-                                    plant.plantId,
-                                    question.id,
-                                    e.target.value,
-                                  )
-                                }
-                                className="w-4 h-4 text-green-600 focus:ring-green-500"
-                                data-testid={`radio-${question.id}-no-desktop`}
-                              />
-                              <span className="text-lg text-gray-700">No</span>
-                            </label>
-                          </div>
-                        )}
-
-                        {question.questionType === "number" && (
-                          <input
-                            type="number"
-                            value={(cropAnswers[plant.plantId]?.[question.id] as string) || ""}
-                            onChange={(e) =>
-                              handleAnswerChange(
-                                plant.plantId,
-                                question.id,
-                                e.target.value,
-                              )
-                            }
-                            className="mt-3 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
-                            placeholder="Enter a number..."
-                            data-testid={`number-${question.id}-desktop`}
-                          />
-                        )}
-
-                        {question.questionType === "textarea" && (
-                          <textarea
-                            value={(cropAnswers[plant.plantId]?.[question.id] as string) || ""}
-                            onChange={(e) =>
-                              handleAnswerChange(
-                                plant.plantId,
-                                question.id,
-                                e.target.value,
-                              )
-                            }
-                            className="mt-3 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
-                            rows={4}
-                            placeholder="Enter your detailed answer..."
-                            data-testid={`textarea-${question.id}-desktop`}
-                          />
-                        )}
-
-                        {question.questionType === "checkbox" &&
-                          question.options && (
-                            <div className="mt-4 space-y-3">
-                              <div className="text-lg font-medium text-gray-700 mb-3">
-                                Select all that apply:
-                              </div>
-                              {question.options.map((option) => {
-                                const selectedOptions =
-                                  (cropAnswers[plant.plantId]?.[question.id] as string[]) || [];
-                                const isChecked = selectedOptions.includes(
-                                  option.value,
-                                );
-
-                                return (
-                                  <label
-                                    key={option.value}
-                                    className="flex items-center gap-4 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={isChecked}
-                                      onChange={(e) =>
-                                        handleCheckboxChange(
-                                          plant.plantId,
-                                          question.id,
-                                          option.value,
-                                          e.target.checked,
-                                        )
-                                      }
-                                      className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
-                                      data-testid={`checkbox-${question.id}-${option.value}-desktop`}
-                                    />
-                                    <span className="text-lg text-gray-900">
-                                      {option.label}
-                                    </span>
-                                  </label>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                        {question.questionType === "multiple_choice" &&
-                          question.options && (
-                            <div className="mt-4 space-y-3">
-                              <div className="text-lg font-medium text-gray-700 mb-3">
-                                Select all that apply:
-                              </div>
-                              {question.options.map((option) => {
-                                const selectedOptions =
-                                  (cropAnswers[plant.plantId]?.[question.id] as string[]) || [];
-                                const isChecked = selectedOptions.includes(
-                                  option.value,
-                                );
-
-                                return (
-                                  <label
-                                    key={option.value}
-                                    className="flex items-center gap-4 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={isChecked}
-                                      onChange={(e) =>
-                                        handleCheckboxChange(
-                                          plant.plantId,
-                                          question.id,
-                                          option.value,
-                                          e.target.checked,
-                                        )
-                                      }
-                                      className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
-                                      data-testid={`checkbox-${question.id}-${option.value}-desktop`}
-                                    />
-                                    <span className="text-lg text-gray-900">
-                                      {option.label}
-                                    </span>
-                                  </label>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                        {/* Custom Answer Field */}
-                        <div className="mt-4">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Additional Comments (Optional)
-                          </label>
-                          <textarea
-                            value={customAnswers[plant.plantId]?.[question.id] || ""}
-                            onChange={(e) => handleCustomAnswerChange(plant.plantId, question.id, e.target.value)}
-                            placeholder="Add any additional details or comments..."
-                            rows={2}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none text-sm"
-                            data-testid={`custom-answer-${question.id}`}
-                          />
-                        </div>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Save button */}
-          <div className="text-center">
+          {/* Navigation buttons */}
+          <div className="flex gap-4 justify-center">
+            {canShowSkip && (
+              <Button
+                onClick={handleSkip}
+                variant="outline"
+                className="px-8 py-6 text-lg font-medium rounded-xl border-2 border-gray-300 hover:bg-gray-50 flex items-center gap-2"
+                data-testid="button-skip"
+              >
+                <SkipForward className="w-5 h-5" />
+                Skip
+              </Button>
+            )}
             <Button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="bg-green-600 hover:bg-green-700 text-white px-16 py-4 text-xl font-medium rounded-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              data-testid="button-save-desktop"
+              onClick={handleNext}
+              className="px-12 py-6 text-lg font-medium rounded-xl bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+              data-testid="button-next"
             >
-              {isSaving ? "Submitting Answers..." : "Save Answers"}
+              {isLastQuestion ? "Finish" : "Next"}
+              <ChevronRight className="w-5 h-5" />
             </Button>
           </div>
         </div>
       </div>
+
+      {/* Skip Dialog */}
+      <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Complete Later in Settings</AlertDialogTitle>
+            <AlertDialogDescription>
+              You can return to answer these crop preference questions anytime from your Settings page. This will help us serve you better!
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowSkipDialog(false)}
+              className="px-6 py-3"
+            >
+              Continue Answering
+            </Button>
+            <AlertDialogAction
+              onClick={proceedToDashboard}
+              className="px-6 py-3 bg-green-600 hover:bg-green-700"
+            >
+              Go to Dashboard
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
