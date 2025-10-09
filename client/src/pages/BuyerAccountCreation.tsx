@@ -55,6 +55,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; phone?: string }>({});
+  const [countries, setCountries] = useState<Array<{ id: number; name: string }>>([]);
   const { toast } = useToast();
 
   // Fetch countries and states from API when component mounts
@@ -64,6 +65,11 @@ export const BuyerAccountCreation = (): JSX.Element => {
         const response = await fetch(`${BaseUrl}/api/locations/countries`);
         const data = await response.json();
         console.log("Buyer Registration - Countries and States Response:", data);
+        
+        // Store countries in state
+        if (data.countries && Array.isArray(data.countries)) {
+          setCountries(data.countries);
+        }
       } catch (error) {
         console.error("Failed to fetch countries and states:", error);
       }
@@ -673,10 +679,14 @@ export const BuyerAccountCreation = (): JSX.Element => {
                     fontSize: "16px",
                   }}
                   required
+                  data-testid="select-country"
                 >
                   <option value="">Select Country</option>
-                  <option value="Nigeria">Nigeria</option>
-                  <option value="Ghana">Ghana</option>
+                  {countries.map((country) => (
+                    <option key={country.id} value={country.name}>
+                      {country.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
