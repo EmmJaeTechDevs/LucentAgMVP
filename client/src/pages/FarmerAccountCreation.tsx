@@ -77,6 +77,12 @@ export const FarmerAccountCreation = (): JSX.Element => {
   const [countries, setCountries] = useState<Array<{ id: number; name: string }>>([]);
   const [homeStates, setHomeStates] = useState<Array<{ id: number; name: string; countryId: number }>>([]);
   const [farmStates, setFarmStates] = useState<Array<{ id: number; name: string; countryId: number }>>([]);
+  const [homeLgas, setHomeLgas] = useState<Array<{ id: number; name: string; stateId: number }>>([]);
+  const [farmLgas, setFarmLgas] = useState<Array<{ id: number; name: string; stateId: number }>>([]);
+  const [loadingHomeStates, setLoadingHomeStates] = useState(false);
+  const [loadingFarmStates, setLoadingFarmStates] = useState(false);
+  const [loadingHomeLgas, setLoadingHomeLgas] = useState(false);
+  const [loadingFarmLgas, setLoadingFarmLgas] = useState(false);
 
   // Fetch countries from API when component mounts
   useEffect(() => {
@@ -103,6 +109,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
     const fetchHomeStates = async () => {
       if (!formData.homeCountry) {
         setHomeStates([]);
+        setHomeLgas([]);
         return;
       }
 
@@ -110,6 +117,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
       const selectedCountry = countries.find(c => c.name === formData.homeCountry);
       if (!selectedCountry) return;
 
+      setLoadingHomeStates(true);
       try {
         const response = await fetch(`${BaseUrl}/api/locations/states/${selectedCountry.id}`);
         const data = await response.json();
@@ -121,6 +129,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
         }
       } catch (error) {
         console.error("Failed to fetch home states:", error);
+      } finally {
+        setLoadingHomeStates(false);
       }
     };
 
@@ -132,6 +142,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
     const fetchFarmStates = async () => {
       if (!formData.farmCountry) {
         setFarmStates([]);
+        setFarmLgas([]);
         return;
       }
 
@@ -139,6 +150,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
       const selectedCountry = countries.find(c => c.name === formData.farmCountry);
       if (!selectedCountry) return;
 
+      setLoadingFarmStates(true);
       try {
         const response = await fetch(`${BaseUrl}/api/locations/states/${selectedCountry.id}`);
         const data = await response.json();
@@ -150,11 +162,77 @@ export const FarmerAccountCreation = (): JSX.Element => {
         }
       } catch (error) {
         console.error("Failed to fetch farm states:", error);
+      } finally {
+        setLoadingFarmStates(false);
       }
     };
 
     fetchFarmStates();
   }, [formData.farmCountry, countries]);
+
+  // Fetch home LGAs when home state is selected
+  useEffect(() => {
+    const fetchHomeLgas = async () => {
+      if (!formData.homeState) {
+        setHomeLgas([]);
+        return;
+      }
+
+      // Find the selected state's ID
+      const selectedState = homeStates.find(s => s.name === formData.homeState);
+      if (!selectedState) return;
+
+      setLoadingHomeLgas(true);
+      try {
+        const response = await fetch(`${BaseUrl}/api/locations/lgas/${selectedState.id}`);
+        const data = await response.json();
+        console.log("Farmer Registration - Home LGAs Response:", data);
+        
+        // Store LGAs in state
+        if (data.lgas && Array.isArray(data.lgas)) {
+          setHomeLgas(data.lgas);
+        }
+      } catch (error) {
+        console.error("Failed to fetch home LGAs:", error);
+      } finally {
+        setLoadingHomeLgas(false);
+      }
+    };
+
+    fetchHomeLgas();
+  }, [formData.homeState, homeStates]);
+
+  // Fetch farm LGAs when farm state is selected
+  useEffect(() => {
+    const fetchFarmLgas = async () => {
+      if (!formData.farmState) {
+        setFarmLgas([]);
+        return;
+      }
+
+      // Find the selected state's ID
+      const selectedState = farmStates.find(s => s.name === formData.farmState);
+      if (!selectedState) return;
+
+      setLoadingFarmLgas(true);
+      try {
+        const response = await fetch(`${BaseUrl}/api/locations/lgas/${selectedState.id}`);
+        const data = await response.json();
+        console.log("Farmer Registration - Farm LGAs Response:", data);
+        
+        // Store LGAs in state
+        if (data.lgas && Array.isArray(data.lgas)) {
+          setFarmLgas(data.lgas);
+        }
+      } catch (error) {
+        console.error("Failed to fetch farm LGAs:", error);
+      } finally {
+        setLoadingFarmLgas(false);
+      }
+    };
+
+    fetchFarmLgas();
+  }, [formData.farmState, farmStates]);
 
   // Validation functions
   const validateEmail = (email: string): string | undefined => {
@@ -475,9 +553,11 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                   required
                   data-testid="select-home-state"
-                  disabled={!formData.homeCountry}
+                  disabled={!formData.homeCountry || loadingHomeStates}
                 >
-                  <option value="">Select State</option>
+                  <option value="">
+                    {loadingHomeStates ? "Getting states..." : "Select State"}
+                  </option>
                   {homeStates.map((state) => (
                     <option key={state.id} value={state.name}>
                       {state.name}
@@ -490,13 +570,23 @@ export const FarmerAccountCreation = (): JSX.Element => {
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Home Local Government *</label>
-                <input
-                  type="text"
+                <select
                   value={formData.homeLocalGov}
                   onChange={(e) => handleInputChange("homeLocalGov", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                   required
-                />
+                  data-testid="select-home-lga"
+                  disabled={!formData.homeState || loadingHomeLgas}
+                >
+                  <option value="">
+                    {loadingHomeLgas ? "Getting LGAs..." : "Select LGA"}
+                  </option>
+                  {homeLgas.map((lga) => (
+                    <option key={lga.id} value={lga.name}>
+                      {lga.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Home Postcode</label>
@@ -584,9 +674,11 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                   required
                   data-testid="select-farm-state"
-                  disabled={!formData.farmCountry}
+                  disabled={!formData.farmCountry || loadingFarmStates}
                 >
-                  <option value="">Select State</option>
+                  <option value="">
+                    {loadingFarmStates ? "Getting states..." : "Select State"}
+                  </option>
                   {farmStates.map((state) => (
                     <option key={state.id} value={state.name}>
                       {state.name}
@@ -599,13 +691,23 @@ export const FarmerAccountCreation = (): JSX.Element => {
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Farm Local Government *</label>
-                <input
-                  type="text"
+                <select
                   value={formData.farmLocalGov}
                   onChange={(e) => handleInputChange("farmLocalGov", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                   required
-                />
+                  data-testid="select-farm-lga"
+                  disabled={!formData.farmState || loadingFarmLgas}
+                >
+                  <option value="">
+                    {loadingFarmLgas ? "Getting LGAs..." : "Select LGA"}
+                  </option>
+                  {farmLgas.map((lga) => (
+                    <option key={lga.id} value={lga.name}>
+                      {lga.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Farm Postcode</label>

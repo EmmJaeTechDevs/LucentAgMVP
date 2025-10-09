@@ -57,6 +57,9 @@ export const BuyerAccountCreation = (): JSX.Element => {
   const [errors, setErrors] = useState<{ email?: string; phone?: string }>({});
   const [countries, setCountries] = useState<Array<{ id: number; name: string }>>([]);
   const [states, setStates] = useState<Array<{ id: number; name: string; countryId: number }>>([]);
+  const [lgas, setLgas] = useState<Array<{ id: number; name: string; stateId: number }>>([]);
+  const [loadingStates, setLoadingStates] = useState(false);
+  const [loadingLgas, setLoadingLgas] = useState(false);
   const { toast } = useToast();
 
   // Fetch countries from API when component mounts
@@ -84,6 +87,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
     const fetchStates = async () => {
       if (!formData.homeCountry) {
         setStates([]);
+        setLgas([]);
         return;
       }
 
@@ -91,6 +95,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
       const selectedCountry = countries.find(c => c.name === formData.homeCountry);
       if (!selectedCountry) return;
 
+      setLoadingStates(true);
       try {
         const response = await fetch(`${BaseUrl}/api/locations/states/${selectedCountry.id}`);
         const data = await response.json();
@@ -102,11 +107,45 @@ export const BuyerAccountCreation = (): JSX.Element => {
         }
       } catch (error) {
         console.error("Failed to fetch states:", error);
+      } finally {
+        setLoadingStates(false);
       }
     };
 
     fetchStates();
   }, [formData.homeCountry, countries]);
+
+  // Fetch LGAs when state is selected
+  useEffect(() => {
+    const fetchLgas = async () => {
+      if (!formData.homeState) {
+        setLgas([]);
+        return;
+      }
+
+      // Find the selected state's ID
+      const selectedState = states.find(s => s.name === formData.homeState);
+      if (!selectedState) return;
+
+      setLoadingLgas(true);
+      try {
+        const response = await fetch(`${BaseUrl}/api/locations/lgas/${selectedState.id}`);
+        const data = await response.json();
+        console.log("Buyer Registration - LGAs Response:", data);
+        
+        // Store LGAs in state
+        if (data.lgas && Array.isArray(data.lgas)) {
+          setLgas(data.lgas);
+        }
+      } catch (error) {
+        console.error("Failed to fetch LGAs:", error);
+      } finally {
+        setLoadingLgas(false);
+      }
+    };
+
+    fetchLgas();
+  }, [formData.homeState, states]);
 
   // Validation functions
   const validateEmail = (email: string): string | undefined => {
@@ -744,9 +783,11 @@ export const BuyerAccountCreation = (): JSX.Element => {
                   }}
                   required
                   data-testid="select-state"
-                  disabled={!formData.homeCountry}
+                  disabled={!formData.homeCountry || loadingStates}
                 >
-                  <option value="">Select State</option>
+                  <option value="">
+                    {loadingStates ? "Getting states..." : "Select State"}
+                  </option>
                   {states.map((state) => (
                     <option key={state.id} value={state.name}>
                       {state.name}
@@ -775,8 +816,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
                 >
                   Local Government *
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.homeLocalGov}
                   onChange={(e) =>
                     handleInputChange("homeLocalGov", e.target.value)
@@ -788,9 +828,19 @@ export const BuyerAccountCreation = (): JSX.Element => {
                     borderRadius: "8px",
                     fontSize: "16px",
                   }}
-                  placeholder="Victoria Island"
                   required
-                />
+                  data-testid="select-lga"
+                  disabled={!formData.homeState || loadingLgas}
+                >
+                  <option value="">
+                    {loadingLgas ? "Getting LGAs..." : "Select LGA"}
+                  </option>
+                  {lgas.map((lga) => (
+                    <option key={lga.id} value={lga.name}>
+                      {lga.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label
