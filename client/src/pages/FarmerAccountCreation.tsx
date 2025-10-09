@@ -75,26 +75,86 @@ export const FarmerAccountCreation = (): JSX.Element => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; phone?: string }>({});
   const [countries, setCountries] = useState<Array<{ id: number; name: string }>>([]);
+  const [homeStates, setHomeStates] = useState<Array<{ id: number; name: string; countryId: number }>>([]);
+  const [farmStates, setFarmStates] = useState<Array<{ id: number; name: string; countryId: number }>>([]);
 
-  // Fetch countries and states from API when component mounts
+  // Fetch countries from API when component mounts
   useEffect(() => {
-    const fetchLocations = async () => {
+    const fetchCountries = async () => {
       try {
         const response = await fetch(`${BaseUrl}/api/locations/countries`);
         const data = await response.json();
-        console.log("Farmer Registration - Countries and States Response:", data);
+        console.log("Farmer Registration - Countries Response:", data);
         
         // Store countries in state
         if (data.countries && Array.isArray(data.countries)) {
           setCountries(data.countries);
         }
       } catch (error) {
-        console.error("Failed to fetch countries and states:", error);
+        console.error("Failed to fetch countries:", error);
       }
     };
 
-    fetchLocations();
+    fetchCountries();
   }, []);
+
+  // Fetch home states when home country is selected
+  useEffect(() => {
+    const fetchHomeStates = async () => {
+      if (!formData.homeCountry) {
+        setHomeStates([]);
+        return;
+      }
+
+      // Find the selected country's ID
+      const selectedCountry = countries.find(c => c.name === formData.homeCountry);
+      if (!selectedCountry) return;
+
+      try {
+        const response = await fetch(`${BaseUrl}/api/locations/states/${selectedCountry.id}`);
+        const data = await response.json();
+        console.log("Farmer Registration - Home States Response:", data);
+        
+        // Store states in state
+        if (data.states && Array.isArray(data.states)) {
+          setHomeStates(data.states);
+        }
+      } catch (error) {
+        console.error("Failed to fetch home states:", error);
+      }
+    };
+
+    fetchHomeStates();
+  }, [formData.homeCountry, countries]);
+
+  // Fetch farm states when farm country is selected
+  useEffect(() => {
+    const fetchFarmStates = async () => {
+      if (!formData.farmCountry) {
+        setFarmStates([]);
+        return;
+      }
+
+      // Find the selected country's ID
+      const selectedCountry = countries.find(c => c.name === formData.farmCountry);
+      if (!selectedCountry) return;
+
+      try {
+        const response = await fetch(`${BaseUrl}/api/locations/states/${selectedCountry.id}`);
+        const data = await response.json();
+        console.log("Farmer Registration - Farm States Response:", data);
+        
+        // Store states in state
+        if (data.states && Array.isArray(data.states)) {
+          setFarmStates(data.states);
+        }
+      } catch (error) {
+        console.error("Failed to fetch farm states:", error);
+      }
+    };
+
+    fetchFarmStates();
+  }, [formData.farmCountry, countries]);
 
   // Validation functions
   const validateEmail = (email: string): string | undefined => {
@@ -414,10 +474,14 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   onChange={(e) => handleInputChange("homeState", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                   required
+                  data-testid="select-home-state"
+                  disabled={!formData.homeCountry}
                 >
                   <option value="">Select State</option>
-                  {NIGERIAN_STATES.map(state => (
-                    <option key={state} value={state}>{state}</option>
+                  {homeStates.map((state) => (
+                    <option key={state.id} value={state.name}>
+                      {state.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -519,10 +583,14 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   onChange={(e) => handleInputChange("farmState", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                   required
+                  data-testid="select-farm-state"
+                  disabled={!formData.farmCountry}
                 >
                   <option value="">Select State</option>
-                  {NIGERIAN_STATES.map(state => (
-                    <option key={state} value={state}>{state}</option>
+                  {farmStates.map((state) => (
+                    <option key={state.id} value={state.name}>
+                      {state.name}
+                    </option>
                   ))}
                 </select>
               </div>
