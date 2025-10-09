@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { api } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { PasswordValidator, validatePasswordStrength } from "@/components/PasswordValidator";
+import { BaseUrl } from "../../../Baseconfig";
 
 // Nigerian States
 const NIGERIAN_STATES = [
@@ -73,6 +74,21 @@ export const FarmerAccountCreation = (): JSX.Element => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; phone?: string }>({});
+
+  // Fetch countries and states from API when component mounts
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await fetch(`${BaseUrl}/api/locations/countries`);
+        const data = await response.json();
+        console.log("Farmer Registration - Countries and States Response:", data);
+      } catch (error) {
+        console.error("Failed to fetch countries and states:", error);
+      }
+    };
+
+    fetchLocations();
+  }, []);
 
   // Validation functions
   const validateEmail = (email: string): string | undefined => {
