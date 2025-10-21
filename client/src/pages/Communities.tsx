@@ -328,37 +328,41 @@ export function Communities() {
                 </div>
               ) : (
                 filteredCommunities.map((community) => (
-                  <div
+                  <Link 
                     key={community.id}
-                    className="bg-white dark:bg-gray-800 rounded-lg p-4 md:p-5 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
-                    data-testid={`community-${community.id}`}
+                    href={`/community/${community.id}`}
                   >
-                    <div className="flex items-center gap-3 md:gap-4">
-                      {/* Community Avatar - Circular */}
-                      <div className="w-14 h-14 md:w-16 md:h-16 bg-green-600 dark:bg-green-700 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Users className="w-7 h-7 md:w-8 md:h-8 text-white" />
-                      </div>
-
-                      {/* Community Info */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base md:text-lg mb-1">
-                          {community.name}
-                        </h3>
-                        
-                        <div className="flex items-center gap-1.5 text-xs md:text-sm text-gray-600 dark:text-gray-400 mb-2">
-                          <Users className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                          <span>{community.memberCount} Members</span>
+                    <div
+                      className="bg-white dark:bg-gray-800 rounded-lg p-4 md:p-5 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
+                      data-testid={`community-${community.id}`}
+                    >
+                      <div className="flex items-center gap-3 md:gap-4">
+                        {/* Community Avatar - Circular */}
+                        <div className="w-14 h-14 md:w-16 md:h-16 bg-green-600 dark:bg-green-700 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Users className="w-7 h-7 md:w-8 md:h-8 text-white" />
                         </div>
-                        
-                        <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base line-clamp-2">
-                          {community.description}
-                        </p>
-                      </div>
 
-                      {/* Chevron Arrow */}
-                      <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                        {/* Community Info */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base md:text-lg mb-1">
+                            {community.name}
+                          </h3>
+                          
+                          <div className="flex items-center gap-1.5 text-xs md:text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            <Users className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            <span>{community.memberCount} Members</span>
+                          </div>
+                          
+                          <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base line-clamp-2">
+                            {community.description}
+                          </p>
+                        </div>
+
+                        {/* Chevron Arrow */}
+                        <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>
