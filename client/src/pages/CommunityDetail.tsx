@@ -116,6 +116,10 @@ export function CommunityDetail() {
   const toggleHeaderExpansion = () => {
     setIsHeaderExpanded(!isHeaderExpanded);
     setShowMenuIcon(!isHeaderExpanded ? false : true);
+    // Reset animation state when manually toggling
+    if (!isHeaderExpanded) {
+      hasAnimatedOnce.current = false;
+    }
   };
 
   return (
