@@ -16,6 +16,21 @@ interface Community {
   posts: number;
 }
 
+// Helper function to detect user type
+function getUserType(): "buyer" | "farmer" {
+  const buyerSession = sessionStorage.getItem("buyerSession");
+  const farmerSession = sessionStorage.getItem("farmerSession");
+  
+  if (buyerSession) {
+    return "buyer";
+  } else if (farmerSession) {
+    return "farmer";
+  }
+  
+  // Default to buyer if neither found
+  return "buyer";
+}
+
 export function Communities() {
   // Validate session (both buyers and farmers can access communities)
   useSessionValidation();
@@ -24,6 +39,10 @@ export function Communities() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"my-communities" | "discover">("my-communities");
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Detect user type
+  const userType = getUserType();
+  const homeRoute = userType === "buyer" ? "/buyer-home" : "/farmer-dashboard";
 
   // Mock data for communities
   const mockCommunities: Community[] = [
@@ -117,12 +136,12 @@ export function Communities() {
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 px-4 md:px-6 py-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
-          <Link href="/buyer-home">
+          <Link href={homeRoute}>
             <ArrowLeft className="w-6 h-6 text-gray-700 dark:text-gray-300 cursor-pointer" data-testid="button-back" />
           </Link>
           <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100">Communities</h1>
         </div>
-        <HamburgerMenu userType="buyer" />
+        <HamburgerMenu userType={userType} />
       </div>
 
       {/* Main Content Container - max width for desktop */}
