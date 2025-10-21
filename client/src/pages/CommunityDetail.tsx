@@ -37,6 +37,7 @@ export function CommunityDetail() {
   const [showMenuIcon, setShowMenuIcon] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
+  const hasAnimatedOnce = useRef(false);
   
   const userType = getUserType();
   const backRoute = "/communities";
@@ -85,25 +86,20 @@ export function CommunityDetail() {
     }
   ];
 
-  // Handle scroll to collapse/expand header
+  // Handle scroll to collapse header (only once)
   useEffect(() => {
     const handleScroll = () => {
-      if (!scrollContainerRef.current) return;
+      if (!scrollContainerRef.current || hasAnimatedOnce.current) return;
       
       const currentScrollY = scrollContainerRef.current.scrollTop;
       
-      // Only trigger if scrolled more than 50px
+      // Only trigger once if scrolled more than 50px
       if (currentScrollY > 50) {
         // Scrolling down - collapse
         if (currentScrollY > lastScrollY.current && isHeaderExpanded) {
           setIsHeaderExpanded(false);
           setShowMenuIcon(true);
-        }
-      } else {
-        // At top - expand
-        if (!isHeaderExpanded) {
-          setIsHeaderExpanded(true);
-          setShowMenuIcon(false);
+          hasAnimatedOnce.current = true; // Mark that animation has happened
         }
       }
       
@@ -111,7 +107,7 @@ export function CommunityDetail() {
     };
 
     const container = scrollContainerRef.current;
-    if (container) {
+    if (container && !hasAnimatedOnce.current) {
       container.addEventListener('scroll', handleScroll);
       return () => container.removeEventListener('scroll', handleScroll);
     }
