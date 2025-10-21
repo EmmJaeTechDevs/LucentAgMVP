@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Users, Search } from "lucide-react";
+import { ArrowLeft, Users, Search, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
@@ -180,17 +180,24 @@ export function Communities() {
           </div>
         </div>
 
-        {/* Search - Only show on Discover tab */}
+        {/* Discover Tab Header with Search */}
         {activeTab === "discover" && (
-          <div className="bg-white dark:bg-gray-800 px-4 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 px-4 md:px-6 py-4 md:py-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+              Find communities you can join
+            </h2>
+            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mb-4 md:mb-6">
+              Connect with farmers near you
+            </p>
+            
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search communities..."
+                placeholder="Find a community..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-gray-100"
+                className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 data-testid="search-communities"
               />
             </div>
@@ -306,7 +313,7 @@ export function Communities() {
 
           {/* Discover Tab Content */}
           {!isLoading && activeTab === "discover" && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {filteredCommunities.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full">
@@ -323,50 +330,33 @@ export function Communities() {
                 filteredCommunities.map((community) => (
                   <div
                     key={community.id}
-                    className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+                    className="bg-white dark:bg-gray-800 rounded-lg p-4 md:p-5 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
                     data-testid={`community-${community.id}`}
                   >
-                    <div className="flex items-start gap-4">
-                      {/* Community Avatar */}
-                      <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Users className="w-6 h-6 text-green-600 dark:text-green-400" />
+                    <div className="flex items-center gap-3 md:gap-4">
+                      {/* Community Avatar - Circular */}
+                      <div className="w-14 h-14 md:w-16 md:h-16 bg-green-600 dark:bg-green-700 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Users className="w-7 h-7 md:w-8 md:h-8 text-white" />
                       </div>
 
                       {/* Community Info */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base">
-                            {community.name}
-                          </h3>
-                          <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full ml-2">
-                            {community.category}
-                          </span>
+                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base md:text-lg mb-1">
+                          {community.name}
+                        </h3>
+                        
+                        <div className="flex items-center gap-1.5 text-xs md:text-sm text-gray-600 dark:text-gray-400 mb-2">
+                          <Users className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                          <span>{community.memberCount} Members</span>
                         </div>
                         
-                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                        <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base line-clamp-2">
                           {community.description}
                         </p>
-
-                        <div className="flex items-center justify-between flex-wrap gap-2">
-                          <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                            <span>{formatNumber(community.memberCount)} members</span>
-                            <span>•</span>
-                            <span>{community.posts} posts</span>
-                          </div>
-                          
-                          <button
-                            onClick={() => handleJoinCommunity(community.id)}
-                            className={`px-4 py-1.5 text-xs font-medium rounded-full transition-colors ${
-                              community.isJoined
-                                ? "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/30"
-                                : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                            }`}
-                            data-testid={`join-${community.id}`}
-                          >
-                            {community.isJoined ? "Joined" : "Join"}
-                          </button>
-                        </div>
                       </div>
+
+                      {/* Chevron Arrow */}
+                      <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                     </div>
                   </div>
                 ))
