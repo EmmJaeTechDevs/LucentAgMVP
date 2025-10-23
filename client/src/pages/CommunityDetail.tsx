@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Users, Info, BookOpen, ShoppingBag, Camera, MessageCircle, Heart, MoreVertical, MoreHorizontal, Menu } from "lucide-react";
+import { ArrowLeft, Users, Info, BookOpen, ShoppingBag, Camera, MessageCircle, Heart, MoreVertical, MoreHorizontal, Menu, FileText, ChevronDown } from "lucide-react";
 import { Link, useParams, useLocation } from "wouter";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 
@@ -27,6 +27,13 @@ interface Post {
   likes: number;
 }
 
+interface Resource {
+  id: string;
+  title: string;
+  image: string;
+  fileType: string;
+}
+
 export function CommunityDetail() {
   useSessionValidation();
   
@@ -35,6 +42,8 @@ export function CommunityDetail() {
   const [activeTab, setActiveTab] = useState<"posts" | "resources" | "joint-delivery" | "targets">("posts");
   const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
   const [showMenuIcon, setShowMenuIcon] = useState(false);
+  const [sortBy, setSortBy] = useState("latest");
+  const [cropFilter, setCropFilter] = useState("all");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
   const hasAnimatedOnce = useRef(false);
@@ -83,6 +92,28 @@ export function CommunityDetail() {
       content: "Looking into organic pest control methods. Has anyone tried using beneficial insects? I'd love to share insights and tips!",
       comments: 22,
       likes: 134
+    }
+  ];
+
+  // Mock resources data
+  const resources: Resource[] = [
+    {
+      id: "res-1",
+      title: "Optimizing Cassava Yields: A Comprehensive Guide",
+      image: "🌾",
+      fileType: "PDF"
+    },
+    {
+      id: "res-2",
+      title: "Sustainable Practices in Cassava Cultivation",
+      image: "🌾",
+      fileType: "PDF"
+    },
+    {
+      id: "res-3",
+      title: "The Economic Impact of Cassava Farming",
+      image: "🌾",
+      fileType: "PDF"
     }
   ];
 
@@ -306,9 +337,76 @@ export function CommunityDetail() {
           )}
 
           {activeTab === "resources" && (
-            <div className="text-center py-12">
-              <p className="text-gray-500 dark:text-gray-400">No resources available yet</p>
-            </div>
+            <>
+              {/* Filter Section */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                {/* Sort By Dropdown */}
+                <div className="relative flex-1">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2.5 pr-10 text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent cursor-pointer"
+                    data-testid="select-sort-by"
+                  >
+                    <option value="latest">Latest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="popular">Most Popular</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400 pointer-events-none" />
+                </div>
+
+                {/* Crop Filter Dropdown */}
+                <div className="relative flex-1">
+                  <select
+                    value={cropFilter}
+                    onChange={(e) => setCropFilter(e.target.value)}
+                    className="w-full appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2.5 pr-10 text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent cursor-pointer"
+                    data-testid="select-crop-filter"
+                  >
+                    <option value="all">All Crops</option>
+                    <option value="cassava">Cassava</option>
+                    <option value="rice">Rice</option>
+                    <option value="maize">Maize</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Resources List */}
+              <div className="space-y-3">
+                {resources.map((resource) => (
+                  <button
+                    key={resource.id}
+                    className="w-full bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-700 hover:shadow-md transition-all flex items-center gap-4 text-left"
+                    data-testid={`resource-${resource.id}`}
+                  >
+                    {/* Resource Image */}
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-amber-800 to-amber-950 dark:from-amber-900 dark:to-black rounded-lg flex items-center justify-center flex-shrink-0 text-3xl sm:text-4xl relative overflow-hidden">
+                      {resource.image}
+                      <div className="absolute bottom-1 right-1 bg-white dark:bg-gray-800 rounded-full p-1">
+                        <FileText className="w-3 h-3 text-gray-700 dark:text-gray-300" />
+                      </div>
+                    </div>
+
+                    {/* Resource Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base mb-1 line-clamp-2">
+                        {resource.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {resource.fileType}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {resources.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-gray-500 dark:text-gray-400">No resources available yet</p>
+                </div>
+              )}
+            </>
           )}
 
           {activeTab === "joint-delivery" && (
