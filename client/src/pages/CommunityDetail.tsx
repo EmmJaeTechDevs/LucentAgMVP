@@ -1,7 +1,16 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Users, Info, BookOpen, ShoppingBag, Camera, MessageCircle, Heart, MoreVertical, MoreHorizontal, Menu, FileText, ChevronDown } from "lucide-react";
+import { ArrowLeft, Users, Info, BookOpen, ShoppingBag, Camera, MessageCircle, Heart, MoreVertical, MoreHorizontal, Menu, FileText, ChevronDown, Download, Flag } from "lucide-react";
 import { Link, useParams, useLocation } from "wouter";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 
 // Helper function to detect user type
 function getUserType(): "buyer" | "farmer" {
@@ -44,6 +53,8 @@ export function CommunityDetail() {
   const [showMenuIcon, setShowMenuIcon] = useState(false);
   const [sortBy, setSortBy] = useState("latest");
   const [cropFilter, setCropFilter] = useState("all");
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [isResourceDrawerOpen, setIsResourceDrawerOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
   const hasAnimatedOnce = useRef(false);
@@ -383,6 +394,10 @@ export function CommunityDetail() {
                 {resources.map((resource) => (
                   <button
                     key={resource.id}
+                    onClick={() => {
+                      setSelectedResource(resource);
+                      setIsResourceDrawerOpen(true);
+                    }}
                     className="w-full bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-700 hover:shadow-md transition-all flex items-center gap-4 text-left"
                     data-testid={`resource-${resource.id}`}
                   >
@@ -428,6 +443,52 @@ export function CommunityDetail() {
           )}
         </div>
       </div>
+
+      {/* Resource Viewer Drawer */}
+      <Drawer open={isResourceDrawerOpen} onOpenChange={setIsResourceDrawerOpen}>
+        <DrawerContent className="max-h-[90vh]">
+          <DrawerHeader className="text-left pb-4">
+            <DrawerTitle className="text-xl font-bold text-gray-900 dark:text-gray-100 pr-8">
+              {selectedResource?.title}
+            </DrawerTitle>
+            <button 
+              className="flex items-center gap-2 text-red-600 dark:text-red-400 mt-2 text-sm font-medium hover:text-red-700 dark:hover:text-red-500 transition-colors"
+              data-testid="button-report-content"
+            >
+              <Flag className="w-4 h-4" />
+              Report Content
+            </button>
+          </DrawerHeader>
+          
+          <div className="px-4 pb-4 flex-1 overflow-y-auto">
+            {/* Preview Area */}
+            <div className="w-full h-[400px] sm:h-[500px] bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl flex items-center justify-center">
+              <div className="text-center text-gray-400 dark:text-gray-500">
+                <FileText className="w-16 h-16 mx-auto mb-2" />
+                <p className="text-sm">PDF Preview</p>
+              </div>
+            </div>
+          </div>
+
+          <DrawerFooter className="pt-4">
+            <button 
+              className="w-full bg-green-800 hover:bg-green-900 dark:bg-green-700 dark:hover:bg-green-800 text-white py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors"
+              data-testid="button-download"
+            >
+              <Download className="w-5 h-5" />
+              Download
+            </button>
+            <DrawerClose asChild>
+              <button 
+                className="w-full text-gray-700 dark:text-gray-300 py-3 font-medium hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                data-testid="button-close-drawer"
+              >
+                Close
+              </button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
