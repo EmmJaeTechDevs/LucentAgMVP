@@ -37,6 +37,7 @@ import { FarmerProfile } from "@/pages/FarmerProfile";
 import { BuyerOrders } from "@/pages/BuyerOrders";
 import { Communities } from "@/pages/Communities";
 import { CommunityDetail } from "@/pages/CommunityDetail";
+import { PostDetail } from "@/pages/PostDetail";
 import { ForgotPassword } from "@/pages/ForgotPassword";
 import { ResetOTP } from "@/pages/ResetOTP";
 import { ResetPassword } from "@/pages/ResetPassword";
@@ -77,6 +78,7 @@ function Router() {
       <Route path="/buyer-orders" component={BuyerOrders} />
       <Route path="/communities" component={Communities} />
       <Route path="/community/:id" component={CommunityDetail} />
+      <Route path="/community/:communityId/post/:postId" component={PostDetail} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-otp" component={ResetOTP} />
       <Route path="/reset-password" component={ResetPassword} />

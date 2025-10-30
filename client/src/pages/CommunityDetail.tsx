@@ -295,9 +295,10 @@ export function CommunityDetail() {
 
               {/* Posts Feed */}
               {posts.map((post) => (
-                <div 
+                <button 
                   key={post.id}
-                  className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+                  onClick={() => setLocation(`/community/${community.id}/post/${post.id}`)}
+                  className="w-full bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-700 hover:shadow-md transition-all text-left"
                   data-testid={`post-${post.id}`}
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -312,7 +313,12 @@ export function CommunityDetail() {
                         </p>
                       </div>
                     </div>
-                    <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                    >
                       <MoreHorizontal className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                     </button>
                   </div>
@@ -322,16 +328,16 @@ export function CommunityDetail() {
                   </p>
 
                   <div className="flex items-center gap-4">
-                    <button className="flex items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors">
+                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                       <MessageCircle className="w-4 h-4" />
                       <span className="text-sm">{post.comments}</span>
-                    </button>
-                    <button className="flex items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+                    </div>
+                    <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                       <Heart className="w-4 h-4" />
                       <span className="text-sm">{post.likes}</span>
-                    </button>
+                    </div>
                   </div>
-                </div>
+                </button>
               ))}
             </>
           )}
