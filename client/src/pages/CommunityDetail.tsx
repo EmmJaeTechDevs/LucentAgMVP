@@ -452,6 +452,10 @@ export function CommunityDetail() {
               {selectedResource?.title}
             </DrawerTitle>
             <button 
+              onClick={() => {
+                setIsResourceDrawerOpen(false);
+                setLocation(`/community/${community.id}/report-resource/${selectedResource?.id}`);
+              }}
               className="flex items-center gap-2 text-red-600 dark:text-red-400 mt-2 text-sm font-medium hover:text-red-700 dark:hover:text-red-500 transition-colors"
               data-testid="button-report-content"
             >
