@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Users, Info, BookOpen, ShoppingBag, Camera, MessageCircle, Heart, MoreVertical, MoreHorizontal, Menu, FileText, ChevronDown, Download, Flag, Truck } from "lucide-react";
+import { ArrowLeft, Users, Info, BookOpen, ShoppingBag, Camera, MessageCircle, Heart, MoreVertical, MoreHorizontal, Menu, FileText, ChevronDown, Download, Flag, Truck, MapPin, Calendar, UserCheck, Leaf, Share2 } from "lucide-react";
 import { Link, useParams, useLocation } from "wouter";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import {
@@ -43,6 +43,21 @@ interface Resource {
   fileType: string;
 }
 
+interface JointDeliveryRequest {
+  id: string;
+  communityId: string;
+  crop: string;
+  totalNeeded: number;
+  have: number;
+  need: number;
+  location: string;
+  dueDate: string;
+  additionalDetails?: string;
+  progress: number;
+  helpingFarmers: string[];
+  createdAt: string;
+}
+
 export function CommunityDetail() {
   useSessionValidation();
   
@@ -56,6 +71,7 @@ export function CommunityDetail() {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const [isResourceDrawerOpen, setIsResourceDrawerOpen] = useState(false);
   const [jointDeliveryView, setJointDeliveryView] = useState<"me" | "others">("me");
+  const [jointDeliveryRequests, setJointDeliveryRequests] = useState<JointDeliveryRequest[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
   const hasAnimatedOnce = useRef(false);
@@ -128,6 +144,27 @@ export function CommunityDetail() {
       fileType: "PDF"
     }
   ];
+
+  // Load joint delivery requests from localStorage
+  useEffect(() => {
+    const loadJointDeliveryRequests = () => {
+      const saved = localStorage.getItem("jointDeliveryRequests");
+      if (saved) {
+        const allRequests = JSON.parse(saved);
+        // Filter requests for this community
+        const communityRequests = allRequests.filter(
+          (req: JointDeliveryRequest) => req.communityId === community.id
+        );
+        setJointDeliveryRequests(communityRequests);
+      }
+    };
+
+    loadJointDeliveryRequests();
+    
+    // Listen for changes to localStorage (from other tabs or after creating a request)
+    window.addEventListener('storage', loadJointDeliveryRequests);
+    return () => window.removeEventListener('storage', loadJointDeliveryRequests);
+  }, [community.id, activeTab]);
 
   // Handle scroll to collapse header (only once)
   useEffect(() => {
@@ -459,36 +496,136 @@ export function CommunityDetail() {
                 </button>
               </div>
 
-              {/* Empty State */}
-              <div className="flex flex-col items-center justify-center py-12 px-4">
-                <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
-                  <Truck className="w-10 h-10 text-green-700 dark:text-green-400" />
+              {/* Joint Delivery Cards */}
+              {jointDeliveryRequests.length > 0 ? (
+                <div className="space-y-4">
+                  {jointDeliveryRequests.map((request) => {
+                    const formattedDate = new Date(request.dueDate).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric'
+                    });
+
+                    return (
+                      <div
+                        key={request.id}
+                        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5"
+                        data-testid={`joint-delivery-${request.id}`}
+                      >
+                        {/* Header with crop name and icon */}
+                        <div className="flex items-start justify-between mb-4">
+                          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 capitalize">
+                            {request.crop}
+                          </h3>
+                          <div className="w-8 h-8 flex items-center justify-center">
+                            <Leaf className="w-6 h-6 text-green-700 dark:text-green-500" />
+                          </div>
+                        </div>
+
+                        {/* Order details */}
+                        <div className="mb-3">
+                          <p className="text-gray-900 dark:text-gray-100 font-medium mb-1">
+                            Total Needed: {request.totalNeeded}kg
+                          </p>
+                          <div className="flex items-center gap-4">
+                            <span className="text-gray-900 dark:text-gray-100 font-medium">
+                              Have: {request.have}kg
+                            </span>
+                            <span className="text-red-600 dark:text-red-400 font-medium">
+                              Need: {request.need}kg
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Location and Date */}
+                        <div className="flex items-center gap-4 mb-3 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-4 h-4" />
+                            <span>{request.location}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            <span>Due: {formattedDate}</span>
+                          </div>
+                        </div>
+
+                        {/* Status */}
+                        <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                          <UserCheck className="w-4 h-4" />
+                          <span>
+                            {request.helpingFarmers.length === 0
+                              ? "No farmer helping yet"
+                              : `${request.helpingFarmers.length} farmer${request.helpingFarmers.length > 1 ? 's' : ''} helping`
+                            }
+                          </span>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="mb-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">Progress</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{request.progress}%</span>
+                          </div>
+                          <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-green-700 dark:bg-green-600 transition-all duration-300"
+                              style={{ width: `${request.progress}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3">
+                          <button
+                            className="flex-1 bg-green-800 hover:bg-green-900 dark:bg-green-700 dark:hover:bg-green-800 text-white py-3 rounded-xl font-semibold transition-colors"
+                            data-testid={`button-manage-${request.id}`}
+                          >
+                            Manage Order
+                          </button>
+                          <button
+                            className="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 rounded-xl font-semibold text-gray-900 dark:text-gray-100 transition-colors flex items-center gap-2"
+                            data-testid={`button-share-${request.id}`}
+                          >
+                            <Share2 className="w-5 h-5" />
+                            Share
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  No Joint Deliveries Yet
-                </h3>
-                
-                <p className="text-center text-gray-600 dark:text-gray-400 text-sm mb-8 max-w-sm">
-                  Got an order that's too big for you alone? Find other farmers to help you fulfil it together.
-                </p>
+              ) : (
+                /* Empty State */
+                <div className="flex flex-col items-center justify-center py-12 px-4">
+                  <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
+                    <Truck className="w-10 h-10 text-green-700 dark:text-green-400" />
+                  </div>
+                  
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    No Joint Deliveries Yet
+                  </h3>
+                  
+                  <p className="text-center text-gray-600 dark:text-gray-400 text-sm mb-8 max-w-sm">
+                    Got an order that's too big for you alone? Find other farmers to help you fulfil it together.
+                  </p>
 
-                <button
-                  onClick={() => setLocation(`/community/${community.id}/joint-delivery-request`)}
-                  className="w-full max-w-sm bg-green-800 hover:bg-green-900 dark:bg-green-700 dark:hover:bg-green-800 text-white py-3.5 rounded-xl font-semibold transition-colors mb-3"
-                  data-testid="button-request-joint-delivery"
-                >
-                  Request Joint Delivery
-                </button>
+                  <button
+                    onClick={() => setLocation(`/community/${community.id}/joint-delivery-request`)}
+                    className="w-full max-w-sm bg-green-800 hover:bg-green-900 dark:bg-green-700 dark:hover:bg-green-800 text-white py-3.5 rounded-xl font-semibold transition-colors mb-3"
+                    data-testid="button-request-joint-delivery"
+                  >
+                    Request Joint Delivery
+                  </button>
 
-                <button
-                  onClick={() => setJointDeliveryView("others")}
-                  className="text-gray-700 dark:text-gray-300 font-medium hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-                  data-testid="button-view-requests-others"
-                >
-                  View Requests by Other Farmers
-                </button>
-              </div>
+                  <button
+                    onClick={() => setJointDeliveryView("others")}
+                    className="text-gray-700 dark:text-gray-300 font-medium hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                    data-testid="button-view-requests-others"
+                  >
+                    View Requests by Other Farmers
+                  </button>
+                </div>
+              )}
             </>
           )}
 

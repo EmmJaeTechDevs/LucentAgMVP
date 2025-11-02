@@ -40,6 +40,36 @@ export function JointDeliveryRequest() {
       return;
     }
 
+    // Calculate the need
+    const totalOrderNum = parseFloat(totalOrder);
+    const amountHaveNum = parseFloat(amountHave);
+    const needAmount = totalOrderNum - amountHaveNum;
+
+    // Create the joint delivery request object
+    const newRequest = {
+      id: `jd-${Date.now()}`,
+      communityId,
+      crop,
+      totalNeeded: totalOrderNum,
+      have: amountHaveNum,
+      need: needAmount,
+      location: `${lga} ${state}`,
+      dueDate: date,
+      additionalDetails,
+      progress: 0,
+      helpingFarmers: [],
+      createdAt: new Date().toISOString(),
+    };
+
+    // Get existing requests from localStorage
+    const existingRequests = JSON.parse(localStorage.getItem("jointDeliveryRequests") || "[]");
+    
+    // Add new request
+    existingRequests.push(newRequest);
+    
+    // Save to localStorage
+    localStorage.setItem("jointDeliveryRequests", JSON.stringify(existingRequests));
+
     toast({
       title: "Request Posted",
       description: "Your joint delivery request has been posted successfully",
