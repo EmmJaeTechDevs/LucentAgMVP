@@ -39,6 +39,7 @@ import { Communities } from "@/pages/Communities";
 import { CommunityDetail } from "@/pages/CommunityDetail";
 import { PostDetail } from "@/pages/PostDetail";
 import { ReportContent } from "@/pages/ReportContent";
+import { JointDeliveryRequest } from "@/pages/JointDeliveryRequest";
 import { ForgotPassword } from "@/pages/ForgotPassword";
 import { ResetOTP } from "@/pages/ResetOTP";
 import { ResetPassword } from "@/pages/ResetPassword";
@@ -81,6 +82,7 @@ function Router() {
       <Route path="/community/:id" component={CommunityDetail} />
       <Route path="/community/:communityId/post/:postId" component={PostDetail} />
       <Route path="/community/:communityId/report-resource/:resourceId" component={ReportContent} />
+      <Route path="/community/:communityId/joint-delivery-request" component={JointDeliveryRequest} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-otp" component={ResetOTP} />
       <Route path="/reset-password" component={ResetPassword} />

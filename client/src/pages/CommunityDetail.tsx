@@ -474,6 +474,7 @@ export function CommunityDetail() {
                 </p>
 
                 <button
+                  onClick={() => setLocation(`/community/${community.id}/joint-delivery-request`)}
                   className="w-full max-w-sm bg-green-800 hover:bg-green-900 dark:bg-green-700 dark:hover:bg-green-800 text-white py-3.5 rounded-xl font-semibold transition-colors mb-3"
                   data-testid="button-request-joint-delivery"
                 >
@@ -481,6 +482,7 @@ export function CommunityDetail() {
                 </button>
 
                 <button
+                  onClick={() => setJointDeliveryView("others")}
                   className="text-gray-700 dark:text-gray-300 font-medium hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                   data-testid="button-view-requests-others"
                 >
