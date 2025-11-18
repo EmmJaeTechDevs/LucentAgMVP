@@ -218,10 +218,12 @@ export const BuyerAccountCreation = (): JSX.Element => {
     setIsSubmitting(true);
 
     try {
+      const userType = "buyer";
+      
       console.log("========================================");
       console.log("🛒 BUYER REGISTRATION - FORM DATA");
       console.log("========================================");
-      console.log("👤 User Type: BUYER");
+      console.log("👤 User Type:", userType.toUpperCase());
       console.log("\n📋 Personal Information:");
       console.log("  - First Name:", formData.firstName);
       console.log("  - Last Name:", formData.lastName);
@@ -248,7 +250,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
           "X-Requested-With": "XMLHttpRequest",
         },
         body: JSON.stringify({
-          userType: "buyer",
+          userType: userType,
           firstName: formData.firstName,
           lastName: formData.lastName,
           phone: formData.phone,

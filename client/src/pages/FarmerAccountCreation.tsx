@@ -333,7 +333,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
       console.log("========================================");
       console.log("🌾 FARMER REGISTRATION - FORM DATA");
       console.log("========================================");
-      console.log("👤 User Type: FARMER");
+      console.log("👤 User Type:", backendData.userType.toUpperCase());
       console.log("\n📋 Personal Information:");
       console.log("  - First Name:", formData.firstName);
       console.log("  - Last Name:", formData.lastName);
