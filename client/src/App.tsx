@@ -16,6 +16,7 @@ import { FarmerAccountCreation } from "@/pages/FarmerAccountCreation";
 import { BuyerAccountCreation } from "@/pages/BuyerAccountCreation";
 import { FarmerVerification } from "@/pages/FarmerVerification";
 import { NotificationPreferences } from "@/pages/NotificationPreferences";
+import { FarmerNotificationPreferences } from "@/pages/FarmerNotificationPreferences";
 import { CropSelection } from "@/pages/CropSelection";
 import { CropProcessing } from "@/pages/CropProcessing";
 import { FarmerDashboard } from "@/pages/FarmerDashboard";
@@ -59,6 +60,7 @@ function Router() {
       <Route path="/buyer-account-creation" component={BuyerAccountCreation} />
       <Route path="/farmer-verification" component={FarmerVerification} />
       <Route path="/notification-preferences" component={NotificationPreferences} />
+      <Route path="/farmer-notification-preferences" component={FarmerNotificationPreferences} />
       <Route path="/crop-selection" component={CropSelection} />
       <Route path="/crop-processing" component={CropProcessing} />
       <Route path="/farmer-dashboard" component={FarmerDashboard} />

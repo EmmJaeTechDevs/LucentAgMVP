@@ -292,8 +292,8 @@ export function FarmerVerification() {
   };
 
   const handleSkip = () => {
-    // Navigate to notification preferences
-    setLocation("/notification-preferences");
+    // Navigate to farmer notification preferences
+    setLocation("/farmer-notification-preferences");
   };
 
   const handleResend = async () => {
