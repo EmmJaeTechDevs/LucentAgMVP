@@ -218,6 +218,26 @@ export const BuyerAccountCreation = (): JSX.Element => {
     setIsSubmitting(true);
 
     try {
+      console.log("========================================");
+      console.log("🛒 BUYER REGISTRATION - FORM DATA");
+      console.log("========================================");
+      console.log("📋 Personal Information:");
+      console.log("  - First Name:", formData.firstName);
+      console.log("  - Last Name:", formData.lastName);
+      console.log("  - Phone:", formData.phone);
+      console.log("  - Email:", formData.email);
+      console.log("  - Password:", "***hidden***");
+      console.log("\n🏠 Home Address:");
+      console.log("  - House Number:", formData.homeHouseNumber);
+      console.log("  - Street:", formData.homeStreet);
+      console.log("  - Bus Stop:", formData.homeBusStop);
+      console.log("  - Additional Description:", formData.homeAdditionalDesc);
+      console.log("  - Country:", formData.homeCountry);
+      console.log("  - State:", formData.homeState);
+      console.log("  - Local Government:", formData.homeLocalGov);
+      console.log("  - Postcode:", formData.homePostcode);
+      console.log("========================================\n");
+      
       // Call your external backend API using CORS proxy to avoid CORS errors
       const response = await fetch(`${BaseUrl}/api/auth/register-buyer`, {
         method: "POST",

@@ -330,6 +330,35 @@ export const FarmerAccountCreation = (): JSX.Element => {
         farmCountry: formData.farmCountry
       };
 
+      console.log("========================================");
+      console.log("🌾 FARMER REGISTRATION - FORM DATA");
+      console.log("========================================");
+      console.log("📋 Personal Information:");
+      console.log("  - First Name:", formData.firstName);
+      console.log("  - Last Name:", formData.lastName);
+      console.log("  - Phone:", formData.phone);
+      console.log("  - Email:", formData.email);
+      console.log("  - Password:", "***hidden***");
+      console.log("\n🏠 Home Address:");
+      console.log("  - House Number:", formData.homeHouseNumber);
+      console.log("  - Street:", formData.homeStreet);
+      console.log("  - Bus Stop:", formData.homeBusStop);
+      console.log("  - Additional Description:", formData.homeAdditionalDesc);
+      console.log("  - Country:", formData.homeCountry);
+      console.log("  - State:", formData.homeState);
+      console.log("  - Local Government:", formData.homeLocalGov);
+      console.log("  - Postcode:", formData.homePostcode);
+      console.log("\n🚜 Farm Address:");
+      console.log("  - House Number:", formData.farmHouseNumber);
+      console.log("  - Street:", formData.farmStreet);
+      console.log("  - Bus Stop:", formData.farmBusStop);
+      console.log("  - Additional Description:", formData.farmAdditionalDesc);
+      console.log("  - Country:", formData.farmCountry);
+      console.log("  - State:", formData.farmState);
+      console.log("  - Local Government:", formData.farmLocalGov);
+      console.log("  - Postcode:", formData.farmPostcode);
+      console.log("========================================\n");
+
       const response = await api.farmers.register(backendData) as any;
       console.log("Registration successful:", response);
       
