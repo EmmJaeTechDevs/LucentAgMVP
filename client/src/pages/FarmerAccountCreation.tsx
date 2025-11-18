@@ -73,6 +73,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; phone?: string }>({});
   const [countries, setCountries] = useState<Array<{ id: number; name: string }>>([]);
   const [homeStates, setHomeStates] = useState<Array<{ id: number; name: string; countryId: number }>>([]);
@@ -273,6 +274,33 @@ export const FarmerAccountCreation = (): JSX.Element => {
       setErrors(prev => ({ ...prev, phone: phoneError }));
     }
   };
+
+  // Check if all required fields are filled
+  useEffect(() => {
+    const requiredFieldsFilled = 
+      formData.firstName.trim() !== "" &&
+      formData.lastName.trim() !== "" &&
+      formData.phone.trim() !== "" &&
+      formData.email.trim() !== "" &&
+      formData.password.trim() !== "" &&
+      formData.homeHouseNumber.trim() !== "" &&
+      formData.homeStreet.trim() !== "" &&
+      formData.homeBusStop.trim() !== "" &&
+      formData.homeCountry.trim() !== "" &&
+      formData.homeState.trim() !== "" &&
+      formData.homeLocalGov.trim() !== "" &&
+      formData.farmHouseNumber.trim() !== "" &&
+      formData.farmStreet.trim() !== "" &&
+      formData.farmBusStop.trim() !== "" &&
+      formData.farmCountry.trim() !== "" &&
+      formData.farmState.trim() !== "" &&
+      formData.farmLocalGov.trim() !== "";
+
+    const noValidationErrors = !errors.email && !errors.phone;
+    const passwordValid = validatePasswordStrength(formData.password, formData.email || formData.firstName);
+
+    setIsFormValid(requiredFieldsFilled && noValidationErrors && passwordValid);
+  }, [formData, errors]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -754,8 +782,9 @@ export const FarmerAccountCreation = (): JSX.Element => {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-green-700 disabled:opacity-50"
+            disabled={isSubmitting || !isFormValid}
+            className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            data-testid="button-create-farmer-account"
           >
             {isSubmitting ? (
               <div className="flex items-center justify-center gap-2">

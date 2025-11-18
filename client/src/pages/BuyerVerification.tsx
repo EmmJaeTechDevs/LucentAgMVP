@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 import { BaseUrl } from "../../../Baseconfig";
+import { ArrowLeft } from "lucide-react";
 
 export function BuyerVerification() {
   const [location, setLocation] = useLocation();
@@ -537,6 +538,16 @@ export function BuyerVerification() {
       {/* Mobile Layout */}
       <div className="block md:hidden flex-1 px-6 pt-16 pb-8">
         <div className="max-w-sm mx-auto">
+          {/* Back button */}
+          <button
+            onClick={() => setLocation("/buyer-account-creation")}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+            data-testid="button-back-mobile"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="font-medium">Back</span>
+          </button>
+
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Verify your account
           </h1>
@@ -623,6 +634,16 @@ export function BuyerVerification() {
       {/* Desktop Layout */}
       <div className="hidden md:flex min-h-screen items-center justify-center p-8">
         <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+          {/* Back button */}
+          <button
+            onClick={() => setLocation("/buyer-account-creation")}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+            data-testid="button-back-desktop"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="font-medium">Back</span>
+          </button>
+
           <h1 className="text-3xl font-bold text-gray-900 mb-3">
             Verify your account
           </h1>

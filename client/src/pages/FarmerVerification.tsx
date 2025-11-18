@@ -4,6 +4,17 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 import { BaseUrl } from "../../../Baseconfig";
+import { ArrowLeft } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export function FarmerVerification() {
   const [location, setLocation] = useLocation();
@@ -12,6 +23,7 @@ export function FarmerVerification() {
   const [countdown, setCountdown] = useState(45);
   const [hasError, setHasError] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showSkipDialog, setShowSkipDialog] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const { toast } = useToast();
   const [isMobile, setIsMobile] = useState(false);
@@ -292,7 +304,13 @@ export function FarmerVerification() {
   };
 
   const handleSkip = () => {
+    // Show confirmation dialog
+    setShowSkipDialog(true);
+  };
+
+  const confirmSkip = () => {
     // Navigate to farmer notification preferences
+    setShowSkipDialog(false);
     setLocation("/farmer-notification-preferences");
   };
 
@@ -516,6 +534,16 @@ export function FarmerVerification() {
       {/* Mobile Layout */}
       <div className="block md:hidden flex-1 px-6 pt-16 pb-8">
         <div className="max-w-sm mx-auto">
+          {/* Back button */}
+          <button
+            onClick={() => setLocation("/farmer-account-creation")}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+            data-testid="button-back-mobile"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="font-medium">Back</span>
+          </button>
+
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Verify your account
           </h1>
@@ -602,6 +630,16 @@ export function FarmerVerification() {
       {/* Desktop Layout */}
       <div className="hidden md:flex min-h-screen items-center justify-center p-8">
         <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+          {/* Back button */}
+          <button
+            onClick={() => setLocation("/farmer-account-creation")}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+            data-testid="button-back-desktop"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="font-medium">Back</span>
+          </button>
+
           <h1 className="text-3xl font-bold text-gray-900 mb-3">
             Verify your account
           </h1>
@@ -684,6 +722,22 @@ export function FarmerVerification() {
           </div>
         </div>
       </div>
+
+      {/* Skip confirmation dialog */}
+      <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Skip Tutorial?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You can access this later in settings.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmSkip}>Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

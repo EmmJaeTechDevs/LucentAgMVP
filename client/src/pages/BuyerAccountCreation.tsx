@@ -54,6 +54,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; phone?: string }>({});
   const [countries, setCountries] = useState<Array<{ id: number; name: string }>>([]);
   const [states, setStates] = useState<Array<{ id: number; name: string; countryId: number }>>([]);
@@ -186,6 +187,27 @@ export const BuyerAccountCreation = (): JSX.Element => {
       setErrors(prev => ({ ...prev, phone: phoneError }));
     }
   };
+
+  // Check if all required fields are filled
+  useEffect(() => {
+    const requiredFieldsFilled = 
+      formData.firstName.trim() !== "" &&
+      formData.lastName.trim() !== "" &&
+      formData.phone.trim() !== "" &&
+      formData.email.trim() !== "" &&
+      formData.password.trim() !== "" &&
+      formData.homeHouseNumber.trim() !== "" &&
+      formData.homeStreet.trim() !== "" &&
+      formData.homeBusStop.trim() !== "" &&
+      formData.homeCountry.trim() !== "" &&
+      formData.homeState.trim() !== "" &&
+      formData.homeLocalGov.trim() !== "";
+
+    const noValidationErrors = !errors.email && !errors.phone;
+    const passwordValid = validatePasswordStrength(formData.password, formData.email || formData.firstName);
+
+    setIsFormValid(requiredFieldsFilled && noValidationErrors && passwordValid);
+  }, [formData, errors]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -898,19 +920,20 @@ export const BuyerAccountCreation = (): JSX.Element => {
           {/* SUBMIT BUTTON */}
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isFormValid}
             style={{
               width: "100%",
               padding: "15px",
-              backgroundColor: isSubmitting ? "#ccc" : "#2e7d32",
+              backgroundColor: (isSubmitting || !isFormValid) ? "#ccc" : "#2e7d32",
               color: "white",
               border: "none",
               borderRadius: "10px",
               fontSize: "1.2rem",
               fontWeight: "600",
-              cursor: isSubmitting ? "not-allowed" : "pointer",
+              cursor: (isSubmitting || !isFormValid) ? "not-allowed" : "pointer",
               transition: "background-color 0.3s",
             }}
+            data-testid="button-create-buyer-account"
           >
             {isSubmitting ? (
               <div className="flex items-center justify-center gap-2">
