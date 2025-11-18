@@ -299,8 +299,8 @@ export function FarmerVerification() {
   };
 
   const handleShowMeHow = () => {
-    // Navigate to onboarding/tutorial
-    setLocation("/dashboard");
+    // Navigate to farmer notification preferences
+    setLocation("/farmer-notification-preferences");
   };
 
   const handleSkip = () => {
