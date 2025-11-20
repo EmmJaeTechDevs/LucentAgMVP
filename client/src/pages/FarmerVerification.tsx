@@ -452,21 +452,14 @@ export function FarmerVerification() {
                 Show Me How
               </Button>
 
-              <div className="relative group">
-                <Button
-                  onClick={handleSkip}
-                  variant="outline"
-                  className="w-full border-2 border-green-600 text-green-600 hover:bg-green-50 py-4 text-lg font-medium rounded-xl transition-colors"
-                  data-testid="button-skip"
-                >
-                  Skip
-                </Button>
-                {/* Tooltip */}
-                <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                  You can access this later in the help section
-                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
-                </div>
-              </div>
+              <Button
+                onClick={handleSkip}
+                variant="outline"
+                className="w-full border-2 border-green-600 text-green-600 hover:bg-green-50 py-4 text-lg font-medium rounded-xl transition-colors"
+                data-testid="button-skip"
+              >
+                Skip
+              </Button>
             </div>
           </div>
         </div>
@@ -507,21 +500,14 @@ export function FarmerVerification() {
                 Show Me How
               </Button>
 
-              <div className="relative group">
-                <Button
-                  onClick={handleSkip}
-                  variant="outline"
-                  className="w-full border-2 border-green-600 text-green-600 hover:bg-green-50 py-4 text-xl font-medium rounded-xl transition-all hover:scale-105"
-                  data-testid="button-skip-desktop"
-                >
-                  Skip
-                </Button>
-                {/* Tooltip */}
-                <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                  You can access this later in the help section
-                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
-                </div>
-              </div>
+              <Button
+                onClick={handleSkip}
+                variant="outline"
+                className="w-full border-2 border-green-600 text-green-600 hover:bg-green-50 py-4 text-xl font-medium rounded-xl transition-all hover:scale-105"
+                data-testid="button-skip-desktop"
+              >
+                Skip
+              </Button>
             </div>
           </div>
         </div>
