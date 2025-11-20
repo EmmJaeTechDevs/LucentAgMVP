@@ -511,6 +511,22 @@ export function FarmerVerification() {
             </div>
           </div>
         </div>
+
+        {/* Skip confirmation dialog */}
+        <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Skip Tutorial?</AlertDialogTitle>
+              <AlertDialogDescription>
+                You can access this later in settings.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmSkip}>Continue</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   }
