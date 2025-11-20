@@ -6,6 +6,7 @@ import { BaseUrl } from "../../../Baseconfig";
 
 interface NotificationSettings {
   sms: boolean;
+  email: boolean;
   whatsapp: boolean;
   inApp: boolean;
 }
@@ -16,6 +17,7 @@ export function FarmerNotificationPreferences() {
   
   const [preferences, setPreferences] = useState<NotificationSettings>({
     sms: true,
+    email: true,
     whatsapp: false,
     inApp: false
   });
@@ -59,7 +61,7 @@ export function FarmerNotificationPreferences() {
     try {
       const preferencesData = {
         smsEnabled: preferences.sms,
-        emailEnabled: true,
+        emailEnabled: preferences.email,
         whatsappEnabled: preferences.whatsapp,
         inAppEnabled: preferences.inApp
       };
@@ -176,6 +178,31 @@ export function FarmerNotificationPreferences() {
               </div>
             </div>
 
+            {/* Email */}
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 mt-1">
+                <button
+                  onClick={() => handleToggle("email")}
+                  className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
+                    preferences.email
+                      ? "bg-green-600 border-green-600"
+                      : "border-gray-300 bg-white"
+                  }`}
+                  data-testid="toggle-email"
+                >
+                  {preferences.email && (
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Email</h3>
+                <p className="text-gray-600 text-sm">Receive updates in your inbox</p>
+              </div>
+            </div>
+
             {/* WhatsApp */}
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 mt-1">
@@ -287,6 +314,31 @@ export function FarmerNotificationPreferences() {
                 <div>
                   <h3 className="text-2xl font-semibold text-gray-900 mb-2">SMS</h3>
                   <p className="text-gray-600 text-lg">Get text messages on your phone</p>
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className="flex items-start gap-6">
+                <div className="flex-shrink-0 mt-2">
+                  <button
+                    onClick={() => handleToggle("email")}
+                    className={`w-8 h-8 rounded border-2 flex items-center justify-center transition-colors ${
+                      preferences.email
+                        ? "bg-green-600 border-green-600"
+                        : "border-gray-300 bg-white"
+                    }`}
+                    data-testid="toggle-email-desktop"
+                  >
+                    {preferences.email && (
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-semibold text-gray-900 mb-2">Email</h3>
+                  <p className="text-gray-600 text-lg">Receive updates in your inbox</p>
                 </div>
               </div>
 
