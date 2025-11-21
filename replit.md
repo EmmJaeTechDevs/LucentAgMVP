@@ -10,6 +10,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### November 21, 2025
+- **Auto-Login Functionality**: Implemented secure auto-login with encrypted session storage
+  - Stores encrypted session tokens (not passwords) after successful registration for both buyers and farmers
+  - On app load, validates stored tokens with backend `/api/auth/validate-token` endpoint
+  - Buyers with valid tokens are automatically redirected to dashboard (/buyer-home)
+  - Farmers are redirected to login page for manual authentication
+  - Invalid or expired tokens (8-hour expiry) are cleared and user redirected to login
+  - Session data encrypted using SessionCrypto utility in both localStorage and sessionStorage
+  - Loading screen displayed during validation to improve UX
+  - Works from any entry point (root URL, deep-links, bookmarks)
+
 ### October 7, 2025
 - **Step-by-Step Onboarding Questionnaire**: Implemented a step-by-step questionnaire during farmer registration for crop preferences
   - Questions appear one at a time with progress indicator
@@ -57,6 +68,12 @@ Preferred communication style: Simple, everyday language.
 - **Session Storage**: PostgreSQL-based session storage with connect-pg-simple
 - **Environment Configuration**: Environment-based database configuration
 - **CORS and Security**: Express middleware for request logging and error handling
+- **Auto-Login Security**: 
+  - Session tokens stored encrypted in localStorage using SessionCrypto utility
+  - 8-hour token expiry enforced client-side with timestamp validation
+  - Backend token validation via `/api/auth/validate-token` endpoint before granting access
+  - Automatic session clearing on validation failure or errors
+  - Password never stored client-side, only server-issued tokens
 
 ## External Dependencies
 
