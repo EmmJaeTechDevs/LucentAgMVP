@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -6,6 +6,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import NotFound from "@/pages/not-found";
+import { useEffect, useState } from "react";
+import { retrieveSession, clearSession, updateSessionTimestamp } from "@/lib/storage";
+import { Loader2 } from "lucide-react";
+import { BaseUrl } from "../../Baseconfig";
+import { SessionCrypto } from "@/utils/sessionCrypto";
 
 import { Splash } from "@/pages/Splash";
 import { LanguageSelector } from "@/pages/LanguageSelector";
@@ -46,6 +51,101 @@ import { ResetOTP } from "@/pages/ResetOTP";
 import { ResetPassword } from "@/pages/ResetPassword";
 import { LoggedOut } from "@/pages/LoggedOut";
 import { SessionExpired } from "@/pages/SessionExpired";
+
+function AutoLoginCheck({ children }: { children: React.ReactNode }) {
+  const [, setLocation] = useLocation();
+  const [isChecking, setIsChecking] = useState(true);
+  const [hasChecked, setHasChecked] = useState(false);
+
+  useEffect(() => {
+    if (hasChecked) return;
+
+    const checkAutoLogin = async () => {
+      try {
+        const session = retrieveSession();
+        
+        if (!session) {
+          setIsChecking(false);
+          return;
+        }
+
+        console.log("Found stored session for:", session.userType);
+
+        if (session.userType === "buyer" && session.token) {
+          try {
+            const response = await fetch(`${BaseUrl}/api/auth/validate-token`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${session.token}`,
+              },
+              body: JSON.stringify({
+                userId: session.userId,
+                userType: "buyer",
+              }),
+            });
+
+            if (response.ok) {
+              const now = new Date().getTime();
+              const expiryTime = now + (8 * 60 * 60 * 1000);
+              
+              const sessionData = {
+                userId: session.userId,
+                email: session.email,
+                token: session.token,
+                userType: "buyer",
+                expiry: expiryTime
+              };
+              
+              // Encrypt session data before storing
+              const encryptedSessionData = SessionCrypto.encryptSessionData(sessionData);
+              sessionStorage.setItem("buyerSession", JSON.stringify(encryptedSessionData));
+              updateSessionTimestamp();
+              
+              console.log("Auto-login successful for buyer, redirecting to dashboard");
+              setLocation("/buyer-home");
+            } else {
+              console.log("Token validation failed, clearing session");
+              clearSession();
+              setLocation("/login");
+            }
+          } catch (error) {
+            console.error("Token validation error:", error);
+            clearSession();
+            setLocation("/login");
+          }
+        } else if (session.userType === "farmer") {
+          console.log("Farmer detected, redirecting to login page");
+          setLocation("/login");
+        } else {
+          console.log("No valid session data");
+          clearSession();
+        }
+      } catch (error) {
+        console.error("Error checking auto-login:", error);
+        clearSession();
+      } finally {
+        setIsChecking(false);
+        setHasChecked(true);
+      }
+    };
+
+    checkAutoLogin();
+  }, [hasChecked, setLocation]);
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="text-center">
+          <Loader2 className="w-16 h-16 animate-spin text-green-600 mx-auto mb-4" />
+          <p className="text-lg text-gray-600">Loading your experience...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
 
 function Router() {
   return (
@@ -102,7 +202,9 @@ function App() {
       <LanguageProvider>
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <AutoLoginCheck>
+            <Router />
+          </AutoLoginCheck>
           <PWAInstallPrompt />
         </TooltipProvider>
       </LanguageProvider>

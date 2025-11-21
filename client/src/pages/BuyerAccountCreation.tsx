@@ -5,6 +5,7 @@ import { SessionCrypto } from "@/utils/sessionCrypto";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { PasswordValidator, validatePasswordStrength } from "@/components/PasswordValidator";
 import { BaseUrl } from "../../../Baseconfig";
+import { storeSession } from "@/lib/storage";
 
 // THIS IS THE NEW BUYER REGISTRATION FORM
 // ALL FIELDS MATCH BACKEND REQUIREMENTS EXACTLY
@@ -335,6 +336,14 @@ export const BuyerAccountCreation = (): JSX.Element => {
         sessionStorage.setItem("buyerSession", JSON.stringify(encryptedSessionData));
         // Also store in localStorage for backward compatibility (encrypted)
         localStorage.setItem("buyerUserId", SessionCrypto.encrypt(userId));
+        
+        // Store session for auto-login
+        storeSession({
+          userId: userId,
+          email: formData.email,
+          token: token,
+          userType: "buyer"
+        });
 
         // Show success message
         toast({

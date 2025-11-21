@@ -6,6 +6,7 @@ import { SessionCrypto } from "@/utils/sessionCrypto";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { PasswordValidator, validatePasswordStrength } from "@/components/PasswordValidator";
 import { BaseUrl } from "../../../Baseconfig";
+import { storeSession } from "@/lib/storage";
 
 // Nigerian States
 const NIGERIAN_STATES = [
@@ -415,6 +416,14 @@ export const FarmerAccountCreation = (): JSX.Element => {
         sessionStorage.setItem("farmerSession", JSON.stringify(encryptedSessionData));
         // Also store in localStorage for backward compatibility (encrypted)
         localStorage.setItem("farmerUserId", SessionCrypto.encrypt(userId));
+        
+        // Store session for auto-login
+        storeSession({
+          userId: userId,
+          email: formData.email,
+          token: token,
+          userType: "farmer"
+        });
       }
       
       setLocation("/farmer-verification");
