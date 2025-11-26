@@ -315,7 +315,9 @@ export const BuyerAccountCreation = (): JSX.Element => {
       if (response.ok && (response.status === 200 || response.status === 201)) {
         // Store complete user data in sessionStorage with 24-hour expiry
         const userId = responseData?.userId || responseData?.user?.userId || responseData?.user?.id || `temp_${Date.now()}`;
-        const token = responseData?.token || responseData?.accessToken || "";
+        const token = responseData?.token || responseData?.accessToken || responseData?.session?.token || responseData?.auth?.token || responseData?.data?.token || "";
+        
+        console.log("Token extracted for auto-login:", token ? "Token found" : "NO TOKEN FOUND");
         
         const now = new Date().getTime();
         const expiryTime = now + (8 * 60 * 60 * 1000); // 8 hours from now

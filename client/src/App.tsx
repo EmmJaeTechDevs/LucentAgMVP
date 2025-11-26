@@ -73,6 +73,7 @@ function AutoLoginCheck({ children }: { children: React.ReactNode }) {
         }
 
         console.log("Found stored session for:", session.userType);
+        console.log("Session token present:", !!session.token, "Token value:", session.token ? "exists" : "empty/undefined");
 
         if (session.userType === "buyer" && session.token) {
           try {
