@@ -5,8 +5,8 @@ const STORAGE_KEY = "lucentag_autologin";
 interface StoredSession {
   userId: string;
   email: string;
+  password: string;
   userType: "farmer" | "buyer";
-  token: string;
   timestamp: number;
 }
 
@@ -57,8 +57,8 @@ export function updateSessionTimestamp(): void {
     storeSession({
       userId: session.userId,
       email: session.email,
+      password: session.password,
       userType: session.userType,
-      token: session.token,
     });
   }
 }

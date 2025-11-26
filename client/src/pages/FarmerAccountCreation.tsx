@@ -394,7 +394,6 @@ export const FarmerAccountCreation = (): JSX.Element => {
       
       // Store complete user data in sessionStorage with 24-hour expiry
       const userId = response?.userId || response?.user?.userId || response?.user?.id;
-      const token = response?.token || response?.accessToken || "";
       
       if (userId) {
         const now = new Date().getTime();
@@ -406,7 +405,6 @@ export const FarmerAccountCreation = (): JSX.Element => {
           lastName: formData.lastName,
           email: formData.email,
           phone: formData.phone,
-          token: token,
           userType: "farmer",
           expiry: expiryTime
         };
@@ -417,13 +415,15 @@ export const FarmerAccountCreation = (): JSX.Element => {
         // Also store in localStorage for backward compatibility (encrypted)
         localStorage.setItem("farmerUserId", SessionCrypto.encrypt(userId));
         
-        // Store session for auto-login
+        // Store encrypted credentials for auto-login
         storeSession({
           userId: userId,
           email: formData.email,
-          token: token,
+          password: formData.password,
           userType: "farmer"
         });
+        
+        console.log("Farmer session stored for auto-login");
       }
       
       setLocation("/farmer-verification");

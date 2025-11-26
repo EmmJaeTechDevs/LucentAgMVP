@@ -68,35 +68,46 @@ function AutoLoginCheck({ children }: { children: React.ReactNode }) {
         const session = retrieveSession();
         
         if (!session) {
+          console.log("No stored session found");
           setIsChecking(false);
           return;
         }
 
         console.log("Found stored session for:", session.userType);
-        console.log("Session token present:", !!session.token, "Token value:", session.token ? "exists" : "empty/undefined");
+        console.log("Session has credentials:", !!session.email && !!session.password);
 
-        if (session.userType === "buyer" && session.token) {
+        if (session.userType === "buyer" && session.email && session.password) {
           try {
-            const response = await fetch(`${BaseUrl}/api/auth/validate-token`, {
+            console.log("Attempting auto-login for buyer...");
+            
+            const response = await fetch(`${BaseUrl}/api/auth/login`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${session.token}`,
               },
               body: JSON.stringify({
-                userId: session.userId,
+                email: session.email,
+                password: session.password,
                 userType: "buyer",
               }),
             });
 
-            if (response.ok) {
+            console.log("Login response status:", response.status);
+            
+            const responseData = await response.json();
+            console.log("Login response:", responseData);
+
+            if (response.ok && responseData.success) {
               const now = new Date().getTime();
               const expiryTime = now + (8 * 60 * 60 * 1000);
               
               const sessionData = {
-                userId: session.userId,
+                userId: responseData.user?.userId || responseData.user?.id || session.userId,
+                firstName: responseData.user?.firstName,
+                lastName: responseData.user?.lastName,
                 email: session.email,
-                token: session.token,
+                phone: responseData.user?.phone,
+                token: responseData.token,
                 userType: "buyer",
                 expiry: expiryTime
               };
@@ -109,26 +120,26 @@ function AutoLoginCheck({ children }: { children: React.ReactNode }) {
               console.log("Auto-login successful for buyer, redirecting to dashboard");
               setLocation("/buyer-home");
             } else {
-              console.log("Token validation failed, clearing session");
+              console.log("Login failed:", responseData.message || "Invalid credentials");
               clearSession();
-              setLocation("/login");
+              setIsChecking(false);
             }
           } catch (error) {
-            console.error("Token validation error:", error);
+            console.error("Login error:", error);
             clearSession();
-            setLocation("/login");
+            setIsChecking(false);
           }
-        } else if (session.userType === "farmer") {
+        } else if (session.userType === "farmer" && session.email && session.password) {
           console.log("Farmer detected, redirecting to login page");
           setLocation("/login");
         } else {
-          console.log("No valid session data");
+          console.log("No valid session credentials");
           clearSession();
+          setIsChecking(false);
         }
       } catch (error) {
         console.error("Error checking auto-login:", error);
         clearSession();
-      } finally {
         setIsChecking(false);
       }
     };
