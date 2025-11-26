@@ -53,14 +53,17 @@ import { LoggedOut } from "@/pages/LoggedOut";
 import { SessionExpired } from "@/pages/SessionExpired";
 
 function AutoLoginCheck({ children }: { children: React.ReactNode }) {
-  const [, setLocation] = useLocation();
-  const [isChecking, setIsChecking] = useState(true);
-  const [hasChecked, setHasChecked] = useState(false);
+  const [location, setLocation] = useLocation();
+  const [isChecking, setIsChecking] = useState(false);
 
   useEffect(() => {
-    if (hasChecked) return;
+    if (location !== "/") {
+      return;
+    }
 
     const checkAutoLogin = async () => {
+      setIsChecking(true);
+      
       try {
         const session = retrieveSession();
         
@@ -126,12 +129,11 @@ function AutoLoginCheck({ children }: { children: React.ReactNode }) {
         clearSession();
       } finally {
         setIsChecking(false);
-        setHasChecked(true);
       }
     };
 
     checkAutoLogin();
-  }, [hasChecked, setLocation]);
+  }, [location, setLocation]);
 
   if (isChecking) {
     return (
