@@ -336,7 +336,7 @@ export function BuyerVerification() {
       // Prepare request data
       const requestData = {
         userId: buyerId,
-        type: "sms",
+        type: "email",
         purpose: "verification",
       };
 

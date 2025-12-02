@@ -332,7 +332,7 @@ export function FarmerVerification() {
       // Prepare request data
       const requestData = {
         userId: farmerId,
-        type: "sms",
+        type: "email",
         purpose: "verification",
       };
 
