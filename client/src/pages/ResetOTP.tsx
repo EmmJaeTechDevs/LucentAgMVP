@@ -96,7 +96,7 @@ export function ResetOTP() {
       const requestData = {
         userId: userId,
         code: enteredCode,
-        type: "sms"
+        type: "email"
       };
 
       console.log("Request Data:", requestData);

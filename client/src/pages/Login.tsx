@@ -435,7 +435,7 @@ export function Login() {
       // Prepare OTP request data (same format as signup pages)
       const otpRequestData = {
         userId: userId,
-        type: "sms",
+        type: "email",
         purpose: "verification",
       };
 

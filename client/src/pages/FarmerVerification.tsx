@@ -176,7 +176,7 @@ export function FarmerVerification() {
       const requestData = {
         userId: farmerId,
         code: verificationCode,
-        type: "sms",
+        type: "email",
       };
 
       console.log("=== VERIFY OTP REQUEST ===");
