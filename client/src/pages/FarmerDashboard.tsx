@@ -33,6 +33,7 @@ export function FarmerDashboard() {
   const [, setLocation] = useLocation();
   const [userName, setUserName] = useState("John");
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [showSkipConfirmPopup, setShowSkipConfirmPopup] = useState(false);
   const { toast } = useToast();
 
   // Validate farmer session
@@ -49,6 +50,11 @@ export function FarmerDashboard() {
   const handleSkipOnboarding = () => {
     sessionStorage.setItem("farmerHasSeenWelcome", "true");
     setShowWelcomePopup(false);
+    setShowSkipConfirmPopup(true);
+  };
+
+  const handleCloseSkipConfirm = () => {
+    setShowSkipConfirmPopup(false);
   };
 
   const handleProceedToOnboarding = () => {
@@ -150,6 +156,29 @@ export function FarmerDashboard() {
               data-testid="button-proceed-onboarding"
             >
               Proceed to onboarding
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Skip Confirmation Popup */}
+      <AlertDialog open={showSkipConfirmPopup} onOpenChange={setShowSkipConfirmPopup}>
+        <AlertDialogContent className="max-w-md mx-4">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold text-center">
+              Onboarding Skipped
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-gray-600 text-base">
+              You can access the onboarding at your convenience in the Help Center.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex justify-center mt-4">
+            <AlertDialogAction 
+              onClick={handleCloseSkipConfirm}
+              className="bg-green-600 hover:bg-green-700 px-8"
+              data-testid="button-ok-skip-confirm"
+            >
+              OK
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
