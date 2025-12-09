@@ -6,11 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import NotFound from "@/pages/not-found";
-import { useEffect, useState } from "react";
-import { retrieveSession, clearSession, updateSessionTimestamp } from "@/lib/storage";
-import { Loader2 } from "lucide-react";
-import { BaseUrl } from "../../Baseconfig";
-import { SessionCrypto } from "@/utils/sessionCrypto";
+import { useEffect } from "react";
+import { retrieveSession } from "@/lib/storage";
 
 import { Splash } from "@/pages/Splash";
 import { LanguageSelector } from "@/pages/LanguageSelector";
@@ -53,111 +50,30 @@ import { ResetPassword } from "@/pages/ResetPassword";
 import { LoggedOut } from "@/pages/LoggedOut";
 import { SessionExpired } from "@/pages/SessionExpired";
 
-function AutoLoginCheck({ children }: { children: React.ReactNode }) {
+function SessionCheck({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
-  const [isChecking, setIsChecking] = useState(false);
 
   useEffect(() => {
+    // Only check session on home page
     if (location !== "/") {
       return;
     }
 
-    const checkAutoLogin = async () => {
-      setIsChecking(true);
-      
-      try {
-        const session = retrieveSession();
-        
-        if (!session) {
-          console.log("No stored session found");
-          setIsChecking(false);
-          return;
-        }
+    const session = retrieveSession();
+    
+    if (!session) {
+      console.log("No stored session found");
+      return;
+    }
 
-        console.log("Found stored session for:", session.userType);
-        console.log("Session has credentials:", !!session.email && !!session.password);
-
-        if (session.userType === "buyer" && session.email && session.password) {
-          try {
-            console.log("Attempting auto-login for buyer...");
-            
-            const response = await fetch(`${BaseUrl}/api/auth/login`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                email: session.email,
-                password: session.password,
-                userType: "buyer",
-              }),
-            });
-
-            console.log("Login response status:", response.status);
-            
-            const responseData = await response.json();
-            console.log("Login response:", responseData);
-
-            if (response.ok && responseData.success) {
-              const now = new Date().getTime();
-              const expiryTime = now + (8 * 60 * 60 * 1000);
-              
-              const sessionData = {
-                userId: responseData.user?.userId || responseData.user?.id || session.userId,
-                firstName: responseData.user?.firstName,
-                lastName: responseData.user?.lastName,
-                email: session.email,
-                phone: responseData.user?.phone,
-                token: responseData.token,
-                userType: "buyer",
-                expiry: expiryTime
-              };
-              
-              // Encrypt session data before storing
-              const encryptedSessionData = SessionCrypto.encryptSessionData(sessionData);
-              sessionStorage.setItem("buyerSession", JSON.stringify(encryptedSessionData));
-              updateSessionTimestamp();
-              
-              console.log("Auto-login successful for buyer, redirecting to dashboard");
-              setLocation("/buyer-home");
-            } else {
-              console.log("Login failed:", responseData.message || "Invalid credentials");
-              clearSession();
-              setIsChecking(false);
-            }
-          } catch (error) {
-            console.error("Login error:", error);
-            clearSession();
-            setIsChecking(false);
-          }
-        } else if (session.userType === "farmer" && session.email && session.password) {
-          console.log("Farmer detected, redirecting to login page");
-          setLocation("/login");
-        } else {
-          console.log("No valid session credentials");
-          clearSession();
-          setIsChecking(false);
-        }
-      } catch (error) {
-        console.error("Error checking auto-login:", error);
-        clearSession();
-        setIsChecking(false);
-      }
-    };
-
-    checkAutoLogin();
+    console.log("Found stored session for:", session.userType);
+    
+    // If session data exists, redirect to login page for manual authentication
+    if (session.email) {
+      console.log("Session data found, redirecting to login page for manual login");
+      setLocation("/login");
+    }
   }, [location, setLocation]);
-
-  if (isChecking) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50">
-        <div className="text-center">
-          <Loader2 className="w-16 h-16 animate-spin text-green-600 mx-auto mb-4" />
-          <p className="text-lg text-gray-600">Loading your experience...</p>
-        </div>
-      </div>
-    );
-  }
 
   return <>{children}</>;
 }
@@ -218,9 +134,9 @@ function App() {
       <LanguageProvider>
         <TooltipProvider>
           <Toaster />
-          <AutoLoginCheck>
+          <SessionCheck>
             <Router />
-          </AutoLoginCheck>
+          </SessionCheck>
           <PWAInstallPrompt />
         </TooltipProvider>
       </LanguageProvider>
