@@ -32,10 +32,30 @@ import lucentLogo from "@assets/image 20_1759571692580.png";
 export function FarmerDashboard() {
   const [, setLocation] = useLocation();
   const [userName, setUserName] = useState("John");
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const { toast } = useToast();
 
   // Validate farmer session
   useSessionValidation("farmer");
+
+  // Check if farmer should see welcome popup (first time after registration)
+  useEffect(() => {
+    const hasSeenWelcome = sessionStorage.getItem("farmerHasSeenWelcome");
+    if (!hasSeenWelcome) {
+      setShowWelcomePopup(true);
+    }
+  }, []);
+
+  const handleSkipOnboarding = () => {
+    sessionStorage.setItem("farmerHasSeenWelcome", "true");
+    setShowWelcomePopup(false);
+  };
+
+  const handleProceedToOnboarding = () => {
+    sessionStorage.setItem("farmerHasSeenWelcome", "true");
+    setShowWelcomePopup(false);
+    setLocation("/farmer-notification-preferences");
+  };
 
   const handleAddNewCrop = () => {
     setLocation("/add-new-crop");
@@ -105,6 +125,36 @@ export function FarmerDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Welcome Popup for New Farmers */}
+      <AlertDialog open={showWelcomePopup} onOpenChange={setShowWelcomePopup}>
+        <AlertDialogContent className="max-w-md mx-4">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold text-center">
+              Welcome to Lucent Ag
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-gray-600 text-base">
+              To help you make the most use of this app, please proceed to the recommended onboarding.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-4">
+            <AlertDialogCancel 
+              onClick={handleSkipOnboarding}
+              className="flex-1 border-gray-300"
+              data-testid="button-skip-onboarding"
+            >
+              Skip onboarding
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleProceedToOnboarding}
+              className="flex-1 bg-green-600 hover:bg-green-700"
+              data-testid="button-proceed-onboarding"
+            >
+              Proceed to onboarding
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Mobile Layout */}
       <div className="block md:hidden flex-1 px-6 pt-16 pb-24">
         <div className="max-w-sm mx-auto">
