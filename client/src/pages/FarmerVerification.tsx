@@ -299,8 +299,8 @@ export function FarmerVerification() {
   };
 
   const handleShowMeHow = () => {
-    // Navigate to farmer notification preferences
-    setLocation("/farmer-notification-preferences");
+    // Navigate directly to farmer dashboard
+    setLocation("/farmer-dashboard");
   };
 
   const handleSkip = () => {
@@ -309,9 +309,9 @@ export function FarmerVerification() {
   };
 
   const confirmSkip = () => {
-    // Navigate to farmer notification preferences
+    // Navigate directly to farmer dashboard
     setShowSkipDialog(false);
-    setLocation("/farmer-notification-preferences");
+    setLocation("/farmer-dashboard");
   };
 
   const handleResend = async () => {
