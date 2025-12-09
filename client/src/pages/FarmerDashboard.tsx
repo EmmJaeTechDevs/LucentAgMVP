@@ -60,7 +60,7 @@ export function FarmerDashboard() {
   const handleProceedToOnboarding = () => {
     sessionStorage.setItem("farmerHasSeenWelcome", "true");
     setShowWelcomePopup(false);
-    setLocation("/farmer-notification-preferences");
+    setLocation("/farmer-onboarding-tutorial");
   };
 
   const handleAddNewCrop = () => {
