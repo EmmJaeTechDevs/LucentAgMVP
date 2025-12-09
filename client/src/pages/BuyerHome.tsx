@@ -38,8 +38,35 @@ export function BuyerHome() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [showSkipConfirmPopup, setShowSkipConfirmPopup] = useState(false);
   const { toast } = useToast();
   const { addToCart, cartCount, isLoading: isCartLoading, fetchCartCount } = useCart();
+
+  // Check if buyer has seen welcome popup
+  useEffect(() => {
+    const hasSeenWelcome = sessionStorage.getItem("buyerHasSeenWelcome");
+    if (!hasSeenWelcome) {
+      setShowWelcomePopup(true);
+    }
+  }, []);
+
+  const handleSkipOnboarding = () => {
+    setShowWelcomePopup(false);
+    setShowSkipConfirmPopup(true);
+  };
+
+  const handleCloseSkipConfirm = () => {
+    sessionStorage.setItem("buyerHasSeenWelcome", "true");
+    setShowSkipConfirmPopup(false);
+    setLocation("/buyer-notification-preferences");
+  };
+
+  const handleProceedToOnboarding = () => {
+    sessionStorage.setItem("buyerHasSeenWelcome", "true");
+    setShowWelcomePopup(false);
+    setLocation("/buyer-onboarding-tutorial");
+  };
 
   // Validate buyer session
   useSessionValidation("buyer");
@@ -1105,6 +1132,59 @@ export function BuyerHome() {
         onClose={() => setIsHarvestingModalOpen(false)}
         onNotifyMe={handleNotifyMe}
       />
+
+      {/* Welcome Popup */}
+      <AlertDialog open={showWelcomePopup} onOpenChange={setShowWelcomePopup}>
+        <AlertDialogContent className="max-w-md mx-auto">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-center text-xl">
+              Welcome to Lucent Ag
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base">
+              To help you make the most use of this app, please proceed to the recommended onboarding.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-col gap-3 sm:flex-col">
+            <AlertDialogAction
+              onClick={handleProceedToOnboarding}
+              className="w-full bg-green-600 hover:bg-green-700"
+              data-testid="button-proceed-onboarding"
+            >
+              Proceed to onboarding
+            </AlertDialogAction>
+            <AlertDialogCancel
+              onClick={handleSkipOnboarding}
+              className="w-full"
+              data-testid="button-skip-onboarding"
+            >
+              Skip onboarding
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Skip Confirmation Popup */}
+      <AlertDialog open={showSkipConfirmPopup} onOpenChange={setShowSkipConfirmPopup}>
+        <AlertDialogContent className="max-w-md mx-auto">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-center text-xl">
+              Onboarding Skipped
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base">
+              You can access the onboarding at your convenience in the Help Center.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={handleCloseSkipConfirm}
+              className="w-full bg-green-600 hover:bg-green-700"
+              data-testid="button-close-skip-confirm"
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

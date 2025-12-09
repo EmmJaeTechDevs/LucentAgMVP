@@ -33,6 +33,7 @@ import { BuyerExplanation } from "@/pages/BuyerExplanation";
 import { BuyerWelcome } from "@/pages/BuyerWelcome";
 import { BuyerNotificationPreferences } from "@/pages/BuyerNotificationPreferences";
 import { BuyerHome } from "@/pages/BuyerHome";
+import { BuyerOnboardingTutorial } from "@/pages/BuyerOnboardingTutorial";
 import { Cart } from "@/pages/Cart";
 import { Checkout } from "@/pages/Checkout";
 import { Login } from "@/pages/Login";
@@ -106,6 +107,7 @@ function Router() {
       <Route path="/buyer-welcome" component={BuyerWelcome} />
       <Route path="/buyer-notification-preferences" component={BuyerNotificationPreferences} />
       <Route path="/buyer-home" component={BuyerHome} />
+      <Route path="/buyer-onboarding-tutorial" component={BuyerOnboardingTutorial} />
       <Route path="/cart" component={Cart} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/login" component={Login} />
