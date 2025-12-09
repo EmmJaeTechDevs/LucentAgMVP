@@ -22,7 +22,7 @@ export function BuyerExplanation() {
 
   const handleGoToPreferences = () => {
     setShowPopup(false);
-    setLocation("/buyer-notification-preferences");
+    setLocation("/buyer-home");
   };
 
   const features = [
