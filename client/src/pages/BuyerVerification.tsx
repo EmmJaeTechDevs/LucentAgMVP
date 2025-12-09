@@ -261,6 +261,9 @@ export function BuyerVerification() {
         const encryptedSessionData = SessionCrypto.encryptSessionData(sessionData);
         
         sessionStorage.setItem("buyerSession", JSON.stringify(encryptedSessionData));
+        
+        // Clear the welcome popup flag so it shows for new registrations
+        sessionStorage.removeItem("buyerHasSeenWelcome");
 
         toast({
           title: "✅ Verification Successful!",
