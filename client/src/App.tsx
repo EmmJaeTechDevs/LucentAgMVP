@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -6,8 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import NotFound from "@/pages/not-found";
-import { useEffect } from "react";
-import { retrieveSession } from "@/lib/storage";
 
 import { Splash } from "@/pages/Splash";
 import { LanguageSelector } from "@/pages/LanguageSelector";
@@ -52,30 +50,6 @@ import { LoggedOut } from "@/pages/LoggedOut";
 import { SessionExpired } from "@/pages/SessionExpired";
 
 function SessionCheck({ children }: { children: React.ReactNode }) {
-  const [location, setLocation] = useLocation();
-
-  useEffect(() => {
-    // Only check session on home page
-    if (location !== "/") {
-      return;
-    }
-
-    const session = retrieveSession();
-    
-    if (!session) {
-      console.log("No stored session found");
-      return;
-    }
-
-    console.log("Found stored session for:", session.userType);
-    
-    // If session data exists, redirect to login page for manual authentication
-    if (session.email) {
-      console.log("Session data found, redirecting to login page for manual login");
-      setLocation("/login");
-    }
-  }, [location, setLocation]);
-
   return <>{children}</>;
 }
 
@@ -83,7 +57,8 @@ function Router() {
   return (
     <Switch>
       {/* Add pages below */}
-      <Route path="/" component={Splash} />
+      <Route path="/" component={BuyerHome} />
+      <Route path="/splash" component={Splash} />
       <Route path="/language-selector" component={LanguageSelector} />
       <Route path="/role-selection" component={RoleSelection} />
       <Route path="/farmer-onboarding" component={FarmerOnboarding} />
