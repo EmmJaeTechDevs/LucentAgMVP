@@ -1003,13 +1003,13 @@ export function BuyerHome() {
           </div>
 
           {/* Farmer Sign Up Banner */}
-          <div className="bg-gray-50 border-t border-gray-100">
+          <div className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 border-t border-yellow-300">
             <div className="max-w-7xl mx-auto px-6 py-2 text-center">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-800 font-medium">
                 Are you a farmer?{" "}
                 <button
                   onClick={() => setLocation("/login")}
-                  className="text-green-600 hover:text-green-700 font-medium hover:underline"
+                  className="text-green-700 hover:text-green-800 font-semibold hover:underline"
                 >
                   Login or Sign up as a Farmer
                 </button>
