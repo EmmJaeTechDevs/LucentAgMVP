@@ -28,6 +28,7 @@ export function BuyerHome() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedProduct, setSelectedProduct] = useState<any>(undefined);
+  const [harvestingProduct, setHarvestingProduct] = useState<any>(undefined);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isHarvestingModalOpen, setIsHarvestingModalOpen] = useState(false);
   const [userLastName, setUserLastName] = useState("John");
@@ -236,7 +237,7 @@ export function BuyerHome() {
       product = searchResultProducts.find((p) => p.id === productId);
     }
     if (product) {
-      setSelectedProduct(product);
+      setHarvestingProduct(product);
       setIsHarvestingModalOpen(true);
     }
   };
@@ -1570,9 +1571,12 @@ export function BuyerHome() {
       />
 
       <HarvestingSoonModal
-        product={selectedProduct}
+        product={harvestingProduct}
         isOpen={isHarvestingModalOpen}
-        onClose={() => setIsHarvestingModalOpen(false)}
+        onClose={() => {
+          setIsHarvestingModalOpen(false);
+          setHarvestingProduct(undefined);
+        }}
         onNotifyMe={handleNotifyMe}
       />
 
