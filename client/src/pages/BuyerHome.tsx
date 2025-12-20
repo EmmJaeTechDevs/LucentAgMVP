@@ -212,15 +212,8 @@ export function BuyerHome() {
   };
 
   const handleProductClick = (productId: number) => {
-    // Look for product in all possible arrays
-    let product = freshTodayProducts.find((p) => p.id === productId);
-    if (!product) {
-      product = searchResultProducts.find((p) => p.id === productId);
-    }
-    if (product) {
-      setSelectedProduct(product);
-      setIsProductModalOpen(true);
-    }
+    // Navigate to product details page
+    setLocation(`/product/${productId}`);
   };
 
   const handleHarvestingProductClick = (productId: number) => {

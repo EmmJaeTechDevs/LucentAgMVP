@@ -50,6 +50,7 @@ import { ResetOTP } from "@/pages/ResetOTP";
 import { ResetPassword } from "@/pages/ResetPassword";
 import { LoggedOut } from "@/pages/LoggedOut";
 import { SessionExpired } from "@/pages/SessionExpired";
+import { ProductDetails } from "@/pages/ProductDetails";
 
 function SessionCheck({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
@@ -107,6 +108,7 @@ function Router() {
       <Route path="/buyer-welcome" component={BuyerWelcome} />
       <Route path="/buyer-notification-preferences" component={BuyerNotificationPreferences} />
       <Route path="/buyer-home" component={BuyerHome} />
+      <Route path="/product/:id" component={ProductDetails} />
       <Route path="/buyer-onboarding-tutorial" component={BuyerOnboardingTutorial} />
       <Route path="/cart" component={Cart} />
       <Route path="/checkout" component={Checkout} />
