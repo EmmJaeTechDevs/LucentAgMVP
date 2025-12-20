@@ -216,17 +216,24 @@ export function BuyerHome() {
   };
 
   const handleProductClick = (productId: number) => {
-    // Find product and show inline details
+    // Find product
     let product = freshTodayProducts.find((p) => p.id === productId);
     if (!product) {
       product = searchResultProducts.find((p) => p.id === productId);
     }
     if (product) {
-      setSelectedProduct(product);
-      // Scroll to product details section
-      setTimeout(() => {
-        document.getElementById('product-details-section')?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+      // Check if mobile (less than 768px) - show modal, otherwise show inline
+      const isMobileView = window.innerWidth < 768;
+      if (isMobileView) {
+        setSelectedProduct(product);
+        setIsProductModalOpen(true);
+      } else {
+        setSelectedProduct(product);
+        // Scroll to product details section on tablet/desktop
+        setTimeout(() => {
+          document.getElementById('product-details-section')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
     }
   };
 
@@ -270,6 +277,7 @@ export function BuyerHome() {
   const closeProductDetails = () => {
     setSelectedProduct(undefined);
     setProductQuantity(1);
+    setIsProductModalOpen(false);
   };
 
   const handleNotifyMe = async (product: any) => {
@@ -1074,9 +1082,9 @@ export function BuyerHome() {
           </div>
         </div>
 
-        {/* Inline Product Details Section */}
-        {selectedProduct && (
-          <div id="product-details-section" className="bg-white border-b">
+        {/* Inline Product Details Section - Only show on tablet/desktop */}
+        {selectedProduct && !isProductModalOpen && (
+          <div id="product-details-section" className="hidden md:block bg-white border-b">
             <div className="max-w-7xl mx-auto px-6 py-8">
               {/* Close button */}
               <button
