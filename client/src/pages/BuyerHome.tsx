@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Search, ShoppingCart, User, LogOut, Settings, Package, Users, Home } from "lucide-react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Search, ShoppingCart, User, LogOut, Settings, Package, Users, Home, Heart, Star, Plus, Minus, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
@@ -40,6 +40,9 @@ export function BuyerHome() {
   const [hasSearched, setHasSearched] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [showSkipConfirmPopup, setShowSkipConfirmPopup] = useState(false);
+  const [productQuantity, setProductQuantity] = useState(1);
+  const sameFarmerScrollRef = useRef<HTMLDivElement>(null);
+  const relatedItemsScrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { addToCart, cartCount, isLoading: isCartLoading, fetchCartCount } = useCart();
 
@@ -212,8 +215,18 @@ export function BuyerHome() {
   };
 
   const handleProductClick = (productId: number) => {
-    // Navigate to product details page
-    setLocation(`/product/${productId}`);
+    // Find product and show inline details
+    let product = freshTodayProducts.find((p) => p.id === productId);
+    if (!product) {
+      product = searchResultProducts.find((p) => p.id === productId);
+    }
+    if (product) {
+      setSelectedProduct(product);
+      // Scroll to product details section
+      setTimeout(() => {
+        document.getElementById('product-details-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
   };
 
   const handleHarvestingProductClick = (productId: number) => {
@@ -230,6 +243,32 @@ export function BuyerHome() {
 
   const handleAddToCart = async (product: any, quantity: number) => {
     await addToCart(product, quantity);
+  };
+
+  // Scroll handlers for inline product details
+  const scrollSameFarmer = (direction: 'left' | 'right') => {
+    if (sameFarmerScrollRef.current) {
+      const scrollAmount = 200;
+      sameFarmerScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollRelatedItems = (direction: 'left' | 'right') => {
+    if (relatedItemsScrollRef.current) {
+      const scrollAmount = 200;
+      relatedItemsScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const closeProductDetails = () => {
+    setSelectedProduct(undefined);
+    setProductQuantity(1);
   };
 
   const handleNotifyMe = async (product: any) => {
@@ -1033,6 +1072,268 @@ export function BuyerHome() {
             </div>
           </div>
         </div>
+
+        {/* Inline Product Details Section */}
+        {selectedProduct && (
+          <div id="product-details-section" className="bg-white border-b">
+            <div className="max-w-7xl mx-auto px-6 py-8">
+              {/* Close button */}
+              <button
+                onClick={closeProductDetails}
+                className="mb-4 text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                data-testid="button-close-product-details"
+              >
+                <X className="w-5 h-5" />
+                <span>Close</span>
+              </button>
+              
+              {/* Product Details */}
+              <div className="flex flex-col md:flex-row gap-8">
+                {/* Product Image */}
+                <div className="md:w-2/5">
+                  <div className="rounded-lg overflow-hidden bg-gray-100 aspect-square">
+                    {typeof selectedProduct.image === "string" && 
+                    (selectedProduct.image.startsWith("/") || selectedProduct.image.startsWith("http")) ? (
+                      <img
+                        src={selectedProduct.image}
+                        alt={selectedProduct.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-6xl bg-gray-200">
+                        {selectedProduct.image}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Product Info */}
+                <div className="md:w-3/5">
+                  <div className="flex items-start justify-between mb-2">
+                    <h2 className="text-2xl font-bold text-gray-900">{selectedProduct.name}</h2>
+                    <button className="p-2 text-gray-400 hover:text-red-500" data-testid="button-favorite">
+                      <Heart className="w-6 h-6" />
+                    </button>
+                  </div>
+                  
+                  <p className="text-gray-600 text-sm mb-2 flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    {selectedProduct.farm}
+                  </p>
+
+                  {/* Rating */}
+                  <div className="flex items-center gap-1 mb-4">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-4 h-4 ${star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                      />
+                    ))}
+                    <span className="text-gray-500 text-sm ml-1">(134 Reviews)</span>
+                  </div>
+
+                  {/* Price */}
+                  <p className="text-2xl font-bold text-gray-900 mb-4">
+                    {selectedProduct.price}{" "}
+                    <span className="font-normal text-base text-gray-600">{selectedProduct.unit}</span>
+                  </p>
+
+                  {/* Quantity Selector */}
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-600 mb-2">Quantity (kg)</p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setProductQuantity(Math.max(1, productQuantity - 1))}
+                        className="w-10 h-10 bg-green-700 text-white rounded-md flex items-center justify-center hover:bg-green-800"
+                        data-testid="button-decrease-quantity"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+                      <span className="w-12 text-center font-medium text-lg">{productQuantity}</span>
+                      <button
+                        onClick={() => setProductQuantity(productQuantity + 1)}
+                        className="w-10 h-10 bg-green-700 text-white rounded-md flex items-center justify-center hover:bg-green-800"
+                        data-testid="button-increase-quantity"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Availability */}
+                  <div className="flex items-center gap-2 mb-6">
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-green-700 text-sm font-medium">{selectedProduct.availableQuantity || "20kg Available"}</span>
+                  </div>
+
+                  {/* Add to Basket Button */}
+                  <button
+                    onClick={async () => {
+                      await handleAddToCart(selectedProduct, productQuantity);
+                      toast({
+                        title: "Added to basket",
+                        description: `${productQuantity} ${selectedProduct.unit?.replace('per ', '') || 'kg'} of ${selectedProduct.name} added to your basket`,
+                      });
+                    }}
+                    className="w-full md:w-auto bg-green-700 hover:bg-green-800 text-white px-8 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+                    data-testid="button-add-to-basket"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    Add to Basket
+                  </button>
+                </div>
+              </div>
+
+              {/* From the Same Farmer Section */}
+              <div className="mt-12">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">From the same farmer</h3>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => scrollSameFarmer('left')}
+                      className="w-8 h-8 border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-50"
+                      data-testid="button-scroll-farmer-left"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => scrollSameFarmer('right')}
+                      className="w-8 h-8 border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-50"
+                      data-testid="button-scroll-farmer-right"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div ref={sameFarmerScrollRef} className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                  {freshTodayProducts.filter(p => p.farm === selectedProduct.farm && p.id !== selectedProduct.id).slice(0, 6).map((product) => (
+                    <div
+                      key={product.id}
+                      onClick={() => {
+                        setSelectedProduct(product);
+                        setProductQuantity(1);
+                      }}
+                      className="flex-shrink-0 w-36 cursor-pointer"
+                      data-testid={`same-farmer-product-${product.id}`}
+                    >
+                      <div className="w-full h-28 bg-gray-100 rounded-lg overflow-hidden mb-2">
+                        {typeof product.image === "string" &&
+                        (product.image.startsWith("/") || product.image.startsWith("http")) ? (
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-3xl bg-gray-200">
+                            {product.image}
+                          </div>
+                        )}
+                      </div>
+                      <h4 className="font-medium text-gray-900 text-sm truncate">{product.name}</h4>
+                      <p className="font-bold text-gray-900 text-sm">
+                        {product.price} <span className="font-normal text-xs text-gray-500">{product.unit}</span>
+                      </p>
+                    </div>
+                  ))}
+                  {freshTodayProducts.filter(p => p.farm === selectedProduct.farm && p.id !== selectedProduct.id).length === 0 && (
+                    freshTodayProducts.filter(p => p.id !== selectedProduct.id).slice(0, 6).map((product) => (
+                      <div
+                        key={product.id}
+                        onClick={() => {
+                          setSelectedProduct(product);
+                          setProductQuantity(1);
+                        }}
+                        className="flex-shrink-0 w-36 cursor-pointer"
+                        data-testid={`same-farmer-product-${product.id}`}
+                      >
+                        <div className="w-full h-28 bg-gray-100 rounded-lg overflow-hidden mb-2">
+                          {typeof product.image === "string" &&
+                          (product.image.startsWith("/") || product.image.startsWith("http")) ? (
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-3xl bg-gray-200">
+                              {product.image}
+                            </div>
+                          )}
+                        </div>
+                        <h4 className="font-medium text-gray-900 text-sm truncate">{product.name}</h4>
+                        <p className="font-bold text-gray-900 text-sm">
+                          {product.price} <span className="font-normal text-xs text-gray-500">{product.unit}</span>
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Related Items Section */}
+              <div className="mt-10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">Related Items</h3>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => scrollRelatedItems('left')}
+                      className="w-8 h-8 border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-50"
+                      data-testid="button-scroll-related-left"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => scrollRelatedItems('right')}
+                      className="w-8 h-8 border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-50"
+                      data-testid="button-scroll-related-right"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div ref={relatedItemsScrollRef} className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                  {freshTodayProducts.filter(p => p.id !== selectedProduct.id).slice(0, 6).map((product) => (
+                    <div
+                      key={product.id}
+                      onClick={() => {
+                        setSelectedProduct(product);
+                        setProductQuantity(1);
+                      }}
+                      className="flex-shrink-0 w-36 cursor-pointer"
+                      data-testid={`related-product-${product.id}`}
+                    >
+                      <div className="w-full h-28 bg-gray-100 rounded-lg overflow-hidden mb-2">
+                        {typeof product.image === "string" &&
+                        (product.image.startsWith("/") || product.image.startsWith("http")) ? (
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-3xl bg-gray-200">
+                            {product.image}
+                          </div>
+                        )}
+                      </div>
+                      <h4 className="font-medium text-gray-900 text-sm truncate">{product.name}</h4>
+                      <p className="text-gray-500 text-xs mb-1 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                        {product.farm}
+                      </p>
+                      <p className="font-bold text-gray-900 text-sm">
+                        {product.price} <span className="font-normal text-xs text-gray-500">{product.unit}</span>
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-6 py-10">
