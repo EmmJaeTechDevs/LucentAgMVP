@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Search, ShoppingCart, User, LogOut, Settings, Package, Users, Home, Heart, Star, Plus, Minus, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Search, ShoppingCart, User, LogOut, Settings, Package, Users, Home, Heart, Star, Plus, Minus, ChevronLeft, ChevronRight, X, UserPlus } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { useCart } from "@/hooks/useCart";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 import {
@@ -72,8 +71,33 @@ export function BuyerHome() {
     setLocation("/buyer-onboarding-tutorial");
   };
 
-  // Validate buyer session
-  useSessionValidation("buyer");
+  // Check if user is logged in (guest mode support - no redirect)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  useEffect(() => {
+    const checkLoginStatus = () => {
+      const buyerSession = sessionStorage.getItem("buyerSession");
+      if (buyerSession) {
+        try {
+          const encryptedSessionData = JSON.parse(buyerSession);
+          const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
+          const now = new Date().getTime();
+          if (sessionData.userId && sessionData.token && now < sessionData.expiry) {
+            setIsLoggedIn(true);
+            if (sessionData.lastName) {
+              setUserLastName(sessionData.lastName);
+            }
+            return;
+          }
+        } catch (error) {
+          console.error("Error parsing buyer session:", error);
+        }
+      }
+      setIsLoggedIn(false);
+    };
+    
+    checkLoginStatus();
+  }, []);
 
   const categories = ["All", "Leafy Greens", "Fruits", "Grains", "Vegetables"];
 
@@ -143,17 +167,22 @@ export function BuyerHome() {
 
     try {
       const token = getBuyerToken();
+      
+      // For guest users, filter from available crops (sample data)
       if (!token) {
-        toast({
-          title: "Authentication Error",
-          description: "Please log in again to search for crops.",
-          variant: "destructive",
+        const lowerQuery = query.toLowerCase();
+        const filteredCrops = availableCrops.filter(crop => {
+          const plantName = crop.plant?.name || '';
+          const farmerName = crop.farmerName || crop.farmer?.name || '';
+          return plantName.toLowerCase().includes(lowerQuery) || 
+                 farmerName.toLowerCase().includes(lowerQuery);
         });
+        setSearchResults(filteredCrops);
         setIsSearching(false);
         return;
       }
 
-      // Make search request with query parameter
+      // Make search request with query parameter for logged-in users
       const response = await fetch(`${BaseUrl}/api/buyer/crops/search?query=${encodeURIComponent(query)}`, {
         method: "GET",
         headers: {
@@ -176,11 +205,6 @@ export function BuyerHome() {
     } catch (error) {
       console.error("Error performing search:", error);
       setSearchResults([]);
-      toast({
-        title: "Search Error",
-        description: "Failed to search for crops. Please try again.",
-        variant: "destructive",
-      });
     } finally {
       setIsSearching(false);
     }
@@ -250,6 +274,13 @@ export function BuyerHome() {
   };
 
   const handleAddToCart = async (product: any, quantity: number) => {
+    if (!isLoggedIn) {
+      toast({
+        title: "Sign in to continue",
+        description: "Create an account or sign in to add items to your cart.",
+      });
+      return;
+    }
     await addToCart(product, quantity);
   };
 
@@ -282,6 +313,14 @@ export function BuyerHome() {
 
   const handleNotifyMe = async (product: any) => {
     console.log("Notify me for:", product.name);
+    
+    if (!isLoggedIn) {
+      toast({
+        title: "Sign in to continue",
+        description: "Create an account or sign in to get notified when this is ready.",
+      });
+      return;
+    }
     
     try {
       // Get buyer token from session storage
@@ -354,6 +393,14 @@ export function BuyerHome() {
   };
 
   const handleCartClick = () => {
+    if (!isLoggedIn) {
+      toast({
+        title: "Sign in to continue",
+        description: "Create an account or sign in to view your cart.",
+      });
+      setLocation("/login");
+      return;
+    }
     setLocation("/cart");
   };
 
@@ -375,22 +422,22 @@ export function BuyerHome() {
     setLocation("/logged-out");
   };
 
-  // Load user data from session storage
-  useEffect(() => {
-    const buyerSession = sessionStorage.getItem("buyerSession");
-    if (buyerSession) {
-      try {
-        const encryptedSessionData = JSON.parse(buyerSession);
-        const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
-        const now = new Date().getTime();
-        if (now < sessionData.expiry && sessionData.lastName) {
-          setUserLastName(sessionData.lastName);
-        }
-      } catch (error) {
-        console.error("Error parsing buyer session:", error);
-      }
-    }
-  }, []);
+
+  // Sample crops for guest users
+  const sampleCrops = [
+    { id: 1, plant: { name: "Fresh Tomatoes", imageUrl: "https://images.unsplash.com/photo-1546470427-0d4db154cce8?w=400" }, pricePerUnit: 2500, unit: "kg", availableQuantity: 50, totalQuantity: 100, farmerName: "Green Valley Farm", state: "Lagos" },
+    { id: 2, plant: { name: "Organic Carrots", imageUrl: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400" }, pricePerUnit: 1800, unit: "kg", availableQuantity: 30, totalQuantity: 50, farmerName: "Sunrise Farms", state: "Ogun" },
+    { id: 3, plant: { name: "Fresh Spinach", imageUrl: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400" }, pricePerUnit: 1500, unit: "kg", availableQuantity: 25, totalQuantity: 40, farmerName: "Leafy Greens Co", state: "Abuja" },
+    { id: 4, plant: { name: "Bell Peppers", imageUrl: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=400" }, pricePerUnit: 2200, unit: "kg", availableQuantity: 40, totalQuantity: 60, farmerName: "Fresh Harvest", state: "Kaduna" },
+    { id: 5, plant: { name: "Cucumbers", imageUrl: "https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?w=400" }, pricePerUnit: 1200, unit: "kg", availableQuantity: 60, totalQuantity: 80, farmerName: "Garden Fresh", state: "Kano" },
+    { id: 6, plant: { name: "Onions", imageUrl: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=400" }, pricePerUnit: 900, unit: "kg", availableQuantity: 100, totalQuantity: 150, farmerName: "Northern Farms", state: "Sokoto" },
+  ];
+
+  const sampleSoonReadyCrops = [
+    { id: 101, plant: { name: "Sweet Corn", imageUrl: "https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400" }, pricePerUnit: 1600, unit: "kg", availableQuantity: 0, totalQuantity: 80, farmerName: "Corn Valley", state: "Plateau", harvestDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() },
+    { id: 102, plant: { name: "Watermelon", imageUrl: "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?w=400" }, pricePerUnit: 3500, unit: "piece", availableQuantity: 0, totalQuantity: 50, farmerName: "Fruit Gardens", state: "Benue", harvestDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() },
+    { id: 103, plant: { name: "Pineapple", imageUrl: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=400" }, pricePerUnit: 2800, unit: "piece", availableQuantity: 0, totalQuantity: 30, farmerName: "Tropical Farms", state: "Cross River", harvestDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString() },
+  ];
 
   // Fetch available crops when component mounts
   useEffect(() => {
@@ -398,27 +445,12 @@ export function BuyerHome() {
       try {
         setIsLoadingCrops(true);
         
-        // Get buyer token from session storage
-        const buyerSession = sessionStorage.getItem("buyerSession");
-        if (!buyerSession) {
-          console.error("No buyer session found");
-          setIsLoadingCrops(false);
-          return;
-        }
-
-        const encryptedSessionData = JSON.parse(buyerSession);
-        const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
-        const now = new Date().getTime();
+        const token = getBuyerToken();
         
-        if (now >= sessionData.expiry) {
-          console.error("Buyer session has expired");
-          setIsLoadingCrops(false);
-          return;
-        }
-
-        const token = sessionData.token;
+        // If no token (guest user), show sample data
         if (!token) {
-          console.error("No buyer token found in session");
+          console.log("Guest user - showing sample crops");
+          setAvailableCrops(sampleCrops);
           setIsLoadingCrops(false);
           return;
         }
@@ -432,32 +464,30 @@ export function BuyerHome() {
           },
         });
 
-        // Console log the response
         console.log("Available crops API response status:", response.status);
         const responseData = await response.json();
         console.log("Available crops API response data:", responseData);
 
         if (response.status === 200 && responseData.crops) {
-          // Debug: Log crop structure to see plant object
           if (responseData.crops.length > 0) {
             console.log("Available crop sample:", responseData.crops[0]);
           }
           setAvailableCrops(responseData.crops);
         } else {
           console.error("Failed to fetch crops or no crops available");
-          setAvailableCrops([]);
+          setAvailableCrops(sampleCrops); // Fallback to sample data
         }
 
       } catch (error) {
         console.error("Error fetching available crops:", error);
-        setAvailableCrops([]);
+        setAvailableCrops(sampleCrops); // Fallback to sample data
       } finally {
         setIsLoadingCrops(false);
       }
     };
 
     fetchAvailableCrops();
-  }, []);
+  }, [isLoggedIn]);
 
   // Fetch soon-ready crops when component mounts
   useEffect(() => {
@@ -465,27 +495,12 @@ export function BuyerHome() {
       try {
         setIsLoadingSoonReady(true);
         
-        // Get buyer token from session storage
-        const buyerSession = sessionStorage.getItem("buyerSession");
-        if (!buyerSession) {
-          console.error("No buyer session found for soon-ready crops");
-          setIsLoadingSoonReady(false);
-          return;
-        }
-
-        const encryptedSessionData = JSON.parse(buyerSession);
-        const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
-        const now = new Date().getTime();
+        const token = getBuyerToken();
         
-        if (now >= sessionData.expiry) {
-          console.error("Buyer session has expired for soon-ready crops");
-          setIsLoadingSoonReady(false);
-          return;
-        }
-
-        const token = sessionData.token;
+        // If no token (guest user), show sample data
         if (!token) {
-          console.error("No buyer token found in session for soon-ready crops");
+          console.log("Guest user - showing sample soon-ready crops");
+          setSoonReadyCrops(sampleSoonReadyCrops);
           setIsLoadingSoonReady(false);
           return;
         }
@@ -499,37 +514,37 @@ export function BuyerHome() {
           },
         });
 
-        // Console log the response
         console.log("Soon-ready crops API response status:", response.status);
         const responseData = await response.json();
         console.log("Soon-ready crops API response data:", responseData);
 
         if (response.status === 200 && responseData.crops) {
-          // Debug: Log crop structure to see plant object
           if (responseData.crops.length > 0) {
             console.log("Soon-ready crop sample:", responseData.crops[0]);
           }
           setSoonReadyCrops(responseData.crops);
         } else {
           console.error("Failed to fetch soon-ready crops or no crops available");
-          setSoonReadyCrops([]);
+          setSoonReadyCrops(sampleSoonReadyCrops); // Fallback to sample data
         }
 
       } catch (error) {
         console.error("Error fetching soon-ready crops:", error);
-        setSoonReadyCrops([]);
+        setSoonReadyCrops(sampleSoonReadyCrops); // Fallback to sample data
       } finally {
         setIsLoadingSoonReady(false);
       }
     };
 
     fetchSoonReadyCrops();
-  }, []);
+  }, [isLoggedIn]);
 
-  // Initialize cart count on component mount
+  // Initialize cart count on component mount (only for logged-in users)
   useEffect(() => {
-    fetchCartCount();
-  }, []);
+    if (isLoggedIn) {
+      fetchCartCount();
+    }
+  }, [isLoggedIn]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -539,7 +554,7 @@ export function BuyerHome() {
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <button
-              onClick={() => setLocation("/buyer-home")}
+              onClick={() => setLocation("/")}
               className="flex-shrink-0"
               data-testid="button-logo"
             >
@@ -550,57 +565,102 @@ export function BuyerHome() {
               />
             </button>
             <div className="flex items-center gap-2">
-              <button
-                onClick={handleProfileClick}
-                className="p-3 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-all duration-200 hover:scale-105"
-                data-testid="button-profile"
-              >
-                <User className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleCartClick}
-                className="p-3 hover:bg-gray-100 rounded-xl transition-colors relative"
-                data-testid="button-cart"
-              >
-                <ShoppingCart className="w-6 h-6 text-gray-700" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
-                    {cartCount > 99 ? '99+' : cartCount}
-                  </span>
-                )}
-              </button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
+              {isLoggedIn ? (
+                <>
                   <button
-                    className="p-3 hover:bg-red-50 rounded-xl transition-colors"
-                    data-testid="button-logout"
+                    onClick={handleProfileClick}
+                    className="p-3 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-all duration-200 hover:scale-105"
+                    data-testid="button-profile"
                   >
-                    <LogOut className="w-6 h-6 text-red-600" />
+                    <User className="w-5 h-5" />
                   </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      You're about to log out of your account. Your session will end and you'll need to sign in again to access your account.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
-                      Log Out
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                  <button
+                    onClick={handleCartClick}
+                    className="p-3 hover:bg-gray-100 rounded-xl transition-colors relative"
+                    data-testid="button-cart"
+                  >
+                    <ShoppingCart className="w-6 h-6 text-gray-700" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
+                        {cartCount > 99 ? '99+' : cartCount}
+                      </span>
+                    )}
+                  </button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className="p-3 hover:bg-red-50 rounded-xl transition-colors"
+                        data-testid="button-logout"
+                      >
+                        <LogOut className="w-6 h-6 text-red-600" />
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          You're about to log out of your account. Your session will end and you'll need to sign in again to access your account.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
+                          Log Out
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setLocation("/login")}
+                    className="px-4 py-2 text-green-700 font-medium text-sm hover:bg-green-50 rounded-lg transition-colors"
+                    data-testid="button-signin"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => setLocation("/role-selection")}
+                    className="px-4 py-2 bg-green-700 text-white font-medium text-sm rounded-lg hover:bg-green-800 transition-colors"
+                    data-testid="button-create-account"
+                  >
+                    Create Account
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
+          {/* Guest Sign Up Banner */}
+          {!isLoggedIn && (
+            <div className="mb-6 bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-4 text-white">
+              <div className="flex items-center gap-3">
+                <div className="bg-white/20 rounded-full p-2">
+                  <UserPlus className="w-6 h-6" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold">Join Lucent Ag</h3>
+                  <p className="text-sm text-green-100">Create an account to order fresh produce</p>
+                </div>
+                <button
+                  onClick={() => setLocation("/role-selection")}
+                  className="bg-white text-green-700 px-4 py-2 rounded-lg font-medium text-sm hover:bg-green-50 transition-colors"
+                  data-testid="button-join-now"
+                >
+                  Join Now
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Greeting Section */}
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Hello {userLastName}!</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isLoggedIn ? `Hello ${userLastName}!` : "Welcome to Lucent Ag"}
+            </h1>
             <p className="text-gray-600 text-sm">
-              Ready for something fresh today?
+              {isLoggedIn ? "Ready for something fresh today?" : "Discover fresh produce from local farms"}
             </p>
           </div>
 
