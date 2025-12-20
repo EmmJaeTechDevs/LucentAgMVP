@@ -262,8 +262,8 @@ export function BuyerVerification() {
         
         sessionStorage.setItem("buyerSession", JSON.stringify(encryptedSessionData));
         
-        // Clear the welcome popup flag so it shows for new registrations
-        sessionStorage.removeItem("buyerHasSeenWelcome");
+        // Set flag to indicate this is a new registration (for onboarding popup)
+        sessionStorage.setItem("buyerIsNewRegistration", "true");
 
         toast({
           title: "✅ Verification Successful!",

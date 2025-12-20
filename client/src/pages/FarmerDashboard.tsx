@@ -39,16 +39,16 @@ export function FarmerDashboard() {
   // Validate farmer session
   useSessionValidation("farmer");
 
-  // Check if farmer should see welcome popup (first time after registration)
+  // Check if farmer is a new registration (only show onboarding for new registrations, not logins)
   useEffect(() => {
-    const hasSeenWelcome = sessionStorage.getItem("farmerHasSeenWelcome");
-    if (!hasSeenWelcome) {
+    const isNewRegistration = sessionStorage.getItem("farmerIsNewRegistration");
+    if (isNewRegistration === "true") {
       setShowWelcomePopup(true);
     }
   }, []);
 
   const handleSkipOnboarding = () => {
-    sessionStorage.setItem("farmerHasSeenWelcome", "true");
+    sessionStorage.removeItem("farmerIsNewRegistration");
     setShowWelcomePopup(false);
     setShowSkipConfirmPopup(true);
   };
@@ -58,7 +58,7 @@ export function FarmerDashboard() {
   };
 
   const handleProceedToOnboarding = () => {
-    sessionStorage.setItem("farmerHasSeenWelcome", "true");
+    sessionStorage.removeItem("farmerIsNewRegistration");
     setShowWelcomePopup(false);
     setLocation("/farmer-onboarding-tutorial");
   };

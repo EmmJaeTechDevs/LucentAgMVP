@@ -43,10 +43,10 @@ export function BuyerHome() {
   const { toast } = useToast();
   const { addToCart, cartCount, isLoading: isCartLoading, fetchCartCount } = useCart();
 
-  // Check if buyer has seen welcome popup
+  // Check if buyer is a new registration (only show onboarding for new registrations, not logins)
   useEffect(() => {
-    const hasSeenWelcome = sessionStorage.getItem("buyerHasSeenWelcome");
-    if (!hasSeenWelcome) {
+    const isNewRegistration = sessionStorage.getItem("buyerIsNewRegistration");
+    if (isNewRegistration === "true") {
       setShowWelcomePopup(true);
     }
   }, []);
@@ -57,13 +57,13 @@ export function BuyerHome() {
   };
 
   const handleCloseSkipConfirm = () => {
-    sessionStorage.setItem("buyerHasSeenWelcome", "true");
+    sessionStorage.removeItem("buyerIsNewRegistration");
     setShowSkipConfirmPopup(false);
     setLocation("/buyer-notification-preferences");
   };
 
   const handleProceedToOnboarding = () => {
-    sessionStorage.setItem("buyerHasSeenWelcome", "true");
+    sessionStorage.removeItem("buyerIsNewRegistration");
     setShowWelcomePopup(false);
     setLocation("/buyer-onboarding-tutorial");
   };

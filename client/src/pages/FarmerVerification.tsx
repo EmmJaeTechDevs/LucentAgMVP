@@ -252,6 +252,9 @@ export function FarmerVerification() {
         const encryptedSessionData = SessionCrypto.encryptSessionData(sessionData);
         
         sessionStorage.setItem("farmerSession", JSON.stringify(encryptedSessionData));
+        
+        // Set flag to indicate this is a new registration (for onboarding popup)
+        sessionStorage.setItem("farmerIsNewRegistration", "true");
 
         toast({
           title: "✅ Verification Successful!",
