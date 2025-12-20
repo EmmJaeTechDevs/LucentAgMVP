@@ -871,12 +871,13 @@ export function BuyerHome() {
         </div>
       </div>
 
-      {/* Desktop Layout */}
-      <div className="hidden md:block p-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-6">
+      {/* Desktop/Tablet Layout */}
+      <div className="hidden md:block">
+        {/* Top Header */}
+        <header className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-6 py-3">
+            <div className="flex items-center justify-between gap-6">
+              {/* Logo */}
               <button
                 onClick={() => setLocation("/buyer-home")}
                 className="flex-shrink-0"
@@ -884,128 +885,196 @@ export function BuyerHome() {
               >
                 <img 
                   src={lucentLogo} 
-                  alt="Lucent Ag Logo" 
-                  className="h-24 w-auto object-contain"
+                  alt="Lucent Ag" 
+                  className="h-12 w-auto object-contain"
                 />
               </button>
-              <div>
-                <h1 className="text-4xl font-bold text-gray-900">Hello {userLastName}!</h1>
-                <p className="text-gray-600 text-xl">
-                  Ready for something fresh today?
-                </p>
+
+              {/* Search Bar */}
+              <form onSubmit={handleSearch} className="flex-1 max-w-xl">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search produce e.g. fresh carrots..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    className="w-full pl-4 pr-12 py-2.5 bg-gray-100 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-sm"
+                    data-testid="input-search-desktop"
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 bg-green-600 hover:bg-green-700 text-white p-2 rounded-md transition-colors"
+                  >
+                    <Search className="w-4 h-4" />
+                  </button>
+                </div>
+              </form>
+
+              {/* Right Actions */}
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={handleProfileClick}
+                  className="flex items-center gap-2 text-gray-700 hover:text-green-600 text-sm font-medium transition-colors"
+                  data-testid="button-account-desktop"
+                >
+                  <User className="w-5 h-5" />
+                  <span>Account</span>
+                </button>
+                <button
+                  onClick={handleCartClick}
+                  className="flex items-center gap-2 text-gray-700 hover:text-green-600 text-sm font-medium transition-colors relative"
+                  data-testid="button-cart-desktop"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  <span>My Basket</span>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
+                  )}
+                </button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      className="flex items-center gap-2 text-red-600 hover:text-red-700 text-sm font-medium transition-colors"
+                      data-testid="button-logout-desktop"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span>Log Out</span>
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        You're about to log out of your account. Your session will end and you'll need to sign in again.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
+                        Log Out
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleProfileClick}
-                className="p-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-                data-testid="button-profile-desktop"
-              >
-                <User className="w-6 h-6" />
-              </button>
-              <button
-                onClick={handleCartClick}
-                className="p-4 hover:bg-gray-100 rounded-xl transition-colors relative"
-                data-testid="button-cart-desktop"
-              >
-                <ShoppingCart className="w-8 h-8 text-gray-700" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center min-w-[24px]">
-                    {cartCount > 99 ? '99+' : cartCount}
-                  </span>
-                )}
-              </button>
-              <HamburgerMenu userType="buyer" />
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
+          </div>
+
+          {/* Category Navigation */}
+          <div className="border-t border-gray-100">
+            <div className="max-w-7xl mx-auto px-6 py-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1">
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => handleCategorySelect(category)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                        selectedCategory === category
+                          ? "bg-green-600 text-white"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                      data-testid={`category-desktop-${category.toLowerCase().replace(" ", "-")}`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-4">
                   <button
-                    className="flex items-center gap-2 px-4 py-3 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-xl transition-all duration-300 hover:scale-105"
-                    data-testid="button-logout-desktop"
+                    onClick={() => setLocation("/buyer-orders")}
+                    className="flex items-center gap-2 text-green-600 hover:text-green-700 text-sm font-medium"
                   >
-                    <LogOut className="w-5 h-5" />
-                    <span>Log Out</span>
+                    <Package className="w-4 h-4" />
+                    <span>My Orders</span>
                   </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      You're about to log out of your account. Your session will end and you'll need to sign in again to access your account.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
-                      Log Out
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                  <button
+                    onClick={() => setLocation("/communities")}
+                    className="flex items-center gap-2 text-gray-600 hover:text-green-600 text-sm font-medium"
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>Communities</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="mb-8">
-            <div className="relative max-w-2xl">
-              <Search className="w-6 h-6 text-gray-400 absolute left-6 top-1/2 transform -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search produce e.g. Fresh carrots..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-16 pr-6 py-5 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-green-500 transition-all text-lg"
-                data-testid="input-search-desktop"
-              />
+          {/* Farmer Sign Up Banner */}
+          <div className="bg-gray-50 border-t border-gray-100">
+            <div className="max-w-7xl mx-auto px-6 py-2 text-center">
+              <span className="text-sm text-gray-600">
+                Are you a farmer?{" "}
+                <button
+                  onClick={() => setLocation("/login")}
+                  className="text-green-600 hover:text-green-700 font-medium hover:underline"
+                >
+                  Login or Sign up as a Farmer
+                </button>
+              </span>
             </div>
-          </form>
+          </div>
+        </header>
 
-          {/* Categories */}
-          <div className="flex gap-4 mb-12">
-            {categories.map((category) => (
+        {/* Hero Banner */}
+        <div className="relative h-64 md:h-80 lg:h-96 overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.5), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=1600&q=80')`,
+            }}
+          />
+          <div className="relative max-w-7xl mx-auto px-6 h-full flex items-center">
+            <div className="max-w-lg">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+                Fresh from local farms to your door
+              </h1>
               <button
-                key={category}
-                onClick={() => handleCategorySelect(category)}
-                className={`px-8 py-4 rounded-full font-medium text-lg transition-colors ${
-                  selectedCategory === category
-                    ? "bg-green-700 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-                data-testid={`category-desktop-${category.toLowerCase().replace(" ", "-")}`}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                data-testid="button-shop-fresh"
               >
-                {category}
+                Shop Fresh Today
               </button>
-            ))}
+            </div>
           </div>
+        </div>
 
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-6 py-10">
           {/* Fresh Today Section */}
           <div className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              Fresh Today
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Fresh Today</h2>
+              <button className="text-green-600 hover:text-green-700 text-sm font-medium flex items-center gap-1">
+                See all
+                <span>→</span>
+              </button>
+            </div>
             {isLoadingCrops ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white rounded-xl shadow-sm animate-pulse">
-                    <div className="w-full h-48 bg-gray-200 rounded-t-xl"></div>
-                    <div className="p-6 space-y-3">
-                      <div className="h-5 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                      <div className="h-5 bg-gray-200 rounded w-2/3"></div>
+              <div className="flex gap-4 overflow-x-auto pb-4">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="flex-shrink-0 w-44 bg-white rounded-lg shadow-sm animate-pulse">
+                    <div className="w-full h-32 bg-gray-200 rounded-t-lg"></div>
+                    <div className="p-3 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : freshTodayProducts.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                 {freshTodayProducts.map((product) => (
-                <div
-                  key={product.id}
-                  onClick={() => handleProductClick(product.id)}
-                  className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer hover:scale-105"
-                  data-testid={`product-desktop-${product.id}`}
-                >
-                  <div className="relative">
-                    <div className="w-full h-48 bg-gray-100 rounded-t-xl overflow-hidden">
+                  <div
+                    key={product.id}
+                    onClick={() => handleProductClick(product.id)}
+                    className="flex-shrink-0 w-44 bg-white rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    data-testid={`product-desktop-${product.id}`}
+                  >
+                    <div className="w-full h-32 bg-gray-100 rounded-t-lg overflow-hidden">
                       {typeof product.image === "string" &&
                       (product.image.startsWith("/") || product.image.startsWith("http")) ? (
                         <img
@@ -1014,104 +1083,184 @@ export function BuyerHome() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-6xl">
+                        <div className="w-full h-full flex items-center justify-center text-4xl bg-gray-200">
                           {product.image}
                         </div>
                       )}
                     </div>
-                    {product.stockLeft && (
-                      <div className="absolute top-3 left-3 bg-orange-100 text-orange-800 px-3 py-1 rounded-lg text-sm font-medium">
-                        {product.stockLeft}
-                      </div>
-                    )}
+                    <div className="p-3">
+                      <h3 className="font-semibold text-gray-900 text-sm mb-1 truncate">
+                        {product.name}
+                      </h3>
+                      <p className="text-gray-500 text-xs mb-1 flex items-center gap-1 truncate">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full flex-shrink-0"></span>
+                        {product.farm}
+                      </p>
+                      <p className="font-bold text-gray-900 text-sm">
+                        {product.price}{" "}
+                        <span className="font-normal text-xs text-gray-500">
+                          {product.unit}
+                        </span>
+                      </p>
+                    </div>
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {product.name}
-                    </h3>
-                    <p className="text-gray-600 mb-3 flex items-center gap-2">
-                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                      {product.farm}
-                    </p>
-                    <p className="text-xl font-bold text-gray-900">
-                      {product.price}{" "}
-                      <span className="font-normal text-base text-gray-600">
-                        {product.unit}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-xl">No fresh crops available at the moment</p>
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">No fresh crops available at the moment</p>
               </div>
             )}
           </div>
 
           {/* Harvesting Soon Section */}
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              Harvesting Soon
-            </h2>
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Harvesting Soon</h2>
+              <button className="text-green-600 hover:text-green-700 text-sm font-medium flex items-center gap-1">
+                See all
+                <span>→</span>
+              </button>
+            </div>
             {isLoadingSoonReady ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white rounded-xl shadow-sm animate-pulse">
-                    <div className="w-full h-48 bg-gray-200 rounded-t-xl"></div>
-                    <div className="p-6 space-y-3">
-                      <div className="h-5 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                      <div className="h-5 bg-gray-200 rounded w-2/3"></div>
+              <div className="flex gap-4 overflow-x-auto pb-4">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="flex-shrink-0 w-44 bg-white rounded-lg shadow-sm animate-pulse">
+                    <div className="w-full h-32 bg-gray-200 rounded-t-lg"></div>
+                    <div className="p-3 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : harvestingSoonProducts.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                 {harvestingSoonProducts.map((product) => (
-                <div
-                  key={product.id}
-                  onClick={() => handleHarvestingProductClick(product.id)}
-                  className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all cursor-pointer hover:scale-105"
-                  data-testid={`product-desktop-${product.id}`}
-                >
-                  <div className="w-full h-48 bg-gray-100 rounded-t-xl overflow-hidden">
-                    {typeof product.image === "string" &&
-                    (product.image.startsWith("/") || product.image.startsWith("http")) ? (
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-6xl">
-                        {product.image}
-                      </div>
-                    )}
+                  <div
+                    key={product.id}
+                    onClick={() => handleHarvestingProductClick(product.id)}
+                    className="flex-shrink-0 w-44 bg-white rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    data-testid={`product-desktop-${product.id}`}
+                  >
+                    <div className="w-full h-32 bg-gray-100 rounded-t-lg overflow-hidden">
+                      {typeof product.image === "string" &&
+                      (product.image.startsWith("/") || product.image.startsWith("http")) ? (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl bg-gray-200">
+                          {product.image}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <h3 className="font-semibold text-gray-900 text-sm mb-1 truncate">
+                        {product.name}
+                      </h3>
+                      <p className="text-gray-500 text-xs mb-1 flex items-center gap-1 truncate">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full flex-shrink-0"></span>
+                        {product.farm}
+                      </p>
+                      <p className="font-bold text-gray-900 text-sm">
+                        {product.price}{" "}
+                        <span className="font-normal text-xs text-gray-500">
+                          {product.unit}
+                        </span>
+                      </p>
+                    </div>
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {product.name}
-                    </h3>
-                    <p className="text-gray-600 mb-3 flex items-center gap-2">
-                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                      {product.farm}
-                    </p>
-                    <p className="text-xl font-bold text-gray-900">
-                      {product.price}{" "}
-                      <span className="font-normal text-base text-gray-600">
-                        {product.unit}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-xl">No harvesting soon crops available</p>
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">No harvesting soon crops available</p>
+              </div>
+            )}
+          </div>
+
+          {/* Shop by Category Section */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Shop by Category</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {[
+                { name: "Vegetables", image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80" },
+                { name: "Fruits", image: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80" },
+                { name: "Grains", image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&q=80" },
+                { name: "Legumes", image: "https://images.unsplash.com/photo-1515543904323-4ce37c8f6114?w=400&q=80" },
+                { name: "Herbs & Spices", image: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?w=400&q=80" },
+              ].map((category) => (
+                <button
+                  key={category.name}
+                  onClick={() => handleCategorySelect(category.name)}
+                  className="group relative h-32 rounded-lg overflow-hidden"
+                  data-testid={`category-image-${category.name.toLowerCase().replace(/ & /g, "-")}`}
+                >
+                  <img
+                    src={category.image}
+                    alt={category.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
+                  <span className="absolute inset-0 flex items-center justify-center text-white font-semibold text-sm">
+                    {category.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Popular Picks Section */}
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Popular Picks</h2>
+            {freshTodayProducts.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {freshTodayProducts.slice(0, 10).map((product) => (
+                  <div
+                    key={product.id}
+                    onClick={() => handleProductClick(product.id)}
+                    className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    data-testid={`popular-product-${product.id}`}
+                  >
+                    <div className="w-full h-28 bg-gray-100 rounded-t-lg overflow-hidden">
+                      {typeof product.image === "string" &&
+                      (product.image.startsWith("/") || product.image.startsWith("http")) ? (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-3xl bg-gray-200">
+                          {product.image}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <h3 className="font-semibold text-gray-900 text-sm mb-1 truncate">
+                        {product.name}
+                      </h3>
+                      <p className="text-gray-500 text-xs mb-1 flex items-center gap-1 truncate">
+                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full flex-shrink-0"></span>
+                        {product.farm}
+                      </p>
+                      <p className="font-bold text-gray-900 text-sm">
+                        {product.price}{" "}
+                        <span className="font-normal text-xs text-gray-500">
+                          {product.unit}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">No products available</p>
               </div>
             )}
           </div>
