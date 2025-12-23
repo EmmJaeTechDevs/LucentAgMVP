@@ -7,6 +7,8 @@ import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import { config } from "process";
 import { BaseUrl } from "../../../Baseconfig";
+import lucentLogo from "@assets/image 20_1759571692580.png";
+import farmerWorkingImage from "@assets/unsplash_i_DbKwALyrQ_1766489801149.png";
 
 export function Login() {
   const [, setLocation] = useLocation();
@@ -656,147 +658,175 @@ export function Login() {
         </div>
       </div>
 
-      {/* Desktop Layout */}
-      <div className="hidden md:flex min-h-screen items-center justify-center p-8">
-        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-6">
-              <div className="text-3xl">🌱</div>
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-3">
-              Welcome Back
-            </h1>
-            <p className="text-gray-600 text-lg">
-              Sign in to your account to continue
-            </p>
-          </div>
+      {/* Desktop/Tablet Layout - Two Column Design */}
+      <div className="hidden md:flex min-h-screen">
+        {/* Left Side - Farmer Image */}
+        <div className="w-1/2 relative">
+          <img 
+            src={farmerWorkingImage} 
+            alt="Farmer working in field" 
+            className="w-full h-full object-cover"
+          />
+        </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-
-            {/* Email/Phone Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email or Phone Number
-              </label>
-              <input
-                type="text"
-                value={formData.emailOrPhone}
-                onChange={(e) =>
-                  handleInputChange("emailOrPhone", e.target.value)
-                }
-                className={`w-full px-4 py-4 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-lg ${
-                  errors.emailOrPhone
-                    ? "border-orange-500 focus:border-orange-600 focus:ring-orange-200"
-                    : "border-gray-300 focus:border-green-600 focus:ring-green-200"
-                }`}
-                placeholder="Please input your email or phone number here"
-                required
-                data-testid="input-email-phone-desktop"
+        {/* Right Side - Login Form */}
+        <div className="w-1/2 flex items-center justify-center bg-white px-8 lg:px-16">
+          <div className="w-full max-w-md">
+            {/* Logo */}
+            <div className="text-center mb-6">
+              <img 
+                src={lucentLogo} 
+                alt="Lucent Ag Logo" 
+                className="h-16 mx-auto object-contain"
+                data-testid="img-logo-desktop"
               />
-              {errors.emailOrPhone && (
-                <p
-                  className="mt-2 text-orange-600"
-                  data-testid="error-email-phone-desktop"
-                >
-                  {errors.emailOrPhone}
-                </p>
-              )}
             </div>
 
-            {/* Password Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={(e) => handleInputChange("password", e.target.value)}
-                  className={`w-full px-4 py-4 pr-14 border rounded-xl focus:outline-none focus:ring-2 transition-colors text-lg ${
-                    errors.password
-                      ? "border-orange-500 focus:border-orange-600 focus:ring-orange-200"
-                      : "border-gray-300 focus:border-green-600 focus:ring-green-200"
-                  }`}
-                  placeholder="Enter your password"
-                  required
-                  data-testid="input-password-desktop"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center justify-center w-14 text-gray-500 hover:text-gray-700 focus:outline-none"
-                  data-testid="toggle-password-visibility-desktop"
-                >
-                  {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
-                </button>
-              </div>
-              {errors.password && (
-                <p
-                  className="mt-2 text-orange-600"
-                  data-testid="error-password-desktop"
-                >
-                  {errors.password}
-                </p>
-              )}
-            </div>
-
-            {/* Remember Login Checkbox */}
-            <div className="flex items-center">
-              <label className="flex items-center space-x-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.rememberLogin}
-                  onChange={(e) =>
-                    handleInputChange("rememberLogin", e.target.checked)
-                  }
-                  className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                  data-testid="checkbox-remember-desktop"
-                />
-                <span className="text-gray-700">Remember Login</span>
-              </label>
-            </div>
-
-            {/* Login Button */}
-            <Button
-              type="submit"
-              disabled={
-                isLoading || !formData.emailOrPhone || !formData.password
-              }
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-xl font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105"
-              data-testid="button-login-desktop"
-            >
-              {isLoading ? "Signing in..." : "Sign In"}
-            </Button>
-
-            {/* Signup Link */}
-            <div className="text-center">
-              <p className="text-gray-600">
-                Don't have an account yet? We invite you to{" "}
-                <button
-                  type="button"
-                  onClick={handleSignupRedirect}
-                  className="text-green-600 font-medium hover:text-green-700 transition-colors"
-                  data-testid="link-signup-desktop"
-                >
-                  Signup
-                </button>
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                Login
+              </h1>
+              <p className="text-gray-500 text-sm">
+                Welcome Back! Provide your details to continue
               </p>
             </div>
 
-            {/* Forgot Password Link */}
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                className="text-green-600 hover:text-green-700 transition-colors"
-                data-testid="link-forgot-password-desktop"
+            <form onSubmit={handleLogin} className="space-y-5">
+              {/* Email Address Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Email Address
+                </label>
+                <input
+                  type="text"
+                  value={formData.emailOrPhone}
+                  onChange={(e) =>
+                    handleInputChange("emailOrPhone", e.target.value)
+                  }
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
+                    errors.emailOrPhone
+                      ? "border-orange-500 focus:border-orange-600 focus:ring-orange-200"
+                      : "border-gray-300 focus:border-green-600 focus:ring-green-200"
+                  }`}
+                  placeholder="Enter your email address"
+                  required
+                  data-testid="input-email-phone-desktop"
+                />
+                {errors.emailOrPhone && (
+                  <p
+                    className="mt-1.5 text-sm text-orange-600"
+                    data-testid="error-email-phone-desktop"
+                  >
+                    {errors.emailOrPhone}
+                  </p>
+                )}
+              </div>
+
+              {/* Password Input */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Password
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-sm text-green-600 hover:text-green-700 transition-colors"
+                    data-testid="link-forgot-password-desktop"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    className={`w-full px-4 py-3 pr-12 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
+                      errors.password
+                        ? "border-orange-500 focus:border-orange-600 focus:ring-orange-200"
+                        : "border-gray-300 focus:border-green-600 focus:ring-green-200"
+                    }`}
+                    placeholder="Enter Password"
+                    required
+                    data-testid="input-password-desktop"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center justify-center w-12 text-gray-500 hover:text-gray-700 focus:outline-none"
+                    data-testid="toggle-password-visibility-desktop"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p
+                    className="mt-1.5 text-sm text-orange-600"
+                    data-testid="error-password-desktop"
+                  >
+                    {errors.password}
+                  </p>
+                )}
+              </div>
+
+              {/* Remember Me Checkbox */}
+              <div className="flex items-center">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.rememberLogin}
+                    onChange={(e) =>
+                      handleInputChange("rememberLogin", e.target.checked)
+                    }
+                    className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    data-testid="checkbox-remember-desktop"
+                  />
+                  <span className="text-sm text-gray-700">Remember Me</span>
+                </label>
+              </div>
+
+              {/* Login Button */}
+              <Button
+                type="submit"
+                disabled={
+                  isLoading || !formData.emailOrPhone || !formData.password
+                }
+                className="w-full bg-green-700 hover:bg-green-800 text-white py-3 text-base font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                data-testid="button-login-desktop"
               >
-                Forgotten Password?
-              </button>
-            </div>
-          </form>
+                {isLoading ? "Signing in..." : "Log In"}
+              </Button>
+
+              {/* Create Account Link */}
+              <div className="text-center">
+                <p className="text-sm text-gray-600">
+                  Don't have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={handleSignupRedirect}
+                    className="text-gray-900 font-semibold hover:text-green-700 transition-colors underline"
+                    data-testid="link-signup-desktop"
+                  >
+                    Create an Account
+                  </button>
+                </p>
+              </div>
+
+              {/* Return to Homepage Link */}
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setLocation("/")}
+                  className="text-sm text-gray-500 hover:text-gray-700 transition-colors underline"
+                  data-testid="link-homepage-desktop"
+                >
+                  Return to Homepage
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
