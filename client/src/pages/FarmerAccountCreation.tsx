@@ -111,6 +111,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
   const [cropConfigs, setCropConfigs] = useState<CropConfig[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [editingCrops, setEditingCrops] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -517,7 +518,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
           userType: "farmer"
         });
       }
-      setLocation("/farmer-verification");
+      setShowSuccessModal(true);
     } catch (error) {
       console.error("Error creating account:", error);
       toast({
@@ -528,6 +529,11 @@ export const FarmerAccountCreation = (): JSX.Element => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleGoToDashboard = () => {
+    setShowSuccessModal(false);
+    setLocation("/farmer-dashboard");
   };
 
   const renderStepIndicator = (step: typeof STEPS[0], index: number) => {
@@ -1332,6 +1338,42 @@ export const FarmerAccountCreation = (): JSX.Element => {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full relative">
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              data-testid="button-close-modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-50 flex items-center justify-center">
+                <Leaf className="w-8 h-8 text-green-600" />
+              </div>
+              
+              <h2 className="text-xl font-bold text-gray-900 mb-2">
+                Welcome! Your Farmer Account Is Ready
+              </h2>
+              <p className="text-gray-500 mb-8">
+                Your account has been successfully created. You can now list your produce, receive orders, and connect with buyers.
+              </p>
+
+              <button
+                onClick={handleGoToDashboard}
+                className="w-full bg-green-700 hover:bg-green-800 text-white py-3 rounded-lg font-medium transition-colors"
+                data-testid="button-go-to-dashboard"
+              >
+                Go to My Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
