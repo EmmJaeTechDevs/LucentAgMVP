@@ -291,6 +291,15 @@ export const FarmerAccountCreation = (): JSX.Element => {
   };
 
   const handleSubmit = async () => {
+    if (!isStep1Valid() || !isStep2Valid() || !isStep3Valid()) {
+      toast({
+        variant: "destructive",
+        title: "Incomplete Information",
+        description: "Please ensure all required fields are filled correctly.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const backendData = {
