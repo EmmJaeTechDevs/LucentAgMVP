@@ -1120,7 +1120,10 @@ export const FarmerAccountCreation = (): JSX.Element => {
       if (currentCropIndex > 0) {
         goToPrevCrop();
       } else {
-        setCurrentStep(3);
+        // Go back to crop selection to allow repicking crops
+        setCropsConfirmed(false);
+        setCropConfigs([]);
+        setCurrentCropIndex(0);
       }
     } else if (editingCrops) {
       cancelEditingCrops();
