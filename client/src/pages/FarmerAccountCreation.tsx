@@ -17,12 +17,29 @@ interface Plant {
   imageUrl?: string;
 }
 
+interface PlantQuestionOption {
+  label: string;
+  value: string;
+}
+
 interface PlantQuestion {
   id: string;
   question: string;
-  options: string[];
+  options: (string | PlantQuestionOption)[];
   multiSelect?: boolean;
 }
+
+// Helper to get option display value
+const getOptionDisplay = (option: string | PlantQuestionOption): string => {
+  if (typeof option === 'string') return option;
+  return option.label || option.value || '';
+};
+
+// Helper to get option value for storage
+const getOptionValue = (option: string | PlantQuestionOption): string => {
+  if (typeof option === 'string') return option;
+  return option.value || option.label || '';
+};
 
 interface CropConfig {
   cropName: string;
@@ -157,8 +174,10 @@ export const FarmerAccountCreation = (): JSX.Element => {
     setSelectedCrops(selectedCrops.filter(c => c !== crop));
   };
 
-  const confirmCrops = () => {
+  const confirmCrops = async () => {
     if (selectedCrops.length === 0) return;
+    
+    // Create initial configs
     const configs: CropConfig[] = selectedCrops.map(cropName => ({
       cropName,
       processesIt: null,
@@ -169,6 +188,43 @@ export const FarmerAccountCreation = (): JSX.Element => {
     setCropsConfirmed(true);
     setCurrentCropIndex(0);
     setEditingCrops(false);
+    
+    // Fetch questions for all selected crops upfront
+    setLoadingQuestions(true);
+    try {
+      const questionsPromises = selectedCrops.map(async (cropName, index) => {
+        const plant = availablePlants.find(p => p.name === cropName);
+        if (!plant) return { index, questions: [] };
+        
+        try {
+          const response = await fetch(`${BaseUrl}/api/plants/${plant.id}/questions`);
+          if (response.ok) {
+            const data = await response.json();
+            const questions: PlantQuestion[] = Array.isArray(data) ? data : (data.questions || []);
+            return { index, questions };
+          }
+        } catch (error) {
+          console.error(`Failed to fetch questions for ${cropName}:`, error);
+        }
+        return { index, questions: [] };
+      });
+      
+      const results = await Promise.all(questionsPromises);
+      
+      setCropConfigs(prev => {
+        const updated = [...prev];
+        results.forEach(({ index, questions }) => {
+          if (updated[index]) {
+            updated[index] = { ...updated[index], questions };
+          }
+        });
+        return updated;
+      });
+    } catch (error) {
+      console.error("Failed to fetch plant questions:", error);
+    } finally {
+      setLoadingQuestions(false);
+    }
   };
 
   const fetchPlantQuestions = async (cropName: string, cropIndex: number) => {
@@ -1038,22 +1094,24 @@ export const FarmerAccountCreation = (): JSX.Element => {
                 </div>
                 <div className="p-4">
                   <div className="flex flex-wrap gap-2">
-                    {question.options.map((option) => {
-                      const isSelected = (currentConfig.answers[question.id] || []).includes(option);
+                    {question.options.map((option, optIndex) => {
+                      const optionValue = getOptionValue(option);
+                      const optionDisplay = getOptionDisplay(option);
+                      const isSelected = (currentConfig.answers[question.id] || []).includes(optionValue);
                       return (
                         <button
-                          key={option}
+                          key={optionValue || optIndex}
                           type="button"
-                          onClick={() => toggleAnswerOption(question.id, option)}
+                          onClick={() => toggleAnswerOption(question.id, optionValue)}
                           className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
                             isSelected 
                               ? 'bg-white border-green-600 text-green-700' 
                               : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
                           }`}
-                          data-testid={`option-${question.id}-${option.toLowerCase().replace(/\s+/g, '-')}`}
+                          data-testid={`option-${question.id}-${optIndex}`}
                         >
                           {isSelected && <Leaf className="w-4 h-4" />}
-                          {option}
+                          {optionDisplay}
                         </button>
                       );
                     })}
