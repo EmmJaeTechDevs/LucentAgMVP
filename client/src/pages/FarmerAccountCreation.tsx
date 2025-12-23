@@ -9,12 +9,13 @@ import { BaseUrl } from "../../../Baseconfig";
 import { storeSession } from "@/lib/storage";
 import lucentLogo from "@assets/image 20_1759571692580.png";
 
-const AVAILABLE_CROPS = [
-  "Maize", "Cassava", "Rice", "Yam", "Tomatoes", "Pepper (Scotch Bonnet)",
-  "Onions", "Groundnut", "Sorghum", "Millet", "Cowpea", "Soybeans",
-  "Palm Oil", "Cocoa", "Cashew", "Plantain", "Banana", "Orange",
-  "Mango", "Pineapple", "Okra", "Spinach", "Cucumber", "Watermelon"
-];
+interface Plant {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  imageUrl?: string;
+}
 
 interface FormData {
   firstName: string;
@@ -89,6 +90,8 @@ export const FarmerAccountCreation = (): JSX.Element => {
   const [loadingFarmLgas, setLoadingFarmLgas] = useState(false);
   const [selectedCrops, setSelectedCrops] = useState<string[]>([]);
   const [cropDropdownOpen, setCropDropdownOpen] = useState(false);
+  const [availablePlants, setAvailablePlants] = useState<Plant[]>([]);
+  const [loadingPlants, setLoadingPlants] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -99,6 +102,28 @@ export const FarmerAccountCreation = (): JSX.Element => {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const fetchPlants = async () => {
+      setLoadingPlants(true);
+      try {
+        const response = await fetch(`${BaseUrl}/api/plants`);
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data)) {
+            setAvailablePlants(data);
+          } else if (data.plants && Array.isArray(data.plants)) {
+            setAvailablePlants(data.plants);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch plants:", error);
+      } finally {
+        setLoadingPlants(false);
+      }
+    };
+    fetchPlants();
   }, []);
 
   const addCrop = (crop: string) => {
@@ -756,19 +781,27 @@ export const FarmerAccountCreation = (): JSX.Element => {
 
           {cropDropdownOpen && (
             <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-              {AVAILABLE_CROPS.filter(crop => !selectedCrops.includes(crop)).map((crop) => (
-                <button
-                  key={crop}
-                  type="button"
-                  onClick={() => addCrop(crop)}
-                  className="w-full px-4 py-2.5 text-left hover:bg-gray-50 text-gray-700 text-sm transition-colors"
-                  data-testid={`crop-option-${crop.toLowerCase().replace(/\s+/g, '-')}`}
-                >
-                  {crop}
-                </button>
-              ))}
-              {AVAILABLE_CROPS.filter(crop => !selectedCrops.includes(crop)).length === 0 && (
-                <p className="px-4 py-3 text-sm text-gray-500">All crops selected</p>
+              {loadingPlants ? (
+                <div className="px-4 py-3 flex items-center gap-2 text-gray-500">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading crops...
+                </div>
+              ) : availablePlants.filter(plant => !selectedCrops.includes(plant.name)).length === 0 ? (
+                <p className="px-4 py-3 text-sm text-gray-500">
+                  {availablePlants.length === 0 ? "No crops available" : "All crops selected"}
+                </p>
+              ) : (
+                availablePlants.filter(plant => !selectedCrops.includes(plant.name)).map((plant) => (
+                  <button
+                    key={plant.id}
+                    type="button"
+                    onClick={() => addCrop(plant.name)}
+                    className="w-full px-4 py-2.5 text-left hover:bg-gray-50 text-gray-700 text-sm transition-colors"
+                    data-testid={`crop-option-${plant.name.toLowerCase().replace(/\s+/g, '-')}`}
+                  >
+                    {plant.name}
+                  </button>
+                ))
               )}
             </div>
           )}
