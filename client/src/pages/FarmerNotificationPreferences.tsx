@@ -117,9 +117,9 @@ export function FarmerNotificationPreferences() {
       const saved = await saveNotificationPreferences();
       
       if (saved) {
-        console.log("Farmer notification preferences saved, navigating to crop selection");
-        // Navigate to crop selection page for farmers
-        setLocation("/crop-selection");
+        console.log("Farmer notification preferences saved, navigating to dashboard");
+        // Navigate directly to farmer dashboard
+        setLocation("/farmer-dashboard");
       }
     } catch (error) {
       console.error("Error saving preferences:", error);
@@ -130,8 +130,8 @@ export function FarmerNotificationPreferences() {
 
   const handleSkip = () => {
     console.log("Farmer skipped notification preferences");
-    // Navigate to crop selection page
-    setLocation("/crop-selection");
+    // Navigate directly to farmer dashboard
+    setLocation("/farmer-dashboard");
   };
 
   return (
