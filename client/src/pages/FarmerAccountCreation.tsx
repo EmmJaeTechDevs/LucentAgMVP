@@ -1,13 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { api } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
 import { SessionCrypto } from "@/utils/sessionCrypto";
-import { Eye, EyeOff, Loader2, ChevronLeft, Check, Home } from "lucide-react";
+import { Eye, EyeOff, Loader2, ChevronLeft, Check, Home, X, ChevronDown, Leaf, Info } from "lucide-react";
 import { PasswordValidator, validatePasswordStrength } from "@/components/PasswordValidator";
 import { BaseUrl } from "../../../Baseconfig";
 import { storeSession } from "@/lib/storage";
 import lucentLogo from "@assets/image 20_1759571692580.png";
+
+const AVAILABLE_CROPS = [
+  "Maize", "Cassava", "Rice", "Yam", "Tomatoes", "Pepper (Scotch Bonnet)",
+  "Onions", "Groundnut", "Sorghum", "Millet", "Cowpea", "Soybeans",
+  "Palm Oil", "Cocoa", "Cashew", "Plantain", "Banana", "Orange",
+  "Mango", "Pineapple", "Okra", "Spinach", "Cucumber", "Watermelon"
+];
 
 interface FormData {
   firstName: string;
@@ -80,6 +87,30 @@ export const FarmerAccountCreation = (): JSX.Element => {
   const [loadingFarmStates, setLoadingFarmStates] = useState(false);
   const [loadingHomeLgas, setLoadingHomeLgas] = useState(false);
   const [loadingFarmLgas, setLoadingFarmLgas] = useState(false);
+  const [selectedCrops, setSelectedCrops] = useState<string[]>([]);
+  const [cropDropdownOpen, setCropDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setCropDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const addCrop = (crop: string) => {
+    if (!selectedCrops.includes(crop)) {
+      setSelectedCrops([...selectedCrops, crop]);
+    }
+    setCropDropdownOpen(false);
+  };
+
+  const removeCrop = (crop: string) => {
+    setSelectedCrops(selectedCrops.filter(c => c !== crop));
+  };
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -701,46 +732,69 @@ export const FarmerAccountCreation = (): JSX.Element => {
 
   const renderStep4 = () => (
     <div className="space-y-6">
-      <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Check className="w-8 h-8 text-green-600" />
-        </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Almost There!</h3>
-        <p className="text-gray-600 mb-4">
-          Review your information and click "Create Account" to complete your registration.
-        </p>
-        <p className="text-sm text-gray-500">
-          After registration, you'll be able to add your farm profile and crop preferences.
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+        <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+        <p className="text-sm text-gray-700">
+          {formData.firstName}, we will like to ensure you earn the most from your crops. To help us do this, please let us know how you handle them post-harvest.
         </p>
       </div>
 
-      <div className="space-y-4">
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-2">Account Details</h4>
-          <p className="text-sm text-gray-600">{formData.firstName} {formData.lastName}</p>
-          <p className="text-sm text-gray-600">{formData.email}</p>
-          <p className="text-sm text-gray-600">{formData.phone}</p>
+      <div>
+        <h3 className="font-semibold text-gray-900 mb-2">What do you grow on your farm?</h3>
+        <p className="text-sm text-gray-500 mb-4">Select one or more crops</p>
+
+        <div className="relative" ref={dropdownRef}>
+          <button
+            type="button"
+            onClick={() => setCropDropdownOpen(!cropDropdownOpen)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-left flex items-center justify-between bg-white hover:border-gray-400 transition-colors"
+            data-testid="dropdown-select-crops"
+          >
+            <span className="text-gray-500">Select Crops</span>
+            <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${cropDropdownOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {cropDropdownOpen && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {AVAILABLE_CROPS.filter(crop => !selectedCrops.includes(crop)).map((crop) => (
+                <button
+                  key={crop}
+                  type="button"
+                  onClick={() => addCrop(crop)}
+                  className="w-full px-4 py-2.5 text-left hover:bg-gray-50 text-gray-700 text-sm transition-colors"
+                  data-testid={`crop-option-${crop.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  {crop}
+                </button>
+              ))}
+              {AVAILABLE_CROPS.filter(crop => !selectedCrops.includes(crop)).length === 0 && (
+                <p className="px-4 py-3 text-sm text-gray-500">All crops selected</p>
+              )}
+            </div>
+          )}
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-2">Home Address</h4>
-          <p className="text-sm text-gray-600">
-            {formData.homeHouseNumber} {formData.homeStreet}, {formData.homeBusStop}
-          </p>
-          <p className="text-sm text-gray-600">
-            {formData.homeLocalGov}, {formData.homeState}, {formData.homeCountry}
-          </p>
-        </div>
-
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-2">Farm Address</h4>
-          <p className="text-sm text-gray-600">
-            {formData.farmHouseNumber} {formData.farmStreet}, {formData.farmBusStop}
-          </p>
-          <p className="text-sm text-gray-600">
-            {formData.farmLocalGov}, {formData.farmState}, {formData.farmCountry}
-          </p>
-        </div>
+        {selectedCrops.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {selectedCrops.map((crop) => (
+              <span
+                key={crop}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 rounded-full text-sm text-gray-700"
+              >
+                <Leaf className="w-4 h-4 text-green-600" />
+                {crop}
+                <button
+                  type="button"
+                  onClick={() => removeCrop(crop)}
+                  className="hover:text-red-500 transition-colors"
+                  data-testid={`remove-crop-${crop.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -760,7 +814,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
       case 1: return "Create Account";
       case 2: return "Home Address";
       case 3: return "Farm Address";
-      case 4: return "Complete Registration";
+      case 4: return "Farm Profile";
       default: return "Create Account";
     }
   };
@@ -774,7 +828,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
           <div className="flex items-center justify-between mb-4">
             <img src={lucentLogo} alt="Lucent Ag" className="h-12 object-contain" />
             <button
-              onClick={() => setLocation("/")}
+              onClick={() => setLocation("/farmer-dashboard")}
               className="p-2 text-gray-600 hover:text-gray-900"
               data-testid="button-home-mobile"
             >
@@ -811,6 +865,16 @@ export const FarmerAccountCreation = (): JSX.Element => {
 
             {/* Navigation Buttons */}
             <div className="mt-8 space-y-3">
+              {currentStep > 1 && (
+                <button
+                  onClick={handleBack}
+                  className="w-full py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                  data-testid="button-back"
+                >
+                  Back
+                </button>
+              )}
+
               {currentStep === 4 ? (
                 <button
                   onClick={handleSubmit}
@@ -824,7 +888,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
                       Creating Account...
                     </span>
                   ) : (
-                    "Create Account"
+                    "Continue"
                   )}
                 </button>
               ) : (
@@ -834,17 +898,6 @@ export const FarmerAccountCreation = (): JSX.Element => {
                   data-testid="button-continue"
                 >
                   Continue
-                </button>
-              )}
-
-              {currentStep > 1 && (
-                <button
-                  onClick={handleBack}
-                  className="w-full flex items-center justify-center gap-2 py-3 text-gray-600 hover:text-gray-900 transition-colors"
-                  data-testid="button-back"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                  Back
                 </button>
               )}
             </div>
@@ -879,7 +932,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
           {/* Top Bar */}
           <div className="flex justify-end p-6 border-b border-gray-100">
             <button
-              onClick={() => setLocation("/")}
+              onClick={() => setLocation("/farmer-dashboard")}
               className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               data-testid="button-return-home"
             >
@@ -907,10 +960,9 @@ export const FarmerAccountCreation = (): JSX.Element => {
                 {currentStep > 1 && (
                   <button
                     onClick={handleBack}
-                    className="flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="flex-1 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
                     data-testid="button-back-desktop"
                   >
-                    <ChevronLeft className="w-5 h-5" />
                     Back
                   </button>
                 )}
@@ -928,7 +980,7 @@ export const FarmerAccountCreation = (): JSX.Element => {
                         Creating Account...
                       </span>
                     ) : (
-                      "Create Account"
+                      "Next"
                     )}
                   </button>
                 ) : (
