@@ -132,6 +132,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public crop endpoints - accessible to both guests and logged-in users
+  // These endpoints fetch real crops from the database for all users
+  
+  app.get('/api/crops/available', async (req, res) => {
+    try {
+      // Get optional auth token from header
+      const authHeader = req.headers.authorization;
+      
+      // Make request to external API
+      const headers: Record<string, string> = {
+        'Accept': 'application/json',
+      };
+      
+      // If user is authenticated, include their token
+      if (authHeader) {
+        headers['Authorization'] = authHeader;
+      }
+      
+      const response = await fetch(`${BaseUrl}/api/buyer/crops/available`, {
+        method: 'GET',
+        headers,
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to fetch available crops:', response.status);
+        return res.status(response.status).json({ crops: [], message: 'No crops available' });
+      }
+      
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching available crops:', error);
+      res.status(500).json({ crops: [], message: 'Failed to fetch crops' });
+    }
+  });
+  
+  app.get('/api/crops/soon-ready', async (req, res) => {
+    try {
+      // Get optional auth token from header
+      const authHeader = req.headers.authorization;
+      
+      // Make request to external API
+      const headers: Record<string, string> = {
+        'Accept': 'application/json',
+      };
+      
+      // If user is authenticated, include their token
+      if (authHeader) {
+        headers['Authorization'] = authHeader;
+      }
+      
+      const response = await fetch(`${BaseUrl}/api/buyer/crops/soon-ready`, {
+        method: 'GET',
+        headers,
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to fetch soon-ready crops:', response.status);
+        return res.status(response.status).json({ crops: [], message: 'No crops available' });
+      }
+      
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching soon-ready crops:', error);
+      res.status(500).json({ crops: [], message: 'Failed to fetch crops' });
+    }
+  });
+  
+  app.get('/api/crops/search', async (req, res) => {
+    try {
+      const query = req.query.query as string;
+      
+      if (!query) {
+        return res.json({ crops: [] });
+      }
+      
+      // Get optional auth token from header
+      const authHeader = req.headers.authorization;
+      
+      // Make request to external API
+      const headers: Record<string, string> = {
+        'Accept': 'application/json',
+      };
+      
+      // If user is authenticated, include their token
+      if (authHeader) {
+        headers['Authorization'] = authHeader;
+      }
+      
+      const response = await fetch(`${BaseUrl}/api/buyer/crops/search?query=${encodeURIComponent(query)}`, {
+        method: 'GET',
+        headers,
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to search crops:', response.status);
+        return res.status(response.status).json({ crops: [] });
+      }
+      
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error searching crops:', error);
+      res.status(500).json({ crops: [] });
+    }
+  });
+
   // Order placement endpoint - handles external API calls with dynamic buyer tokens
   app.post('/api/orders', async (req, res) => {
     try {

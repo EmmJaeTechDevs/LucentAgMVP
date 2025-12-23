@@ -154,7 +154,7 @@ export function BuyerHome() {
     }
   };
 
-  // Search API function
+  // Search API function - uses backend API for both guests and logged-in users
   const performSearch = async (query: string) => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -168,27 +168,19 @@ export function BuyerHome() {
     try {
       const token = getBuyerToken();
       
-      // For guest users, filter from available crops (sample data)
-      if (!token) {
-        const lowerQuery = query.toLowerCase();
-        const filteredCrops = availableCrops.filter(crop => {
-          const plantName = crop.plant?.name || '';
-          const farmerName = crop.farmerName || crop.farmer?.name || '';
-          return plantName.toLowerCase().includes(lowerQuery) || 
-                 farmerName.toLowerCase().includes(lowerQuery);
-        });
-        setSearchResults(filteredCrops);
-        setIsSearching(false);
-        return;
+      // Build headers - include auth token if available
+      const headers: Record<string, string> = {
+        "Accept": "application/json",
+      };
+      
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
-      // Make search request with query parameter for logged-in users
-      const response = await fetch(`${BaseUrl}/api/buyer/crops/search?query=${encodeURIComponent(query)}`, {
+      // Make search request to our backend API (works for both guests and logged-in users)
+      const response = await fetch(`/api/crops/search?query=${encodeURIComponent(query)}`, {
         method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Accept": "application/json",
-        },
+        headers,
       });
 
       console.log("Search API response status:", response.status);
@@ -423,23 +415,7 @@ export function BuyerHome() {
   };
 
 
-  // Sample crops for guest users
-  const sampleCrops = [
-    { id: 1, plant: { name: "Fresh Tomatoes", imageUrl: "https://images.unsplash.com/photo-1546470427-0d4db154cce8?w=400" }, pricePerUnit: 2500, unit: "kg", availableQuantity: 50, totalQuantity: 100, farmerName: "Green Valley Farm", state: "Lagos" },
-    { id: 2, plant: { name: "Organic Carrots", imageUrl: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400" }, pricePerUnit: 1800, unit: "kg", availableQuantity: 30, totalQuantity: 50, farmerName: "Sunrise Farms", state: "Ogun" },
-    { id: 3, plant: { name: "Fresh Spinach", imageUrl: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400" }, pricePerUnit: 1500, unit: "kg", availableQuantity: 25, totalQuantity: 40, farmerName: "Leafy Greens Co", state: "Abuja" },
-    { id: 4, plant: { name: "Bell Peppers", imageUrl: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=400" }, pricePerUnit: 2200, unit: "kg", availableQuantity: 40, totalQuantity: 60, farmerName: "Fresh Harvest", state: "Kaduna" },
-    { id: 5, plant: { name: "Cucumbers", imageUrl: "https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?w=400" }, pricePerUnit: 1200, unit: "kg", availableQuantity: 60, totalQuantity: 80, farmerName: "Garden Fresh", state: "Kano" },
-    { id: 6, plant: { name: "Onions", imageUrl: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=400" }, pricePerUnit: 900, unit: "kg", availableQuantity: 100, totalQuantity: 150, farmerName: "Northern Farms", state: "Sokoto" },
-  ];
-
-  const sampleSoonReadyCrops = [
-    { id: 101, plant: { name: "Sweet Corn", imageUrl: "https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400" }, pricePerUnit: 1600, unit: "kg", availableQuantity: 0, totalQuantity: 80, farmerName: "Corn Valley", state: "Plateau", harvestDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() },
-    { id: 102, plant: { name: "Watermelon", imageUrl: "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?w=400" }, pricePerUnit: 3500, unit: "piece", availableQuantity: 0, totalQuantity: 50, farmerName: "Fruit Gardens", state: "Benue", harvestDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() },
-    { id: 103, plant: { name: "Pineapple", imageUrl: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=400" }, pricePerUnit: 2800, unit: "piece", availableQuantity: 0, totalQuantity: 30, farmerName: "Tropical Farms", state: "Cross River", harvestDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString() },
-  ];
-
-  // Fetch available crops when component mounts
+  // Fetch available crops when component mounts - uses backend API for both guests and logged-in users
   useEffect(() => {
     const fetchAvailableCrops = async () => {
       try {
@@ -447,21 +423,19 @@ export function BuyerHome() {
         
         const token = getBuyerToken();
         
-        // If no token (guest user), show sample data
-        if (!token) {
-          console.log("Guest user - showing sample crops");
-          setAvailableCrops(sampleCrops);
-          setIsLoadingCrops(false);
-          return;
+        // Build headers - include auth token if available
+        const headers: Record<string, string> = {
+          "Accept": "application/json",
+        };
+        
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
         }
 
-        // Make GET request to fetch available crops
-        const response = await fetch(`${BaseUrl}/api/buyer/crops/available`, {
+        // Make GET request to our backend API (works for both guests and logged-in users)
+        const response = await fetch(`/api/crops/available`, {
           method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-          },
+          headers,
         });
 
         console.log("Available crops API response status:", response.status);
@@ -475,12 +449,12 @@ export function BuyerHome() {
           setAvailableCrops(responseData.crops);
         } else {
           console.error("Failed to fetch crops or no crops available");
-          setAvailableCrops(sampleCrops); // Fallback to sample data
+          setAvailableCrops([]);
         }
 
       } catch (error) {
         console.error("Error fetching available crops:", error);
-        setAvailableCrops(sampleCrops); // Fallback to sample data
+        setAvailableCrops([]);
       } finally {
         setIsLoadingCrops(false);
       }
@@ -489,7 +463,7 @@ export function BuyerHome() {
     fetchAvailableCrops();
   }, [isLoggedIn]);
 
-  // Fetch soon-ready crops when component mounts
+  // Fetch soon-ready crops when component mounts - uses backend API for both guests and logged-in users
   useEffect(() => {
     const fetchSoonReadyCrops = async () => {
       try {
@@ -497,21 +471,19 @@ export function BuyerHome() {
         
         const token = getBuyerToken();
         
-        // If no token (guest user), show sample data
-        if (!token) {
-          console.log("Guest user - showing sample soon-ready crops");
-          setSoonReadyCrops(sampleSoonReadyCrops);
-          setIsLoadingSoonReady(false);
-          return;
+        // Build headers - include auth token if available
+        const headers: Record<string, string> = {
+          "Accept": "application/json",
+        };
+        
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
         }
 
-        // Make GET request to fetch soon-ready crops
-        const response = await fetch(`${BaseUrl}/api/buyer/crops/soon-ready`, {
+        // Make GET request to our backend API (works for both guests and logged-in users)
+        const response = await fetch(`/api/crops/soon-ready`, {
           method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-          },
+          headers,
         });
 
         console.log("Soon-ready crops API response status:", response.status);
@@ -525,12 +497,12 @@ export function BuyerHome() {
           setSoonReadyCrops(responseData.crops);
         } else {
           console.error("Failed to fetch soon-ready crops or no crops available");
-          setSoonReadyCrops(sampleSoonReadyCrops); // Fallback to sample data
+          setSoonReadyCrops([]);
         }
 
       } catch (error) {
         console.error("Error fetching soon-ready crops:", error);
-        setSoonReadyCrops(sampleSoonReadyCrops); // Fallback to sample data
+        setSoonReadyCrops([]);
       } finally {
         setIsLoadingSoonReady(false);
       }
