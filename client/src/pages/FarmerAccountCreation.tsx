@@ -587,9 +587,9 @@ export const FarmerAccountCreation = (): JSX.Element => {
     }
   };
 
-  const handleGoToDashboard = () => {
+  const handleGoToVerification = () => {
     setShowSuccessModal(false);
-    setLocation("/farmer-dashboard");
+    setLocation("/farmer-verification");
   };
 
   const renderStepIndicator = (step: typeof STEPS[0], index: number) => {
@@ -1418,18 +1418,18 @@ export const FarmerAccountCreation = (): JSX.Element => {
               </div>
               
               <h2 className="text-xl font-bold text-gray-900 mb-2">
-                Welcome! Your Farmer Account Is Ready
+                Almost There!
               </h2>
               <p className="text-gray-500 mb-8">
-                Your account has been successfully created. You can now list your produce, receive orders, and connect with buyers.
+                Your account has been created. Please verify your email to complete registration and start connecting with buyers.
               </p>
 
               <button
-                onClick={handleGoToDashboard}
+                onClick={handleGoToVerification}
                 className="w-full bg-green-700 hover:bg-green-800 text-white py-3 rounded-lg font-medium transition-colors"
-                data-testid="button-go-to-dashboard"
+                data-testid="button-verify-email"
               >
-                Go to My Dashboard
+                Verify My Email
               </button>
             </div>
           </div>
