@@ -4,6 +4,7 @@ import { Link, useLocation } from "wouter";
 import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { useCart } from "@/hooks/useCart";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
+import { SignInModal } from "@/components/SignInModal";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 import { BaseUrl } from "../../../Baseconfig";
 import lucentLogo from "@assets/image 20_1759571692580.png";
@@ -29,7 +30,47 @@ export function Cart() {
   const [relatedCrops, setRelatedCrops] = useState<any[]>([]);
   const [isLoadingRelated, setIsLoadingRelated] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showSignInModal, setShowSignInModal] = useState(false);
   const relatedScrollRef = useRef<HTMLDivElement>(null);
+
+  const isBuyerLoggedIn = () => {
+    try {
+      const buyerSession = sessionStorage.getItem("buyerSession");
+      if (!buyerSession) return false;
+      
+      const encryptedSessionData = JSON.parse(buyerSession);
+      const sessionData = SessionCrypto.decryptSessionData(encryptedSessionData);
+      const now = new Date().getTime();
+      
+      if (sessionData.token && now < sessionData.expiry && sessionData.userType === "buyer") {
+        return true;
+      }
+      
+      const userType = localStorage.getItem("userType");
+      const buyerUserId = localStorage.getItem("buyerUserId");
+      if (userType === "buyer" && buyerUserId && sessionData.token && now < sessionData.expiry) {
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Error checking buyer login:", error);
+      return false;
+    }
+  };
+
+  const handleCheckoutClick = () => {
+    if (isBuyerLoggedIn()) {
+      setLocation("/checkout");
+    } else {
+      setShowSignInModal(true);
+    }
+  };
+
+  const handleSignInSuccess = () => {
+    setShowSignInModal(false);
+    setLocation("/checkout");
+  };
 
   useEffect(() => {
     fetchCartItems();
@@ -333,14 +374,13 @@ export function Cart() {
                     </div>
                   </div>
 
-                  <Link href="/checkout">
-                    <button
-                      className="w-full mt-6 bg-green-700 hover:bg-green-800 text-white py-3 rounded-lg font-semibold transition-colors"
-                      data-testid="button-checkout-desktop"
-                    >
-                      Checkout
-                    </button>
-                  </Link>
+                  <button
+                    onClick={handleCheckoutClick}
+                    className="w-full mt-6 bg-green-700 hover:bg-green-800 text-white py-3 rounded-lg font-semibold transition-colors"
+                    data-testid="button-checkout-desktop"
+                  >
+                    Checkout
+                  </button>
                 </div>
               </div>
             </div>
@@ -351,14 +391,13 @@ export function Cart() {
                 <span className="text-gray-600">Total</span>
                 <span className="text-xl font-bold text-gray-900">₦{total.toLocaleString()}</span>
               </div>
-              <Link href="/checkout">
-                <button
-                  className="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-colors"
-                  data-testid="button-checkout-mobile"
-                >
-                  Checkout
-                </button>
-              </Link>
+              <button
+                onClick={handleCheckoutClick}
+                className="w-full bg-green-700 hover:bg-green-800 text-white py-4 rounded-xl font-semibold text-lg transition-colors"
+                data-testid="button-checkout-mobile"
+              >
+                Checkout
+              </button>
             </div>
 
             {/* Related Items Section */}
@@ -466,6 +505,13 @@ export function Cart() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Sign In Modal */}
+      <SignInModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        onSuccess={handleSignInSuccess}
+      />
     </div>
   );
 }
