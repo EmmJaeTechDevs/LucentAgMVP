@@ -9,9 +9,10 @@ interface SignInModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  onSignUpClick?: () => void;
 }
 
-export function SignInModal({ isOpen, onClose, onSuccess }: SignInModalProps) {
+export function SignInModal({ isOpen, onClose, onSuccess, onSignUpClick }: SignInModalProps) {
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -73,8 +74,12 @@ export function SignInModal({ isOpen, onClose, onSuccess }: SignInModalProps) {
   };
 
   const handleCreateAccount = () => {
-    onClose();
-    setLocation("/buyer-account-creation");
+    if (onSignUpClick) {
+      onSignUpClick();
+    } else {
+      onClose();
+      setLocation("/buyer-account-creation");
+    }
   };
 
   return (

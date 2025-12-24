@@ -5,6 +5,7 @@ import { useSessionValidation } from "@/hooks/useSessionValidation";
 import { useCart } from "@/hooks/useCart";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { SignInModal } from "@/components/SignInModal";
+import { SignUpModal } from "@/components/SignUpModal";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 import { BaseUrl } from "../../../Baseconfig";
 import lucentLogo from "@assets/image 20_1759571692580.png";
@@ -31,6 +32,7 @@ export function Cart() {
   const [isLoadingRelated, setIsLoadingRelated] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showSignUpModal, setShowSignUpModal] = useState(false);
   const relatedScrollRef = useRef<HTMLDivElement>(null);
 
   const isBuyerLoggedIn = () => {
@@ -70,6 +72,21 @@ export function Cart() {
   const handleSignInSuccess = () => {
     setShowSignInModal(false);
     setLocation("/checkout");
+  };
+
+  const handleSignUpSuccess = () => {
+    setShowSignUpModal(false);
+    setLocation("/checkout");
+  };
+
+  const switchToSignUp = () => {
+    setShowSignInModal(false);
+    setShowSignUpModal(true);
+  };
+
+  const switchToSignIn = () => {
+    setShowSignUpModal(false);
+    setShowSignInModal(true);
   };
 
   useEffect(() => {
@@ -511,6 +528,15 @@ export function Cart() {
         isOpen={showSignInModal}
         onClose={() => setShowSignInModal(false)}
         onSuccess={handleSignInSuccess}
+        onSignUpClick={switchToSignUp}
+      />
+
+      {/* Sign Up Modal */}
+      <SignUpModal
+        isOpen={showSignUpModal}
+        onClose={() => setShowSignUpModal(false)}
+        onSuccess={handleSignUpSuccess}
+        onSignInClick={switchToSignIn}
       />
     </div>
   );
