@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Search, ShoppingCart, User, LogOut, Settings, Package, Users, Home, Heart, Star, Plus, Minus, ChevronLeft, ChevronRight, X, UserPlus } from "lucide-react";
+import { Search, ShoppingCart, User, LogOut, Settings, Package, Users, Home, Heart, Star, Plus, Minus, ChevronLeft, ChevronRight, X, UserPlus, Menu } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/hooks/useCart";
@@ -531,23 +531,23 @@ export function BuyerHome() {
       {/* Mobile Layout */}
       <div className="block md:hidden">
         {/* Fixed Header */}
-        <div className="fixed top-0 left-0 right-0 bg-white z-50 px-4 py-2 border-b border-gray-100">
-          <div className="flex items-center justify-between">
+        <div className="fixed top-0 left-0 right-0 bg-white z-50 px-4 pt-3 pb-2 border-b border-gray-100">
+          {/* Top Row: Menu, Logo, Icons */}
+          <div className="flex items-center justify-between mb-3">
             <button
-              onClick={() => setLocation("/")}
-              className="flex-shrink-0"
-              data-testid="button-logo"
+              className="p-1"
+              data-testid="button-menu"
             >
-              <img 
-                src={lucentLogo} 
-                alt="Lucent Ag" 
-                className="h-8 w-auto object-contain"
-              />
+              <Menu className="w-6 h-6 text-gray-700" />
             </button>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <span className="text-green-700 font-bold text-lg">Lucent</span>
+              <span className="text-yellow-500 font-bold text-lg">Ag</span>
+            </div>
+            <div className="flex items-center gap-2">
               <button
                 onClick={handleCartClick}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors relative"
+                className="p-1 relative"
                 data-testid="button-cart"
               >
                 <ShoppingCart className="w-5 h-5 text-gray-700" />
@@ -559,18 +559,16 @@ export function BuyerHome() {
               </button>
               <button
                 onClick={handleProfileClick}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-1"
                 data-testid="button-profile"
               >
                 <User className="w-5 h-5 text-gray-700" />
               </button>
             </div>
           </div>
-        </div>
 
-        <div className="pt-14 pb-24 px-4">
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="mb-4">
+          <form onSubmit={handleSearch} className="mb-3">
             <div className="relative">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
               <input
@@ -578,7 +576,7 @@ export function BuyerHome() {
                 placeholder="Search produce e.g. Fresh carrots..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-100 border border-gray-200 rounded-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                className="w-full pl-9 pr-4 py-2 bg-gray-100 border border-gray-200 rounded-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                 data-testid="input-search"
               />
               {isSearching && (
@@ -590,10 +588,10 @@ export function BuyerHome() {
           </form>
 
           {/* Action Buttons */}
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-2 mb-3">
             <button
               onClick={() => setLocation("/farmer-registration")}
-              className="flex-1 px-3 py-2 border border-green-700 text-green-700 rounded-full text-xs font-medium hover:bg-green-50 transition-colors"
+              className="flex-1 px-3 py-2 bg-green-700 text-white rounded-full text-xs font-medium hover:bg-green-800 transition-colors"
               data-testid="button-farmer-cta"
             >
               Are you a Farmer?
@@ -608,15 +606,15 @@ export function BuyerHome() {
           </div>
 
           {/* Categories */}
-          <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide pb-1">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => handleCategorySelect(category)}
-                className={`px-4 py-2 rounded-full font-medium text-xs whitespace-nowrap transition-colors ${
+                className={`px-3 py-1.5 rounded-full font-medium text-xs whitespace-nowrap transition-colors border ${
                   selectedCategory === category
-                    ? "bg-green-700 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-green-700 text-white border-green-700"
+                    : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
                 }`}
                 data-testid={`category-${category.toLowerCase().replace(" ", "-")}`}
               >
@@ -624,7 +622,9 @@ export function BuyerHome() {
               </button>
             ))}
           </div>
+        </div>
 
+        <div className="pt-44 pb-24 px-4">
           {/* Hero Banner */}
           <div className="relative mb-6 rounded-xl overflow-hidden h-32">
             <img 
