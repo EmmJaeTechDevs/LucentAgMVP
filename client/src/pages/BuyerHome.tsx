@@ -21,6 +21,8 @@ import { HarvestingSoonModal } from "@/components/HarvestingSoonModal";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { BaseUrl } from "../../../Baseconfig";
 import lucentLogo from "@assets/image_22_1766874458493.png";
+import phoneIcon from "@assets/Group_1766874872016.png";
+import basketIcon from "@assets/hugeicons_shopping-basket-03_1766874881761.png";
 
 export function BuyerHome() {
   const [, setLocation] = useLocation();
@@ -40,6 +42,7 @@ export function BuyerHome() {
   const [hasSearched, setHasSearched] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [showSkipConfirmPopup, setShowSkipConfirmPopup] = useState(false);
+  const [showDownloadPrompt, setShowDownloadPrompt] = useState(false);
   const [productQuantity, setProductQuantity] = useState(1);
   const sameFarmerScrollRef = useRef<HTMLDivElement>(null);
   const relatedItemsScrollRef = useRef<HTMLDivElement>(null);
@@ -547,18 +550,13 @@ export function BuyerHome() {
                 className="h-8 w-auto object-contain"
               />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <button
-                onClick={handleCartClick}
-                className="p-1 relative"
-                data-testid="button-cart"
+                onClick={() => setShowDownloadPrompt(true)}
+                className="p-1"
+                data-testid="button-download"
               >
-                <ShoppingCart className="w-5 h-5 text-gray-700" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                    {cartCount > 9 ? '9+' : cartCount}
-                  </span>
-                )}
+                <img src={phoneIcon} alt="Download App" className="w-5 h-5 object-contain" />
               </button>
               <button
                 onClick={handleProfileClick}
@@ -566,6 +564,18 @@ export function BuyerHome() {
                 data-testid="button-profile"
               >
                 <User className="w-5 h-5 text-gray-700" />
+              </button>
+              <button
+                onClick={handleCartClick}
+                className="p-1 relative"
+                data-testid="button-cart"
+              >
+                <img src={basketIcon} alt="Cart" className="w-5 h-5 object-contain" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -1666,6 +1676,50 @@ export function BuyerHome() {
             >
               Continue
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Download App Prompt */}
+      <AlertDialog open={showDownloadPrompt} onOpenChange={setShowDownloadPrompt}>
+        <AlertDialogContent className="max-w-md mx-auto">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-center text-xl">
+              Download Our App
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base">
+              Get the best experience with our mobile app. Download now for faster access, push notifications, and exclusive features.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-center gap-4 my-4">
+            <button
+              className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+              data-testid="button-download-ios"
+            >
+              <span className="text-xl">🍎</span>
+              <div className="text-left">
+                <div className="text-[10px] leading-none">Download on the</div>
+                <div className="text-sm font-semibold">App Store</div>
+              </div>
+            </button>
+            <button
+              className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+              data-testid="button-download-android"
+            >
+              <span className="text-xl">▶️</span>
+              <div className="text-left">
+                <div className="text-[10px] leading-none">GET IT ON</div>
+                <div className="text-sm font-semibold">Google Play</div>
+              </div>
+            </button>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className="w-full"
+              data-testid="button-close-download"
+            >
+              Maybe Later
+            </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
