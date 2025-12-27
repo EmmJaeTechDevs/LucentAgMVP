@@ -518,13 +518,21 @@ export function BuyerHome() {
     }
   }, [isLoggedIn]);
 
+  // Category images for Shop by Category section
+  const categoryImages = [
+    { name: "Vegetables", image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400" },
+    { name: "Fruits", image: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400" },
+    { name: "Grains", image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400" },
+    { name: "Leafy Greens", image: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400" },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Mobile Layout */}
       <div className="block md:hidden">
-        <div className="px-6 pt-16 pb-24">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+        {/* Fixed Header */}
+        <div className="fixed top-0 left-0 right-0 bg-white z-50 px-4 py-2 border-b border-gray-100">
+          <div className="flex items-center justify-between">
             <button
               onClick={() => setLocation("/")}
               className="flex-shrink-0"
@@ -532,146 +540,103 @@ export function BuyerHome() {
             >
               <img 
                 src={lucentLogo} 
-                alt="Lucent Ag Logo" 
-                className="h-20 w-auto object-contain"
+                alt="Lucent Ag" 
+                className="h-8 w-auto object-contain"
               />
             </button>
-            <div className="flex items-center gap-2">
-              {isLoggedIn ? (
-                <>
-                  <button
-                    onClick={handleProfileClick}
-                    className="p-3 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-all duration-200 hover:scale-105"
-                    data-testid="button-profile"
-                  >
-                    <User className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={handleCartClick}
-                    className="p-3 hover:bg-gray-100 rounded-xl transition-colors relative"
-                    data-testid="button-cart"
-                  >
-                    <ShoppingCart className="w-6 h-6 text-gray-700" />
-                    {cartCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
-                        {cartCount > 99 ? '99+' : cartCount}
-                      </span>
-                    )}
-                  </button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button
-                        className="p-3 hover:bg-red-50 rounded-xl transition-colors"
-                        data-testid="button-logout"
-                      >
-                        <LogOut className="w-6 h-6 text-red-600" />
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          You're about to log out of your account. Your session will end and you'll need to sign in again to access your account.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
-                          Log Out
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setLocation("/login")}
-                    className="px-4 py-2 text-green-700 font-medium text-sm hover:bg-green-50 rounded-lg transition-colors"
-                    data-testid="button-signin"
-                  >
-                    Sign In
-                  </button>
-                  <button
-                    onClick={() => setLocation("/role-selection")}
-                    className="px-4 py-2 bg-green-700 text-white font-medium text-sm rounded-lg hover:bg-green-800 transition-colors"
-                    data-testid="button-create-account"
-                  >
-                    Create Account
-                  </button>
-                </>
-              )}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleCartClick}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors relative"
+                data-testid="button-cart"
+              >
+                <ShoppingCart className="w-5 h-5 text-gray-700" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={handleProfileClick}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                data-testid="button-profile"
+              >
+                <User className="w-5 h-5 text-gray-700" />
+              </button>
             </div>
           </div>
+        </div>
 
-          {/* Guest Sign Up Banner */}
-          {!isLoggedIn && (
-            <div className="mb-6 bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-4 text-white">
-              <div className="flex items-center gap-3">
-                <div className="bg-white/20 rounded-full p-2">
-                  <UserPlus className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold">Join Lucent Ag</h3>
-                  <p className="text-sm text-green-100">Create an account to order fresh produce</p>
-                </div>
-                <button
-                  onClick={() => setLocation("/role-selection")}
-                  className="bg-white text-green-700 px-4 py-2 rounded-lg font-medium text-sm hover:bg-green-50 transition-colors"
-                  data-testid="button-join-now"
-                >
-                  Join Now
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Greeting Section */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">
-              {isLoggedIn ? `Hello ${userLastName}!` : "Welcome to Lucent Ag"}
-            </h1>
-            <p className="text-gray-600 text-sm">
-              {isLoggedIn ? "Ready for something fresh today?" : "Discover fresh produce from local farms"}
-            </p>
-          </div>
-
+        <div className="pt-14 pb-24 px-4">
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="mb-6">
+          <form onSubmit={handleSearch} className="mb-4">
             <div className="relative">
-              <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" />
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search produce e.g. Fresh carrots..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="w-full pl-12 pr-4 py-4 bg-gray-100 border-0 rounded-xl focus:ring-2 focus:ring-green-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-100 border border-gray-200 rounded-full text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                 data-testid="input-search"
               />
               {isSearching && (
-                <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                  <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
               )}
             </div>
           </form>
 
+          {/* Action Buttons */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setLocation("/farmer-registration")}
+              className="flex-1 px-3 py-2 border border-green-700 text-green-700 rounded-full text-xs font-medium hover:bg-green-50 transition-colors"
+              data-testid="button-farmer-cta"
+            >
+              Are you a Farmer?
+            </button>
+            <button
+              onClick={() => setLocation("/login")}
+              className="flex-1 px-3 py-2 bg-green-700 text-white rounded-full text-xs font-medium hover:bg-green-800 transition-colors"
+              data-testid="button-farmer-signup"
+            >
+              Login or Sign Up as a Farmer
+            </button>
+          </div>
+
           {/* Categories */}
-          <div className="flex gap-3 mb-8 overflow-x-auto scrollbar-hide pb-2">
+          <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide pb-1">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => handleCategorySelect(category)}
-                className={`px-6 py-3 rounded-full font-medium text-sm whitespace-nowrap transition-colors ${
+                className={`px-4 py-2 rounded-full font-medium text-xs whitespace-nowrap transition-colors ${
                   selectedCategory === category
                     ? "bg-green-700 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
                 data-testid={`category-${category.toLowerCase().replace(" ", "-")}`}
               >
                 {category}
               </button>
             ))}
+          </div>
+
+          {/* Hero Banner */}
+          <div className="relative mb-6 rounded-xl overflow-hidden h-32">
+            <img 
+              src="https://images.unsplash.com/photo-1500937386664-56d1dfef3f32?w=800"
+              alt="Fresh produce"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center px-4">
+              <h2 className="text-white text-lg font-bold leading-tight">
+                Fresh from local farms<br />to your door
+              </h2>
+            </div>
           </div>
 
           {/* Search Results Section */}
@@ -761,143 +726,172 @@ export function BuyerHome() {
           ) : (
             <>
               {/* Fresh Today Section */}
-              <div className="mb-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">
-                  Fresh Today
-                </h2>
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-base font-bold text-gray-900">Fresh Today</h2>
+                  <button className="text-xs text-green-700 font-medium">See all &gt;</button>
+                </div>
                 {isLoadingCrops ? (
-              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex-shrink-0 w-48 bg-white rounded-xl shadow-sm animate-pulse">
-                    <div className="w-full h-32 bg-gray-200 rounded-t-xl"></div>
-                    <div className="p-4 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : freshTodayProducts.length > 0 ? (
-              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-                {freshTodayProducts.map((product) => (
-                <div
-                  key={product.id}
-                  onClick={() => handleProductClick(product.id)}
-                  className="flex-shrink-0 w-48 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                  data-testid={`product-${product.id}`}
-                >
-                  <div className="relative">
-                    <div className="w-full h-32 bg-gray-100 rounded-t-xl overflow-hidden">
-                      {typeof product.image === "string" &&
-                      (product.image.startsWith("/") || product.image.startsWith("http")) ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl">
-                          {product.image}
+                  <div className="grid grid-cols-2 gap-3">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="bg-white rounded-lg border border-gray-100 animate-pulse">
+                        <div className="w-full h-24 bg-gray-200 rounded-t-lg"></div>
+                        <div className="p-2 space-y-1">
+                          <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-2 bg-gray-200 rounded w-1/2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
                         </div>
-                      )}
-                    </div>
-                    {product.stockLeft && (
-                      <div className="absolute top-2 left-2 bg-orange-100 text-orange-800 px-2 py-1 rounded-lg text-xs font-medium">
-                        {product.stockLeft}
                       </div>
-                    )}
+                    ))}
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-1">
-                      {product.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-2 flex items-center gap-1">
-                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                      {product.farm}
-                    </p>
-                    <p className="font-bold text-gray-900">
-                      {product.price}{" "}
-                      <span className="font-normal text-sm text-gray-600">
-                        {product.unit}
-                      </span>
-                    </p>
+                ) : freshTodayProducts.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {freshTodayProducts.slice(0, 2).map((product) => (
+                      <div
+                        key={product.id}
+                        onClick={() => handleProductClick(product.id)}
+                        className="bg-white rounded-lg border border-gray-100 hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
+                        data-testid={`product-${product.id}`}
+                      >
+                        <div className="relative">
+                          <div className="w-full h-24 bg-gray-100 overflow-hidden">
+                            {typeof product.image === "string" && (product.image.startsWith("/") || product.image.startsWith("http")) ? (
+                              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-3xl bg-gray-100">{product.image}</div>
+                            )}
+                          </div>
+                          <div className="absolute top-1 left-1 bg-white/90 text-green-700 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                            Fresh Today
+                          </div>
+                          <div className="absolute top-1 right-1 bg-green-600 text-white px-1.5 py-0.5 rounded text-[10px] font-medium">
+                            Picked Today
+                          </div>
+                        </div>
+                        <div className="p-2">
+                          <h3 className="font-semibold text-gray-900 text-sm">{product.name}</h3>
+                          <p className="text-gray-500 text-xs flex items-center gap-1">
+                            <span className="text-green-600">📍</span> {product.farm}
+                          </p>
+                          <p className="font-bold text-gray-900 text-sm mt-1">
+                            {product.price} <span className="font-normal text-xs text-gray-500">{product.unit}</span>
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              ))}
+                ) : (
+                  <div className="text-center py-6">
+                    <p className="text-gray-500 text-sm">No fresh crops available</p>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No fresh crops available at the moment</p>
-              </div>
-            )}
-          </div>
 
-          {/* Harvesting Soon Section */}
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Harvesting Soon
-            </h2>
-            {isLoadingSoonReady ? (
-              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex-shrink-0 w-48 bg-white rounded-xl shadow-sm animate-pulse">
-                    <div className="w-full h-32 bg-gray-200 rounded-t-xl"></div>
-                    <div className="p-4 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : harvestingSoonProducts.length > 0 ? (
-              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-                {harvestingSoonProducts.map((product) => (
-                <div
-                  key={product.id}
-                  onClick={() => handleHarvestingProductClick(product.id)}
-                  className="flex-shrink-0 w-48 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                  data-testid={`product-${product.id}`}
-                >
-                  <div className="w-full h-32 bg-gray-100 rounded-t-xl overflow-hidden">
-                    {typeof product.image === "string" &&
-                    (product.image.startsWith("/") || product.image.startsWith("http")) ? (
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl">
-                        {product.image}
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-1">
-                      {product.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-2 flex items-center gap-1">
-                      <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                      {product.farm}
-                    </p>
-                    <p className="font-bold text-gray-900">
-                      {product.price}{" "}
-                      <span className="font-normal text-sm text-gray-600">
-                        {product.unit}
-                      </span>
-                    </p>
-                  </div>
+              {/* Harvesting Soon Section */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-base font-bold text-gray-900">Harvesting Soon</h2>
+                  <button className="text-xs text-green-700 font-medium">See all &gt;</button>
                 </div>
-              ))}
+                {isLoadingSoonReady ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="bg-white rounded-lg border border-gray-100 animate-pulse">
+                        <div className="w-full h-24 bg-gray-200 rounded-t-lg"></div>
+                        <div className="p-2 space-y-1">
+                          <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-2 bg-gray-200 rounded w-1/2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : harvestingSoonProducts.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {harvestingSoonProducts.slice(0, 2).map((product, index) => (
+                      <div
+                        key={product.id}
+                        onClick={() => handleHarvestingProductClick(product.id)}
+                        className="bg-white rounded-lg border border-gray-100 hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
+                        data-testid={`harvesting-${product.id}`}
+                      >
+                        <div className="w-full h-24 bg-gray-100 overflow-hidden">
+                          {typeof product.image === "string" && (product.image.startsWith("/") || product.image.startsWith("http")) ? (
+                            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-3xl bg-gray-100">{product.image}</div>
+                          )}
+                        </div>
+                        <div className="p-2">
+                          <h3 className="font-semibold text-gray-900 text-sm">{product.name}</h3>
+                          <p className="text-gray-500 text-xs flex items-center gap-1">
+                            <span className="text-green-600">📍</span> {product.farm}
+                          </p>
+                          <p className="text-green-600 text-xs flex items-center gap-1 mt-1">
+                            <span>⏰</span> Ready in {index + 3} days
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6">
+                    <p className="text-gray-500 text-sm">No harvesting soon crops</p>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No harvesting soon crops available</p>
+
+              {/* Shop by Category Section */}
+              <div className="mb-6">
+                <h2 className="text-base font-bold text-gray-900 mb-3">Shop by Category</h2>
+                <div className="grid grid-cols-2 gap-3">
+                  {categoryImages.map((cat) => (
+                    <button
+                      key={cat.name}
+                      onClick={() => handleCategorySelect(cat.name)}
+                      className="relative rounded-lg overflow-hidden h-24 group"
+                      data-testid={`category-img-${cat.name.toLowerCase()}`}
+                    >
+                      <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      <div className="absolute inset-0 bg-black/30 flex items-end p-2">
+                        <span className="text-white font-semibold text-sm">{cat.name}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* Popular Picks Section */}
+              <div className="mb-6">
+                <h2 className="text-base font-bold text-gray-900 mb-3">Popular Picks</h2>
+                <div className="grid grid-cols-2 gap-3">
+                  {[...freshTodayProducts, ...harvestingSoonProducts].slice(0, 6).map((product) => (
+                    <div
+                      key={`popular-${product.id}`}
+                      onClick={() => handleProductClick(product.id)}
+                      className="bg-white rounded-lg border border-gray-100 hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
+                      data-testid={`popular-${product.id}`}
+                    >
+                      <div className="w-full h-24 bg-gray-100 overflow-hidden">
+                        {typeof product.image === "string" && (product.image.startsWith("/") || product.image.startsWith("http")) ? (
+                          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-3xl bg-gray-100">{product.image}</div>
+                        )}
+                      </div>
+                      <div className="p-2">
+                        <h3 className="font-semibold text-gray-900 text-sm">{product.name}</h3>
+                        <p className="text-gray-500 text-xs flex items-center gap-1">
+                          <span className="text-green-600">📍</span> {product.farm}
+                        </p>
+                        <p className="font-bold text-gray-900 text-sm mt-1">
+                          {product.price} <span className="font-normal text-xs text-gray-500">{product.unit}</span>
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </>
           )}
         </div>
