@@ -25,8 +25,18 @@ import {
   User, 
   Headphones,
   LogOut,
-  Home
+  Home,
+  Users,
+  ChevronRight,
+  ChevronDown
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import lucentLogo from "@assets/image 20_1759571692580.png";
 
 export function FarmerDashboard() {
@@ -398,12 +408,13 @@ export function FarmerDashboard() {
         </div>
       </div>
 
-      {/* Desktop Layout */}
-      <div className="hidden md:flex min-h-screen p-8">
-        <div className="w-full max-w-4xl mx-auto">
-          {/* Header with Logo and Greeting */}
-          <div className="mb-12">
-            <div className="flex items-center gap-6 mb-4">
+      {/* Desktop/Tablet Layout */}
+      <div className="hidden md:block min-h-screen bg-gray-50">
+        {/* Desktop Navbar */}
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              {/* Logo */}
               <button
                 onClick={() => setLocation("/farmer-dashboard")}
                 className="flex-shrink-0"
@@ -412,153 +423,253 @@ export function FarmerDashboard() {
                 <img 
                   src={lucentLogo} 
                   alt="Lucent Ag Logo" 
-                  className="h-24 w-auto object-contain"
+                  className="h-10 w-auto object-contain"
                 />
               </button>
               
-              <h1 className="text-5xl font-bold text-gray-900">
-                {getGreeting()}, {userName}!
-              </h1>
+              {/* Navigation Links */}
+              <nav className="flex items-center gap-8">
+                <button
+                  onClick={() => setLocation("/farmer-dashboard")}
+                  className="text-gray-900 font-medium hover:text-green-600 transition-colors"
+                  data-testid="nav-dashboard"
+                >
+                  Dashboard
+                </button>
+                <button
+                  onClick={handleViewCrops}
+                  className="text-gray-600 hover:text-green-600 transition-colors"
+                  data-testid="nav-my-produce"
+                >
+                  My Produce
+                </button>
+                <button
+                  onClick={handleCheckOrders}
+                  className="text-gray-600 hover:text-green-600 transition-colors"
+                  data-testid="nav-my-orders"
+                >
+                  My Orders
+                </button>
+                <button
+                  onClick={() => setLocation("/communities")}
+                  className="text-gray-600 hover:text-green-600 transition-colors"
+                  data-testid="nav-community"
+                >
+                  Community
+                </button>
+                <button
+                  onClick={handleContactSupport}
+                  className="text-gray-600 hover:text-green-600 transition-colors"
+                  data-testid="nav-help"
+                >
+                  Help
+                </button>
+              </nav>
+              
+              {/* Right Icons */}
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={handleNotifications}
+                  className="text-gray-600 hover:text-green-600 transition-colors relative"
+                  data-testid="button-notifications-desktop"
+                >
+                  <Bell className="w-5 h-5" />
+                </button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-1 text-gray-600 hover:text-green-600 transition-colors" data-testid="button-user-menu">
+                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                        <User className="w-4 h-4 text-gray-600" />
+                      </div>
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={handleEditProfile}>
+                      <User className="w-4 h-4 mr-2" />
+                      Edit Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSettings}>
+                      <Settings className="w-4 h-4 mr-2" />
+                      Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleContactSupport}>
+                      <Headphones className="w-4 h-4 mr-2" />
+                      Contact Support
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Log Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
-            
-            <p className="text-gray-600 text-xl">
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+          {/* Greeting */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-1">
+              {getGreeting()}, {userName}!
+            </h1>
+            <p className="text-gray-500">
               Start your day by adding your produce!
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-8">
-            {/* Main action card - spans 2 columns */}
-            <div className="col-span-2 bg-gradient-to-br from-green-100 to-green-200 rounded-3xl p-8 relative overflow-hidden">
-              {/* Decorative leaf background */}
-              <div className="absolute top-6 right-6 opacity-20">
-                <Leaf className="w-32 h-32 text-green-600" />
+          {/* Three Action Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {/* Tell us what you're planting */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16">
+                <div className="absolute top-0 right-0 w-0 h-0 border-t-[64px] border-t-green-100 border-l-[64px] border-l-transparent" />
               </div>
-              
               <div className="relative z-10">
-                <div className="mb-6">
-                  <Leaf className="w-12 h-12 text-green-600" />
+                <div className="mb-4">
+                  <Leaf className="w-6 h-6 text-green-700" />
                 </div>
-                
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
                   Tell us what you're planting
-                </h2>
-                
-                <p className="text-gray-700 text-lg leading-relaxed mb-8 max-w-md">
+                </h3>
+                <p className="text-gray-500 text-sm mb-6 leading-relaxed">
                   Add a new crop, how much you expect to grow, and when it will be ready.
                 </p>
-                
                 <Button
                   onClick={handleAddNewCrop}
-                  className="bg-green-700 hover:bg-green-800 text-white px-8 py-4 text-lg font-medium rounded-xl transition-all hover:scale-105"
+                  className="bg-green-800 hover:bg-green-900 text-white px-4 py-2 text-sm font-medium rounded-lg"
                   data-testid="button-add-new-crop-desktop"
                 >
-                  <Plus className="w-6 h-6 mr-3" />
+                  <Plus className="w-4 h-4 mr-2" />
                   Add New Crop
                 </Button>
               </div>
             </div>
 
-            {/* Side actions column */}
-            <div className="space-y-6">
-              <button
-                onClick={handleViewCrops}
-                className="w-full bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all text-center hover:scale-105"
-                data-testid="button-view-crops-desktop"
-              >
-                <Package className="w-10 h-10 text-gray-600 mx-auto mb-4" />
-                <span className="text-gray-900 font-semibold text-lg block">
-                  View Your Crops
-                </span>
-              </button>
-              
-              <button
-                onClick={handleCheckOrders}
-                className="w-full bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all text-center hover:scale-105"
-                data-testid="button-check-orders-desktop"
-              >
-                <ShoppingCart className="w-10 h-10 text-gray-600 mx-auto mb-4" />
-                <span className="text-gray-900 font-semibold text-lg block">
+            {/* My Orders */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16">
+                <div className="absolute top-0 right-0 w-0 h-0 border-t-[64px] border-t-green-100 border-l-[64px] border-l-transparent" />
+              </div>
+              <div className="relative z-10">
+                <div className="mb-4">
+                  <ShoppingCart className="w-6 h-6 text-green-700" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  My Orders
+                </h3>
+                <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+                  See who has placed orders for your produce and process them
+                </p>
+                <Button
+                  onClick={handleCheckOrders}
+                  className="bg-green-800 hover:bg-green-900 text-white px-4 py-2 text-sm font-medium rounded-lg"
+                  data-testid="button-check-orders-desktop"
+                >
                   Check Orders
-                </span>
-              </button>
+                </Button>
+              </div>
+            </div>
+
+            {/* My Community */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16">
+                <div className="absolute top-0 right-0 w-0 h-0 border-t-[64px] border-t-green-100 border-l-[64px] border-l-transparent" />
+              </div>
+              <div className="relative z-10">
+                <div className="mb-4">
+                  <Users className="w-6 h-6 text-green-700" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  My Community
+                </h3>
+                <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+                  Connect with other farmers, access resources and partake in joint deliveries
+                </p>
+                <Button
+                  onClick={() => setLocation("/communities")}
+                  className="bg-green-800 hover:bg-green-900 text-white px-4 py-2 text-sm font-medium rounded-lg"
+                  data-testid="button-open-community-desktop"
+                >
+                  Open Community
+                </Button>
+              </div>
             </div>
           </div>
 
-          {/* Secondary actions grid */}
-          <div className="grid grid-cols-4 gap-6 mt-12">
-            <button
-              onClick={handleNotifications}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all text-center hover:scale-105"
-              data-testid="button-notifications-desktop"
-            >
-              <Bell className="w-10 h-10 text-gray-600 mx-auto mb-4" />
-              <span className="text-gray-900 font-medium text-lg block">
-                Notifications
-              </span>
-            </button>
-            
-            <button
-              onClick={handleSettings}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all text-center hover:scale-105"
-              data-testid="button-settings-desktop"
-            >
-              <Settings className="w-10 h-10 text-gray-600 mx-auto mb-4" />
-              <span className="text-gray-900 font-medium text-lg block">
-                Settings
-              </span>
-            </button>
-            
-            <button
-              onClick={handleEditProfile}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all text-center hover:scale-105"
-              data-testid="button-edit-profile-desktop"
-            >
-              <User className="w-10 h-10 text-gray-600 mx-auto mb-4" />
-              <span className="text-gray-900 font-medium text-lg block">
-                Edit Your Profile
-              </span>
-            </button>
-            
-            <button
-              onClick={handleContactSupport}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all text-center hover:scale-105"
-              data-testid="button-contact-support-desktop"
-            >
-              <Headphones className="w-10 h-10 text-gray-600 mx-auto mb-4" />
-              <span className="text-gray-900 font-medium text-lg block">
-                Contact Support
-              </span>
-            </button>
-            
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <button
-                  className="bg-red-50 rounded-2xl p-6 shadow-sm border border-red-100 hover:shadow-lg transition-all text-center hover:scale-105"
-                  data-testid="button-logout-desktop"
-                >
-                  <LogOut className="w-10 h-10 text-red-600 mx-auto mb-4" />
-                  <span className="text-red-600 font-medium text-lg block">
-                    Log Out
-                  </span>
-                </button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    You're about to log out of your account. Your session will end and you'll need to sign in again to access your account.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
-                    Log Out
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+          {/* Today's Summary */}
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-1">
+              Today's Summary
+            </h2>
+            <p className="text-gray-500 text-sm">
+              A quick look at what's happening on your farm
+            </p>
           </div>
-        </div>
+
+          {/* Summary Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Crops on your farm */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
+              <div className="text-4xl font-bold text-gray-900 mb-1">4</div>
+              <div className="text-gray-500 text-sm mb-4">Crops on your farm</div>
+              <button
+                onClick={handleViewCrops}
+                className="text-green-700 text-sm font-medium flex items-center gap-1 hover:text-green-800 transition-colors"
+                data-testid="link-view-crops"
+              >
+                View Crops
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Total Orders */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
+              <div className="text-4xl font-bold text-gray-900 mb-1">48</div>
+              <div className="text-gray-500 text-sm mb-4">Total Orders</div>
+              <button
+                onClick={handleCheckOrders}
+                className="text-green-700 text-sm font-medium flex items-center gap-1 hover:text-green-800 transition-colors"
+                data-testid="link-view-all-orders"
+              >
+                View All Orders
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* New Orders */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
+              <div className="text-4xl font-bold text-gray-900 mb-1">2</div>
+              <div className="text-gray-500 text-sm mb-4">New Orders</div>
+              <button
+                onClick={handleCheckOrders}
+                className="text-green-700 text-sm font-medium flex items-center gap-1 hover:text-green-800 transition-colors"
+                data-testid="link-view-new-orders"
+              >
+                View New Orders
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Pending Deliveries */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
+              <div className="text-4xl font-bold text-gray-900 mb-1">4</div>
+              <div className="text-gray-500 text-sm mb-4">Pending Deliveries</div>
+              <button
+                onClick={handleCheckOrders}
+                className="text-green-700 text-sm font-medium flex items-center gap-1 hover:text-green-800 transition-colors"
+                data-testid="link-view-pending-deliveries"
+              >
+                View Pending Deliveries
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );
