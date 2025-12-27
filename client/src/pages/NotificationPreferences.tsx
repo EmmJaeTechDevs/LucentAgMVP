@@ -334,55 +334,55 @@ export function NotificationPreferences() {
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden md:flex min-h-screen items-center justify-center p-8">
-        <div className="bg-white rounded-3xl shadow-xl p-12 w-full max-w-md">
+      <div className="hidden md:flex min-h-screen items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
           {/* Bell icon */}
-          <div className="mb-8 text-center">
-            <div className="w-20 h-20 mx-auto text-8xl">🔔</div>
+          <div className="mb-4 text-center">
+            <div className="w-12 h-12 mx-auto text-5xl">🔔</div>
           </div>
 
-          <h1 className="text-4xl font-bold text-gray-900 mb-6 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-3 text-center">
             Stay Updated!
           </h1>
 
-          <p className="text-gray-600 text-lg leading-relaxed mb-10 text-center">
+          <p className="text-gray-600 text-sm leading-relaxed mb-6 text-center">
             Choose how you want to get important messages from us.
           </p>
 
           {/* Preference options */}
-          <div className="space-y-6 mb-10">
+          <div className="space-y-3 mb-6">
             {preferences.map((pref) => (
               <div
                 key={pref.id}
                 onClick={() => handleTogglePreference(pref.id)}
-                className="flex items-start gap-4 cursor-pointer"
+                className="flex items-start gap-3 cursor-pointer"
                 data-testid={`preference-${pref.id}-desktop`}
               >
                 <div
-                  className={`w-7 h-7 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${
                     pref.checked
                       ? "bg-green-600 border-green-600"
                       : "border-gray-300 bg-white"
                   }`}
                 >
-                  {pref.checked && <Check className="w-5 h-5 text-white" />}
+                  {pref.checked && <Check className="w-3 h-3 text-white" />}
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 text-xl">
+                  <h3 className="font-semibold text-gray-900 text-base">
                     {pref.title}
                   </h3>
-                  <p className="text-gray-600">{pref.description}</p>
+                  <p className="text-gray-600 text-sm">{pref.description}</p>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Action buttons */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Button
               onClick={handleSaveChoices}
               disabled={isLoading}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-xl font-medium rounded-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-base font-medium rounded-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               data-testid="button-save-choices-desktop"
             >
               {isLoading ? "Loading..." : "Save My Choices"}
@@ -392,7 +392,7 @@ export function NotificationPreferences() {
               onClick={handleSkipForNow}
               disabled={isLoading}
               variant="outline"
-              className="w-full border-2 border-gray-300 text-gray-600 hover:bg-gray-50 py-4 text-xl font-medium rounded-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="w-full border-2 border-gray-300 text-gray-600 hover:bg-gray-50 py-3 text-base font-medium rounded-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               data-testid="button-skip-for-now-desktop"
             >
               {isLoading ? "Loading..." : "Skip for Now"}
