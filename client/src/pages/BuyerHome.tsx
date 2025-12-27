@@ -581,12 +581,7 @@ export function BuyerHome() {
           {/* Top Row: Menu, Logo, Icons */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <button
-                className="p-1"
-                data-testid="button-menu"
-              >
-                <Menu className="w-6 h-6 text-gray-700" />
-              </button>
+              <HamburgerMenu userType="buyer" />
               <img 
                 src={lucentLogo} 
                 alt="Lucent Ag" 
