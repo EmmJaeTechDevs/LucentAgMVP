@@ -43,11 +43,54 @@ export function BuyerHome() {
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [showSkipConfirmPopup, setShowSkipConfirmPopup] = useState(false);
   const [showDownloadPrompt, setShowDownloadPrompt] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
   const [productQuantity, setProductQuantity] = useState(1);
   const sameFarmerScrollRef = useRef<HTMLDivElement>(null);
   const relatedItemsScrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { addToCart, cartCount, isLoading: isCartLoading, fetchCartCount } = useCart();
+
+  // PWA Install prompt handling
+  useEffect(() => {
+    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+      setIsAppInstalled(true);
+      return;
+    }
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setIsAppInstalled(true);
+      setShowDownloadPrompt(false);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        toast({ title: "App installed successfully!", description: "You can now access Lucent Ag from your home screen." });
+      }
+      setDeferredPrompt(null);
+      setShowDownloadPrompt(false);
+    } else {
+      setShowDownloadPrompt(true);
+    }
+  };
 
   // Check if buyer is a new registration (only show onboarding for new registrations, not logins)
   useEffect(() => {
@@ -552,7 +595,7 @@ export function BuyerHome() {
             </div>
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setShowDownloadPrompt(true)}
+                onClick={handleInstallClick}
                 className="p-1"
                 data-testid="button-download"
               >
@@ -1685,40 +1728,50 @@ export function BuyerHome() {
         <AlertDialogContent className="max-w-md mx-auto">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-center text-xl">
-              Download Our App
+              Install Lucent Ag
             </AlertDialogTitle>
             <AlertDialogDescription className="text-center text-base">
-              Get the best experience with our mobile app. Download now for faster access, push notifications, and exclusive features.
+              {isAppInstalled 
+                ? "The app is already installed on your device. You can access it from your home screen."
+                : "Add Lucent Ag to your home screen for quick access and a better experience."}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="flex justify-center gap-4 my-4">
-            <button
-              className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-              data-testid="button-download-ios"
-            >
-              <span className="text-xl">🍎</span>
-              <div className="text-left">
-                <div className="text-[10px] leading-none">Download on the</div>
-                <div className="text-sm font-semibold">App Store</div>
-              </div>
-            </button>
-            <button
-              className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-              data-testid="button-download-android"
-            >
-              <span className="text-xl">▶️</span>
-              <div className="text-left">
-                <div className="text-[10px] leading-none">GET IT ON</div>
-                <div className="text-sm font-semibold">Google Play</div>
-              </div>
-            </button>
-          </div>
+          {!isAppInstalled && (
+            <div className="flex flex-col gap-3 my-4">
+              {deferredPrompt ? (
+                <button
+                  onClick={async () => {
+                    if (deferredPrompt) {
+                      deferredPrompt.prompt();
+                      const { outcome } = await deferredPrompt.userChoice;
+                      if (outcome === 'accepted') {
+                        toast({ title: "App installed!", description: "Access Lucent Ag from your home screen." });
+                      }
+                      setDeferredPrompt(null);
+                      setShowDownloadPrompt(false);
+                    }
+                  }}
+                  className="w-full flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                  data-testid="button-install-pwa"
+                >
+                  <img src={phoneIcon} alt="" className="w-5 h-5" />
+                  Install App
+                </button>
+              ) : (
+                <div className="text-center text-sm text-gray-500 py-2">
+                  <p className="mb-2">To install this app on your device:</p>
+                  <p className="text-xs"><strong>iOS:</strong> Tap the Share button, then "Add to Home Screen"</p>
+                  <p className="text-xs"><strong>Android:</strong> Tap the menu (⋮), then "Install app" or "Add to Home screen"</p>
+                </div>
+              )}
+            </div>
+          )}
           <AlertDialogFooter>
             <AlertDialogCancel
               className="w-full"
               data-testid="button-close-download"
             >
-              Maybe Later
+              {isAppInstalled ? "Close" : "Maybe Later"}
             </AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
