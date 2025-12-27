@@ -20,7 +20,7 @@ import { ProductDetailsModal } from "@/components/ProductDetailsModal";
 import { HarvestingSoonModal } from "@/components/HarvestingSoonModal";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { BaseUrl } from "../../../Baseconfig";
-import lucentLogo from "@assets/image 20_1759571692580.png";
+import lucentLogo from "@assets/image_22_1766874458493.png";
 
 export function BuyerHome() {
   const [, setLocation] = useLocation();
@@ -534,15 +534,18 @@ export function BuyerHome() {
         <div className="fixed top-0 left-0 right-0 bg-white z-50 px-4 pt-3 pb-2 border-b border-gray-100">
           {/* Top Row: Menu, Logo, Icons */}
           <div className="flex items-center justify-between mb-3">
-            <button
-              className="p-1"
-              data-testid="button-menu"
-            >
-              <Menu className="w-6 h-6 text-gray-700" />
-            </button>
-            <div className="flex items-center gap-1">
-              <span className="text-green-700 font-bold text-lg">Lucent</span>
-              <span className="text-yellow-500 font-bold text-lg">Ag</span>
+            <div className="flex items-center gap-2">
+              <button
+                className="p-1"
+                data-testid="button-menu"
+              >
+                <Menu className="w-6 h-6 text-gray-700" />
+              </button>
+              <img 
+                src={lucentLogo} 
+                alt="Lucent Ag" 
+                className="h-8 w-auto object-contain"
+              />
             </div>
             <div className="flex items-center gap-2">
               <button
