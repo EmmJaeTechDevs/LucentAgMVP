@@ -1,27 +1,18 @@
-import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { 
   Search, 
   ShoppingCart, 
   Bell, 
   Heart, 
   Calendar,
-  MapPin,
-  X
+  MapPin
 } from "lucide-react";
 
 export function BuyerExplanation() {
   const [, setLocation] = useLocation();
-  const [showPopup, setShowPopup] = useState(false);
 
   const handleContinue = () => {
-    setShowPopup(true);
-  };
-
-  const handleGoToPreferences = () => {
-    setShowPopup(false);
     setLocation("/buyer-home");
   };
 
@@ -155,37 +146,6 @@ export function BuyerExplanation() {
           </Button>
         </div>
       </div>
-
-      {/* Settings popup dialog */}
-      <Dialog open={showPopup} onOpenChange={setShowPopup}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-gray-900">
-              Quick Setup
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 leading-relaxed">
-              Before we begin, let's set up your notification preferences so you never miss important updates about fresh produce and harvest times.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <Bell className="w-5 h-5 text-blue-600 flex-shrink-0" />
-            <p className="text-sm text-blue-800">
-              <strong>Tip:</strong> You can always change these settings later in your account settings.
-            </p>
-          </div>
-
-          <DialogFooter className="flex gap-3">
-            <Button
-              onClick={handleGoToPreferences}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-              data-testid="button-go-to-preferences"
-            >
-              Set Up Notifications
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
