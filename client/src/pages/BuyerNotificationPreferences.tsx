@@ -194,141 +194,142 @@ export function BuyerNotificationPreferences() {
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden md:flex min-h-screen p-8">
-        <div className="w-full max-w-2xl mx-auto">
-          <div className="bg-white rounded-3xl shadow-xl p-12 text-center">
-            {/* Bell icon */}
-            <div className="w-20 h-20 mx-auto mb-8 text-8xl">🔔</div>
-            
-            <h1 className="text-4xl font-bold text-gray-900 mb-6">
-              Stay Updated!
-            </h1>
-            <p className="text-gray-600 text-xl leading-relaxed mb-12">
-              Choose how you want to get important messages from us.
-            </p>
+      <div className="hidden md:flex min-h-screen items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
+          {/* Bell icon */}
+          <div className="mb-4 text-center">
+            <div className="w-12 h-12 mx-auto text-5xl">🔔</div>
+          </div>
 
-            {/* Notification Options */}
-            <div className="space-y-8 mb-16 text-left">
-              {/* SMS */}
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0 mt-2">
-                  <button
-                    onClick={() => handleToggle("sms")}
-                    className={`w-8 h-8 rounded border-2 flex items-center justify-center transition-colors ${
-                      preferences.sms
-                        ? "bg-green-600 border-green-600"
-                        : "border-gray-300 bg-white"
-                    }`}
-                    data-testid="toggle-sms-desktop"
-                  >
-                    {preferences.sms && (
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-2">SMS</h3>
-                  <p className="text-gray-600 text-lg">Get text messages on your phone</p>
-                </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-3 text-center">
+            Stay Updated!
+          </h1>
+
+          <p className="text-gray-600 text-sm leading-relaxed mb-6 text-center">
+            Choose how you want to get important messages from us.
+          </p>
+
+          {/* Notification Options */}
+          <div className="space-y-3 mb-6">
+            {/* SMS */}
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 mt-0.5">
+                <button
+                  onClick={() => handleToggle("sms")}
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                    preferences.sms
+                      ? "bg-green-600 border-green-600"
+                      : "border-gray-300 bg-white"
+                  }`}
+                  data-testid="toggle-sms-desktop"
+                >
+                  {preferences.sms && (
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
               </div>
-
-              {/* Email */}
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0 mt-2">
-                  <button
-                    onClick={() => handleToggle("email")}
-                    className={`w-8 h-8 rounded border-2 flex items-center justify-center transition-colors ${
-                      preferences.email
-                        ? "bg-green-600 border-green-600"
-                        : "border-gray-300 bg-white"
-                    }`}
-                    data-testid="toggle-email-desktop"
-                  >
-                    {preferences.email && (
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-2">Email</h3>
-                  <p className="text-gray-600 text-lg">Receive updates in your inbox</p>
-                </div>
-              </div>
-
-              {/* WhatsApp */}
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0 mt-2">
-                  <button
-                    onClick={() => handleToggle("whatsapp")}
-                    className={`w-8 h-8 rounded border-2 flex items-center justify-center transition-colors ${
-                      preferences.whatsapp
-                        ? "bg-green-600 border-green-600"
-                        : "border-gray-300 bg-white"
-                    }`}
-                    data-testid="toggle-whatsapp-desktop"
-                  >
-                    {preferences.whatsapp && (
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-2">WhatsApp</h3>
-                  <p className="text-gray-600 text-lg">We'll message you directly on WhatsApp</p>
-                </div>
-              </div>
-
-              {/* In App */}
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0 mt-2">
-                  <button
-                    onClick={() => handleToggle("inApp")}
-                    className={`w-8 h-8 rounded border-2 flex items-center justify-center transition-colors ${
-                      preferences.inApp
-                        ? "bg-green-600 border-green-600"
-                        : "border-gray-300 bg-white"
-                    }`}
-                    data-testid="toggle-in-app-desktop"
-                  >
-                    {preferences.inApp && (
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-2">In App</h3>
-                  <p className="text-gray-600 text-lg">See messages here in the app</p>
-                </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 text-base">SMS</h3>
+                <p className="text-gray-600 text-sm">Get text messages on your phone</p>
               </div>
             </div>
 
-            {/* Buttons */}
-            <div className="space-y-6">
-              <button
-                onClick={handleSave}
-                disabled={isSubmitting}
-                className="w-full bg-green-700 hover:bg-green-800 text-white py-6 rounded-xl font-semibold text-xl transition-all hover:scale-105 disabled:opacity-50"
-                data-testid="button-save-choices-desktop"
-              >
-                {isSubmitting ? "Saving..." : "Save My Choices"}
-              </button>
-
-              <button
-                onClick={handleSkip}
-                className="w-full border border-gray-300 hover:bg-gray-50 text-gray-700 py-6 rounded-xl font-medium text-xl transition-colors"
-                data-testid="button-skip-desktop"
-              >
-                Skip for Now
-              </button>
+            {/* Email */}
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 mt-0.5">
+                <button
+                  onClick={() => handleToggle("email")}
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                    preferences.email
+                      ? "bg-green-600 border-green-600"
+                      : "border-gray-300 bg-white"
+                  }`}
+                  data-testid="toggle-email-desktop"
+                >
+                  {preferences.email && (
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 text-base">Email</h3>
+                <p className="text-gray-600 text-sm">Receive updates in your inbox</p>
+              </div>
             </div>
+
+            {/* WhatsApp */}
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 mt-0.5">
+                <button
+                  onClick={() => handleToggle("whatsapp")}
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                    preferences.whatsapp
+                      ? "bg-green-600 border-green-600"
+                      : "border-gray-300 bg-white"
+                  }`}
+                  data-testid="toggle-whatsapp-desktop"
+                >
+                  {preferences.whatsapp && (
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 text-base">WhatsApp</h3>
+                <p className="text-gray-600 text-sm">We'll message you directly on WhatsApp</p>
+              </div>
+            </div>
+
+            {/* In App */}
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 mt-0.5">
+                <button
+                  onClick={() => handleToggle("inApp")}
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                    preferences.inApp
+                      ? "bg-green-600 border-green-600"
+                      : "border-gray-300 bg-white"
+                  }`}
+                  data-testid="toggle-in-app-desktop"
+                >
+                  {preferences.inApp && (
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 text-base">In App</h3>
+                <p className="text-gray-600 text-sm">See messages here in the app</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="space-y-3">
+            <button
+              onClick={handleSave}
+              disabled={isSubmitting}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium text-base transition-all hover:scale-105 disabled:opacity-50"
+              data-testid="button-save-choices-desktop"
+            >
+              {isSubmitting ? "Saving..." : "Save My Choices"}
+            </button>
+
+            <button
+              onClick={handleSkip}
+              className="w-full border-2 border-gray-300 hover:bg-gray-50 text-gray-600 py-3 rounded-lg font-medium text-base transition-all hover:scale-105"
+              data-testid="button-skip-desktop"
+            >
+              Skip for Now
+            </button>
           </div>
         </div>
       </div>

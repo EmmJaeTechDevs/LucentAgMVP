@@ -581,7 +581,7 @@ export function BuyerHome() {
           {/* Top Row: Menu, Logo, Icons */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <HamburgerMenu userType="buyer" />
+              <HamburgerMenu userType="buyer" showLogout={isLoggedIn} />
               <img 
                 src={lucentLogo} 
                 alt="Lucent Ag" 

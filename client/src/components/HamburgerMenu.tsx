@@ -5,9 +5,10 @@ import { useToast } from "@/hooks/use-toast";
 
 interface HamburgerMenuProps {
   userType?: "buyer" | "farmer";
+  showLogout?: boolean;
 }
 
-export function HamburgerMenu({ userType = "buyer" }: HamburgerMenuProps) {
+export function HamburgerMenu({ userType = "buyer", showLogout = true }: HamburgerMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -131,20 +132,24 @@ export function HamburgerMenu({ userType = "buyer" }: HamburgerMenuProps) {
                   </div>
                 </Link>
               ))}
-              <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  handleLogout();
-                }}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer w-full"
-                data-testid="menu-logout"
-              >
-                <LogOut className="w-5 h-5 text-red-600" />
-                <span className="text-red-600 font-medium">
-                  Log Out
-                </span>
-              </button>
+              {showLogout && (
+                <>
+                  <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      handleLogout();
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer w-full"
+                    data-testid="menu-logout"
+                  >
+                    <LogOut className="w-5 h-5 text-red-600" />
+                    <span className="text-red-600 font-medium">
+                      Log Out
+                    </span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}
