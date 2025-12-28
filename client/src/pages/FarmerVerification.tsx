@@ -265,7 +265,8 @@ export function FarmerVerification() {
         localStorage.removeItem("farmerUserId");
         sessionStorage.removeItem("tempFarmerSession");
 
-        setShowSuccess(true);
+        // Navigate directly to farmer dashboard (onboarding popup will show there)
+        setLocation("/farmer-dashboard");
       } else if (response.status === 400) {
         console.log("❌ VERIFICATION FAILED - Status 400 (Invalid OTP)");
         toast({
