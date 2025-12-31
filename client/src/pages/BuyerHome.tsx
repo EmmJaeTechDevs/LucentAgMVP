@@ -1051,31 +1051,33 @@ export function BuyerHome() {
                     </span>
                   )}
                 </button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <button
-                      className="flex items-center gap-2 text-red-600 hover:text-red-700 text-sm font-medium transition-colors"
-                      data-testid="button-logout-desktop"
-                    >
-                      <LogOut className="w-5 h-5" />
-                      <span>Log Out</span>
-                    </button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        You're about to log out of your account. Your session will end and you'll need to sign in again.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
-                        Log Out
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                {isLoggedIn && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className="flex items-center gap-2 text-red-600 hover:text-red-700 text-sm font-medium transition-colors"
+                        data-testid="button-logout-desktop"
+                      >
+                        <LogOut className="w-5 h-5" />
+                        <span>Log Out</span>
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          You're about to log out of your account. Your session will end and you'll need to sign in again.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleLogout} className="bg-red-600 hover:bg-red-700">
+                          Log Out
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             </div>
           </div>
