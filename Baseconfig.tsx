@@ -1,2 +1,2 @@
 // API Configuration
-export const BaseUrl = "https://lucent-ag-api-damidek.replit.app";
+export const BaseUrl = "dev_api.shambabridge-lucentag.com";
