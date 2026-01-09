@@ -74,8 +74,8 @@ export function useSessionValidation(userType?: "buyer" | "farmer") {
         // Clear invalid sessions
         sessionStorage.clear();
         localStorage.clear();
-        // Redirect to session expired page
-        setLocation("/session-expired");
+        // Redirect to login page (not session-expired) to prevent polluting browser history
+        setLocation("/");
       }
     };
 
