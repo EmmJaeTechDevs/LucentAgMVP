@@ -6,15 +6,17 @@ import { useToast } from "@/hooks/use-toast";
 interface HamburgerMenuProps {
   userType?: "buyer" | "farmer";
   showLogout?: boolean;
+  isLoggedIn?: boolean;
 }
 
-export function HamburgerMenu({ userType = "buyer", showLogout = true }: HamburgerMenuProps) {
+export function HamburgerMenu({ userType = "buyer", showLogout = true, isLoggedIn = false }: HamburgerMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
+  // handleLogout - Used by: Logout button
   const handleLogout = () => {
     sessionStorage.clear();
     localStorage.clear();
@@ -22,7 +24,17 @@ export function HamburgerMenu({ userType = "buyer", showLogout = true }: Hamburg
       title: "Logged Out Successfully",
       description: "You have been securely logged out.",
     });
-    setLocation("/logged-out");
+    setLocation("/login");
+  };
+
+  // handleMenuItemClick - Used by: Settings, My Orders, Communities links
+  const handleMenuItemClick = (href: string) => {
+    setIsOpen(false);
+    if (isLoggedIn) {
+      setLocation(href);
+    } else {
+      setLocation("/login");
+    }
   };
 
   // Close menu when clicking outside
@@ -116,21 +128,17 @@ export function HamburgerMenu({ userType = "buyer", showLogout = true }: Hamburg
           >
             <div className="py-2">
               {menuItems.map((item) => (
-                <Link
+                <button
                   key={item.href}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => handleMenuItemClick(item.href)}
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer w-full text-left"
+                  data-testid={item.testId}
                 >
-                  <div
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-                    data-testid={item.testId}
-                  >
-                    <item.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                    <span className="text-gray-900 dark:text-gray-100 font-medium">
-                      {item.label}
-                    </span>
-                  </div>
-                </Link>
+                  <item.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  <span className="text-gray-900 dark:text-gray-100 font-medium">
+                    {item.label}
+                  </span>
+                </button>
               ))}
               {showLogout && (
                 <>
