@@ -23,6 +23,7 @@ import { BaseUrl } from "../../../Baseconfig";
 import lucentLogo from "@assets/image_22_1766874458493.png";
 import phoneIcon from "@assets/Group_1766874872016.png";
 import basketIcon from "@assets/hugeicons_shopping-basket-03_1766874881761.png";
+import hero from "../assets/unsplash_SuxeVibEPFE.png"
 
 export function BuyerHome() {
   const [, setLocation] = useLocation();
@@ -679,7 +680,7 @@ export function BuyerHome() {
           {/* Hero Banner */}
           <div className="relative mb-6 rounded-xl overflow-hidden h-32">
             <img 
-              src="https://images.unsplash.com/photo-1500937386664-56d1dfef3f32?w=800"
+              src={hero}
               alt="Fresh produce"
               className="w-full h-full object-cover"
             />
@@ -1141,10 +1142,7 @@ export function BuyerHome() {
         {/* Hero Banner */}
         <div className="relative h-64 md:h-80 lg:h-96 overflow-hidden">
           <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.5), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=1600&q=80')`,
-            }}
+            className="absolute inset-0 bg-cover bg-center bg-herologo"
           />
           <div className="relative max-w-7xl mx-auto px-6 h-full flex items-center">
             <div className="max-w-lg">
