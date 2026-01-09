@@ -57,7 +57,7 @@ app.use((req, res, next) => {
   }
 
   // Use PORT from environment variable, default to 5000 for Replit
-  const port = parseInt(process.env.PORT || "4000", 10);
+  const port = parseInt(process.env.PORT || "3001", 10);
   server.listen({
     port,
     host: "0.0.0.0",
