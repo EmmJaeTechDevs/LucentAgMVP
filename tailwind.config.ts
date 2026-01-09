@@ -57,6 +57,9 @@ module.exports = {
           '"Noto Color Emoji"',
         ],
       },
+      backgroundImage: {
+        'herologo': "url('/src/assets/unsplash_SuxeVibEPFE.png')",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
