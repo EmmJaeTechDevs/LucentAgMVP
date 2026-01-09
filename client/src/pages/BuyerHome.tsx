@@ -443,10 +443,15 @@ export function BuyerHome() {
     setLocation("/cart");
   };
 
-  const handleProfileClick = () => {
-    setLocation("/buyer-profile");
+ const handleProfileClick = () => {
+    
+    if (isLoggedIn) {
+      setLocation("/buyer-profile");
+    } else {
+      setLocation("/login");
+    }
+  
   };
-
   const handleLogout = () => {
     // Clear all session and local storage data
     sessionStorage.clear();
