@@ -4,6 +4,11 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/hooks/useCart";
 import { SessionCrypto } from "@/utils/sessionCrypto";
+import Vegetable from "../assets/image 18 (3).png"
+import Fruit from "../assets/image 18 (2).png"
+import Grains from "../assets/image 18 (1).png"
+import Legumes from "../assets/image 18.png"
+import Spices from "../assets/image 18 (4).png"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -443,7 +448,7 @@ export function BuyerHome() {
     setLocation("/cart");
   };
 
-   const handleProfileClick = () => {
+  const handleProfileClick = () => {
     
     if (isLoggedIn) {
       setLocation("/buyer-profile");
@@ -573,10 +578,10 @@ export function BuyerHome() {
 
   // Category images for Shop by Category section
   const categoryImages = [
-    { name: "Vegetables", image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400" },
-    { name: "Fruits", image: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400" },
-    { name: "Grains", image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400" },
-    { name: "Leafy Greens", image: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400" },
+    { name: "Vegetables", image: Vegetable },
+    { name: "Fruits", image: Fruit },
+    { name: "Grains", image: Grains },
+    { name: "Herbs and spices", image: Spices },
   ];
 
   return (
@@ -588,7 +593,7 @@ export function BuyerHome() {
           {/* Top Row: Menu, Logo, Icons */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <HamburgerMenu userType="buyer" showLogout={isLoggedIn} />
+             <HamburgerMenu userType="buyer" showLogout={isLoggedIn} isLoggedIn={isLoggedIn} />
               <img 
                 src={lucentLogo} 
                 alt="Lucent Ag" 
@@ -907,7 +912,7 @@ export function BuyerHome() {
                     <button
                       key={cat.name}
                       onClick={() => handleCategorySelect(cat.name)}
-                      className="relative rounded-lg overflow-hidden h-24 group"
+                      className="relative rounded-lg overflow-hidden h-36 group"
                       data-testid={`category-img-${cat.name.toLowerCase()}`}
                     >
                       <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
@@ -1574,16 +1579,16 @@ export function BuyerHome() {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Shop by Category</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {[
-                { name: "Vegetables", image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80" },
-                { name: "Fruits", image: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400&q=80" },
-                { name: "Grains", image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&q=80" },
-                { name: "Legumes", image: "https://images.unsplash.com/photo-1515543904323-4ce37c8f6114?w=400&q=80" },
-                { name: "Herbs & Spices", image: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?w=400&q=80" },
+                { name: "Vegetables", image: Vegetable },
+                { name: "Fruits", image: Fruit },
+                { name: "Grains", image: Grains },
+                { name: "Legumes", image: Legumes },
+                { name: "Herbs & Spices", image: Spices },
               ].map((category) => (
                 <button
                   key={category.name}
                   onClick={() => handleCategorySelect(category.name)}
-                  className="group relative h-32 rounded-lg overflow-hidden"
+                  className="group relative h-48 rounded-lg overflow-hidden"
                   data-testid={`category-image-${category.name.toLowerCase().replace(/ & /g, "-")}`}
                 >
                   <img
