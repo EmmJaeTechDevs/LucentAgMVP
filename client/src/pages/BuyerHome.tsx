@@ -6,7 +6,7 @@ import { useCart } from "@/hooks/useCart";
 import { SessionCrypto } from "@/utils/sessionCrypto";
 import Vegetable from "../assets/image 18 (3).png"
 import Fruit from "../assets/image 18 (2).png"
-import grains from "../assets/image 18 (1).png"
+import Grains from "../assets/image 18 (1).png"
 import Legumes from "../assets/image 18.png"
 import Spices from "../assets/image 18 (4).png"
 import {
@@ -580,7 +580,7 @@ export function BuyerHome() {
   const categoryImages = [
     { name: "Vegetables", image: Vegetable },
     { name: "Fruits", image: Fruit },
-    { name: "Grains", image: grains },
+    { name: "Grains", image: Grains },
     { name: "Herbs and spices", image: Spices },
   ];
 
@@ -1581,7 +1581,7 @@ export function BuyerHome() {
               {[
                 { name: "Vegetables", image: Vegetable },
                 { name: "Fruits", image: Fruit },
-                { name: "Grains", image: grains },
+                { name: "Grains", image: Grains },
                 { name: "Legumes", image: Legumes },
                 { name: "Herbs & Spices", image: Spices },
               ].map((category) => (
