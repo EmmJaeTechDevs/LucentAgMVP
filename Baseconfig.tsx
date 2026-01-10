@@ -1,2 +1,2 @@
 // API Configuration
-export const BaseUrl = "dev_api.shambabridge-lucentag.com";
+export const BaseUrl = "https://dev_api.shambabridge-lucentag.com";
