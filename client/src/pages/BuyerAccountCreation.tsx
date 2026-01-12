@@ -68,7 +68,7 @@ export const BuyerAccountCreation = (): JSX.Element => {
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch(`${BaseUrl}/api/locations/countries`);
+        const response = await fetch("https://api.shambabridge-lucentag.com/api/locations/countries");
         const data = await response.json();
         console.log("Buyer Registration - Countries Response:", data);
         
