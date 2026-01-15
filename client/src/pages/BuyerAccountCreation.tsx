@@ -63,12 +63,15 @@ export const BuyerAccountCreation = (): JSX.Element => {
   const [loadingStates, setLoadingStates] = useState(false);
   const [loadingLgas, setLoadingLgas] = useState(false);
   const { toast } = useToast();
+ const envbase_url = import.meta.env.VITE_BASE_URL;
 
+  const Api = envbase_url ?? BaseUrl;
+  
   // Fetch countries from API when component mounts
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch("https://api.shambabridge-lucentag.com/api/locations/countries");
+        const response = await fetch(`${Api}/api/locations/countries`);
         const data = await response.json();
         console.log("Buyer Registration - Countries Response:", data);
         
